@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://b40dc4dj74kh3"]
+[gd_scene load_steps=11 format=3 uid="uid://b40dc4dj74kh3"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
+[ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
 [ext_resource type="Texture2D" uid="uid://dqfnsql0v5t3c" path="res://assets/batiments/feu_camp.png" id="2_o0tnf"]
 [ext_resource type="Texture2D" uid="uid://bjf4f3tenb7ba" path="res://assets/batiments/hutte.png" id="3_jmdev"]
 [ext_resource type="Script" uid="uid://c45umn6d46ogd" path="res://scripts/infos_stats.gd" id="4_o0tnf"]
@@ -38,6 +39,17 @@ corner_radius_bottom_left = 6
 [sub_resource type="LabelSettings" id="LabelSettings_11y2r"]
 font_size = 30
 
+[sub_resource type="GDScript" id="GDScript_o0tnf"]
+script/source = "extends Panel
+
+@onready var lbl_title = $lbl_goal_title
+@onready var lbl_description = $lbl_goal_description
+
+func set_goal(title: String, description: String):
+	lbl_title.text = \"🎯 \" + title
+	lbl_description.text = description
+"
+
 [node name="Menu" type="Panel"]
 script = ExtResource("1_11y2r")
 
@@ -55,6 +67,7 @@ offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_pnxe8")
+script = ExtResource("2_jmdev")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/ZoneInventaire"]
 layout_mode = 0
@@ -152,3 +165,22 @@ scale = Vector2(0.458231, 0.416195)
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 2
 label_settings = SubResource("LabelSettings_11y2r")
+
+[node name="Goal" type="Panel" parent="HUD"]
+offset_top = 165.0
+offset_right = 300.0
+offset_bottom = 245.0
+script = SubResource("GDScript_o0tnf")
+
+[node name="Label" type="Label" parent="HUD/Goal"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Goal:"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HUD/Goal"]
+layout_mode = 0
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 60.0
