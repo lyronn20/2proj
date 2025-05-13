@@ -1,0 +1,122 @@
+[gd_scene load_steps=8 format=3 uid="uid://b40dc4dj74kh3"]
+
+[ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
+[ext_resource type="Texture2D" uid="uid://dqfnsql0v5t3c" path="res://assets/batiments/feu_camp.png" id="2_o0tnf"]
+[ext_resource type="Texture2D" uid="uid://bjf4f3tenb7ba" path="res://assets/batiments/hutte.png" id="3_jmdev"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnxe8"]
+bg_color = Color(0.352941, 0.231373, 0.113725, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.125423, 0.0713096, 0.0218245, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_70nuf"]
+bg_color = Color(0.352941, 0.231373, 0.113725, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
+corner_radius_bottom_right = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qv43e"]
+bg_color = Color(0.352941, 0.231373, 0.113725, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
+corner_radius_bottom_left = 6
+
+[sub_resource type="LabelSettings" id="LabelSettings_11y2r"]
+font_size = 30
+
+[node name="Menu" type="Panel"]
+script = ExtResource("1_11y2r")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="ZoneInventaire" type="Panel" parent="HUD"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -83.0
+offset_right = -27.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_pnxe8")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/ZoneInventaire"]
+layout_mode = 0
+offset_left = 340.0
+offset_top = 3.0
+offset_right = 409.0
+offset_bottom = 72.0
+alignment = 2
+
+[node name="feu_camp" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+clip_contents = true
+layout_mode = 2
+texture = ExtResource("2_o0tnf")
+expand_mode = 2
+
+[node name="hutte" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("3_jmdev")
+expand_mode = 2
+
+[node name="Infos_Stats" type="Panel" parent="HUD"]
+offset_right = 250.0
+offset_bottom = 165.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_70nuf")
+
+[node name="GestionJeu" type="Panel" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -180.0
+offset_bottom = 70.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_qv43e")
+
+[node name="button" type="HBoxContainer" parent="HUD/GestionJeu"]
+layout_mode = 0
+offset_right = 60.0
+offset_bottom = 45.0
+
+[node name="btn_pause" type="Button" parent="HUD/GestionJeu/button"]
+modulate = Color(0.913434, 0.736336, 0.58943, 1)
+layout_mode = 2
+text = "Pause"
+
+[node name="btn_play" type="Button" parent="HUD/GestionJeu/button"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+text = "Reprendre"
+
+[node name="btn_fast" type="Button" parent="HUD/GestionJeu/button"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+text = "x2"
+
+[node name="coordonées" type="HBoxContainer" parent="HUD/GestionJeu"]
+layout_mode = 0
+offset_left = 8.99994
+offset_top = 49.0
+offset_right = 58.9999
+offset_bottom = 77.0
+scale = Vector2(0.458231, 0.416195)
+
+[node name="mouse_coordonnées" type="Label" parent="HUD/GestionJeu/coordonées"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+label_settings = SubResource("LabelSettings_11y2r")
