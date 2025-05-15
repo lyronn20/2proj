@@ -1,12 +1,12 @@
 extends Node2D
 
 @onready var route_tilemap: TileMapLayer = $Map/Route/route
+@onready var herbe_tilemap: TileMapLayer = $herbe
 @onready var menu = $CanvasLayer/Menu
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
 
 var last_cell = null
-const TERRAIN_ID = 0
-
+const TERRAIN_ID = 0  # ID défini dans l'inventaire
 var current_preview: Sprite2D = null
 var current_scene: PackedScene = null
 var selected_mode: String = ""
@@ -38,16 +38,20 @@ func _unhandled_input(event):
 					obj.queue_free()
 					break
 
+			if route_tilemap.get_cell_source_id(cell) != -1:
+				route_tilemap.erase_cell(cell)
+
 		elif current_scene:
-			var instance = current_scene.instantiate()
-			instance.global_position = current_preview.global_position  # ✅ synchronisé
-			instance.add_to_group("placeable")
-			add_child(instance)
+			var herbe_id = herbe_tilemap.get_cell_source_id(cell)
+			if herbe_id == 0:  # Seulement sur l'herbe (ID = 0)
+				var instance = current_scene.instantiate()
+				instance.global_position = current_preview.global_position
+				instance.add_to_group("placeable")
+				add_child(instance)
 
-
-			current_preview.queue_free()
-			current_preview = null
-			current_scene = null
+				current_preview.queue_free()
+				current_preview = null
+				current_scene = null
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
