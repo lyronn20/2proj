@@ -6,7 +6,7 @@ extends Node2D
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
 
 var last_cell = null
-const TERRAIN_ID = 0  # ID défini dans l'inventaire
+const TERRAIN_ID = 0  # ID défini dans le terrain set
 var current_preview: Sprite2D = null
 var current_scene: PackedScene = null
 var selected_mode: String = ""
@@ -33,13 +33,16 @@ func _unhandled_input(event):
 		var cell = route_tilemap.local_to_map(pos)
 
 		if selected_mode == "gomme":
+			# Supprimer objets cliqués
 			for obj in get_tree().get_nodes_in_group("placeable"):
 				if obj is Node2D and obj.global_position.distance_to(pos) < 16:
 					obj.queue_free()
 					break
 
-			if route_tilemap.get_cell_source_id(cell) != -1:
-				route_tilemap.erase_cell(cell)
+			# Supprimer terrain intelligent route
+			route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
+			# Remettre de l’herbe
+			herbe_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
 
 		elif current_scene:
 			var herbe_id = herbe_tilemap.get_cell_source_id(cell)

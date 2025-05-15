@@ -84,6 +84,7 @@ clip_contents = true
 layout_mode = 2
 texture = ExtResource("2_o0tnf")
 expand_mode = 2
+stretch_mode = 3
 
 [node name="hutte" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
