@@ -1,4 +1,4 @@
-extends TileMap
+extends TileMapLayer
 
 @onready var camera = get_parent().get_node("Camera2D")
 
