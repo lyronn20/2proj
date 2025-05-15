@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var grille_logique = $GrilleLogique
+@onready var grille_logique = $Map
 @onready var map = $Map
 @onready var menu = $CanvasLayer/Menu
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
@@ -11,7 +11,7 @@ var current_scene: PackedScene = null
 var taille_objet := Vector2i(4, 4)
 
 func _ready():
-	map.set_process_unhandled_input(true)
+	#map.set_process_unhandled_input(true)
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 
 func _process(_delta):
@@ -54,7 +54,7 @@ func _on_objet_selectionne(nom: String):
 			texture = load("res://assets/batiments/hutte.png")
 		"route_terre":
 			current_scene =preload("res://scenes/sol_terre.tscn")
-			texture = preload("res://assets/batiments/sol_terre.png")
+			texture = preload("res://assets/map/sol_terre.png")
 		_:
 			return
 

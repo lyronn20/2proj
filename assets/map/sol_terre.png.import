@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ceu4ravoveybx"
-path="res://.godot/imported/light_mask_circle.png-05bf890e4f84db6e00a4223fe120d5b2.ctex"
+uid="uid://b1r42x5lvt6c"
+path="res://.godot/imported/sol_terre.png-7690297112d39f4c21091a924a585cb0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/map/light_mask_circle.png"
-dest_files=["res://.godot/imported/light_mask_circle.png-05bf890e4f84db6e00a4223fe120d5b2.ctex"]
+source_file="res://assets/map/sol_terre.png"
+dest_files=["res://.godot/imported/sol_terre.png-7690297112d39f4c21091a924a585cb0.ctex"]
 
 [params]
 

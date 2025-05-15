@@ -9,6 +9,7 @@ func _ready():
 	feu_camp.connect("gui_input", Callable(self, "_on_feu_camp_input"))
 	hutte.connect("gui_input", Callable(self, "_on_hutte_input"))
 	route_terre.connect("gui_input", Callable(self, "_on_sol_terre_input"))
+	
 
 func _on_feu_camp_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

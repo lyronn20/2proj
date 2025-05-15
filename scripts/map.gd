@@ -1,4 +1,4 @@
-extends Sprite2D
+extends TileMap
 
 @onready var camera = get_parent().get_node("Camera2D")
 

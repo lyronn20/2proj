@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1r42x5lvt6c"
-path="res://.godot/imported/sol_terre.png-7adef9c29dc7a06783b001b1fa9248f5.ctex"
+uid="uid://d3d4nmh2k4h2v"
+path="res://.godot/imported/eau.png-5172945549acaeb07efadcfee575c890.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/batiments/sol_terre.png"
-dest_files=["res://.godot/imported/sol_terre.png-7adef9c29dc7a06783b001b1fa9248f5.ctex"]
+source_file="res://assets/map/eau.png"
+dest_files=["res://.godot/imported/eau.png-5172945549acaeb07efadcfee575c890.ctex"]
 
 [params]
 
