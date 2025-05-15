@@ -1,35 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://d20fn4vqeyosm"]
+[gd_scene load_steps=2 format=3 uid="uid://bir28wkkygf38"]
 
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="1_pynw4"]
 
-[sub_resource type="GDScript" id="GDScript_pynw4"]
-script/source = "extends Node2D
-
-
-@export var map: TileMap
-@export var sapin_scene: PackedScene = preload(\"res://scenes/sapin.tscn\")
-@export var id_herbe := 0  # ID de la tuile d'herbe dans ton TileSet
-
-func _ready():
-	randomize()
-	generer_sapins()
-
-func generer_sapins():
-	for x in range(-50, 50):
-		for y in range(-50, 50):
-			if randi() % 100 < 6:  # ~6% de chance
-				var cell_pos = Vector2i(x, y)
-				var id_tuile = map.get_cell_source_id(0, cell_pos)
-
-				if id_tuile == id_herbe:
-					var sapin = sapin_scene.instantiate()
-					sapin.position = map.map_to_local(cell_pos)
-					add_child(sapin)
-"
-
 [node name="Sapin" type="Node2D"]
-script = SubResource("GDScript_pynw4")
+scale = Vector2(0.7, 0.7)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.7, 0.7)
 texture = ExtResource("1_pynw4")

@@ -11,22 +11,21 @@ var current_preview: Sprite2D = null
 var current_scene: PackedScene = null
 var selected_mode: String = ""
 
-# 📏 Taille des objets (en cases)
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
-	"hutte": Vector2i(4, 4)
+	"hutte": Vector2i(4, 4),
+	"sapin": Vector2i(1, 1)
 }
 
-# 🔒 Grille logique d’occupation (bâtiments uniquement)
 var occupied_cells := {}
-
-# 👇 Chargement scène PNJ
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
+const SAPIN_SCENE = preload("res://scenes/Sapin.tscn")
 
 func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	spawn_pnjs(20)
+	generate_sapins(100)
 
 func _process(_delta):
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
@@ -34,7 +33,6 @@ func _process(_delta):
 	if cell != last_cell:
 		last_cell = cell
 		menu.set_mouse_coords(cell)
-		stats.update_stats(0, Vector2i(45, 50), Vector2i(38, 40), 22)
 
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
@@ -43,7 +41,7 @@ func _process(_delta):
 		grid_pos.y = int(grid_pos.y / size.y) * size.y
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
 
-		# ✅ Couleur selon validité du placement
+		# ✅ Vérifie la possibilité de placement pour colorer le sprite
 		if can_place_object(grid_pos, size):
 			current_preview.modulate = Color(1, 1, 1, 0.5)  # blanc transparent
 		else:
@@ -52,6 +50,8 @@ func _process(_delta):
 	elif current_preview:
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
+
+	update_ui_stats()
 
 
 func _unhandled_input(event):
@@ -62,6 +62,9 @@ func _unhandled_input(event):
 		if selected_mode == "gomme":
 			for obj in get_tree().get_nodes_in_group("placeable"):
 				if obj is Node2D and obj.global_position.distance_to(pos) < 16:
+					# Libère la cellule
+					var obj_cell = route_tilemap.local_to_map(obj.global_position)
+					occupied_cells.erase(obj_cell)
 					obj.queue_free()
 					break
 
@@ -81,9 +84,14 @@ func _unhandled_input(event):
 				var instance = current_scene.instantiate()
 				instance.global_position = route_tilemap.map_to_local(base_cell)
 				instance.add_to_group("placeable")
+
+				if selected_mode == "sapin":
+					instance.add_to_group("sapin")
+				else:
+					instance.add_to_group("housing")
+
 				add_child(instance)
 
-				# Réserve les cellules dans la grille logique
 				for x in range(size.x):
 					for y in range(size.y):
 						var placed_cell = base_cell + Vector2i(x, y)
@@ -98,11 +106,8 @@ func _unhandled_input(event):
 
 func placer_route():
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
-
-	# ❌ Ne pas poser si un bâtiment occupe déjà la cellule
 	if occupied_cells.has(cell):
 		return
-
 	route_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
 
 func _on_objet_selectionne(nom: String):
@@ -125,6 +130,9 @@ func _on_objet_selectionne(nom: String):
 		"hutte":
 			current_scene = preload("res://scenes/hutte.tscn")
 			texture = load("res://assets/batiments/hutte.png")
+		"sapin":
+			current_scene = SAPIN_SCENE
+			texture = load("res://assets/environnement/sapin.png")  # adapte si besoin
 		_:
 			return
 
@@ -137,17 +145,22 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 	for x in range(size.x):
 		for y in range(size.y):
 			var check_cell = start_cell + Vector2i(x, y)
-
-			# 🔒 Si déjà occupée par un bâtiment
 			if occupied_cells.has(check_cell):
 				return false
-
-			# 🛑 Si une route est déjà posée ici (interdit de construire dessus)
 			if route_tilemap.get_cell_source_id(check_cell) != -1:
 				return false
-
 	return true
 
+func update_ui_stats():
+	var population = get_tree().get_nodes_in_group("pnj").size()
+	var housing_count = get_tree().get_nodes_in_group("housing").size()
+	var housing_total = housing_count
+
+	var jobs_occupied = 0
+	var jobs_total = 0
+	var progress = 100
+
+	stats.update_stats(population, Vector2i(housing_count, housing_total), Vector2i(jobs_occupied, jobs_total), progress)
 
 func spawn_pnjs(count: int):
 	var tries = 0
@@ -166,3 +179,28 @@ func spawn_pnjs(count: int):
 			pnj.add_to_group("pnj")
 			add_child(pnj)
 			count -= 1
+
+func generate_sapins(count: int = 50):
+	var map_size = Vector2i(herbe_tilemap.get_used_rect().size)
+	var origin = herbe_tilemap.get_used_rect().position
+
+	var spawned := 0
+	var tries := 0
+
+	while spawned < count and tries < count * 10:
+		tries += 1
+		var x = randi_range(origin.x, origin.x + map_size.x - 1)
+		var y = randi_range(origin.y, origin.y + map_size.y - 1)
+		var cell := Vector2i(x, y)
+
+		# ✅ Vérifie que c’est de l’herbe et pas occupé
+		if herbe_tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
+			var sapin = SAPIN_SCENE.instantiate()
+			sapin.position = herbe_tilemap.map_to_local(cell)
+			sapin.add_to_group("placeable")
+			sapin.add_to_group("sapin")
+			add_child(sapin)
+
+			# ✅ Réserve la case dans occupied_cells
+			occupied_cells[cell] = true
+			spawned += 1
