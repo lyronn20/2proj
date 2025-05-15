@@ -24,12 +24,13 @@ const SAPIN_SCENE = preload("res://scenes/Sapin.tscn")
 func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+	# Aucun chargement de sauvegarde ici, on lance la génération normale
 	spawn_pnjs(20)
 	generate_sapins(100)
 
 func _process(_delta):
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
-
 	if cell != last_cell:
 		last_cell = cell
 		menu.set_mouse_coords(cell)
@@ -40,19 +41,13 @@ func _process(_delta):
 		grid_pos.x = int(grid_pos.x / size.x) * size.x
 		grid_pos.y = int(grid_pos.y / size.y) * size.y
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
-
-		# ✅ Vérifie la possibilité de placement pour colorer le sprite
-		if can_place_object(grid_pos, size):
-			current_preview.modulate = Color(1, 1, 1, 0.5)  # blanc transparent
-		else:
-			current_preview.modulate = Color(1, 0, 0, 0.5)  # rouge transparent
+		current_preview.modulate = Color(1, 1, 1, 0.5) if can_place_object(grid_pos, size) else Color(1, 0, 0, 0.5)
 
 	elif current_preview:
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
 
 	update_ui_stats()
-
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -61,10 +56,8 @@ func _unhandled_input(event):
 
 		if selected_mode == "gomme":
 			for obj in get_tree().get_nodes_in_group("placeable"):
-				if obj is Node2D and obj.global_position.distance_to(pos) < 16:
-					# Libère la cellule
-					var obj_cell = route_tilemap.local_to_map(obj.global_position)
-					occupied_cells.erase(obj_cell)
+				if obj.global_position.distance_to(pos) < 16:
+					occupied_cells.erase(route_tilemap.local_to_map(obj.global_position))
 					obj.queue_free()
 					break
 
@@ -73,7 +66,6 @@ func _unhandled_input(event):
 
 		elif selected_mode == "route":
 			placer_route()
-
 		elif current_scene:
 			var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 			var base_cell = route_tilemap.local_to_map(pos)
@@ -82,20 +74,19 @@ func _unhandled_input(event):
 
 			if can_place_object(base_cell, size):
 				var instance = current_scene.instantiate()
+				instance.name = selected_mode
 				instance.global_position = route_tilemap.map_to_local(base_cell)
 				instance.add_to_group("placeable")
-
-				if selected_mode == "sapin":
-					instance.add_to_group("sapin")
-				else:
-					instance.add_to_group("housing")
-
 				add_child(instance)
+
+				match selected_mode:
+					"sapin": instance.add_to_group("sapin")
+					"pnj": instance.add_to_group("pnj")
+					_: instance.add_to_group("housing")
 
 				for x in range(size.x):
 					for y in range(size.y):
-						var placed_cell = base_cell + Vector2i(x, y)
-						occupied_cells[placed_cell] = true
+						occupied_cells[base_cell + Vector2i(x, y)] = true
 
 				current_preview.queue_free()
 				current_preview = null
@@ -106,13 +97,11 @@ func _unhandled_input(event):
 
 func placer_route():
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
-	if occupied_cells.has(cell):
-		return
-	route_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
+	if not occupied_cells.has(cell):
+		route_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
 
 func _on_objet_selectionne(nom: String):
 	selected_mode = nom
-
 	if current_preview:
 		current_preview.queue_free()
 		current_preview = null
@@ -122,7 +111,6 @@ func _on_objet_selectionne(nom: String):
 		return
 
 	var texture: Texture2D = null
-
 	match nom:
 		"feu_camp":
 			current_scene = preload("res://scenes/feu_camp.tscn")
@@ -132,7 +120,7 @@ func _on_objet_selectionne(nom: String):
 			texture = load("res://assets/batiments/hutte.png")
 		"sapin":
 			current_scene = SAPIN_SCENE
-			texture = load("res://assets/environnement/sapin.png")  # adapte si besoin
+			texture = load("res://assets/environnement/sapin.png")
 		_:
 			return
 
@@ -152,55 +140,41 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 	return true
 
 func update_ui_stats():
-	var population = get_tree().get_nodes_in_group("pnj").size()
-	var housing_count = get_tree().get_nodes_in_group("housing").size()
-	var housing_total = housing_count
-
-	var jobs_occupied = 0
-	var jobs_total = 0
-	var progress = 100
-
-	stats.update_stats(population, Vector2i(housing_count, housing_total), Vector2i(jobs_occupied, jobs_total), progress)
+	stats.update_stats(
+		get_tree().get_nodes_in_group("pnj").size(),
+		Vector2i(get_tree().get_nodes_in_group("housing").size(), 50),
+		Vector2i(0, 0),
+		100
+	)
 
 func spawn_pnjs(count: int):
-	var tries = 0
-	var max_tries = count * 10
-
-	while count > 0 and tries < max_tries:
+	var tries := 0
+	while count > 0 and tries < count * 10:
 		tries += 1
-		var x = randi_range(0, 20)
-		var y = randi_range(0, 20)
-		var world_pos = Vector2(x, y)
-		var cell = herbe_tilemap.local_to_map(world_pos)
-
+		var cell = Vector2i(randi_range(0, 20), randi_range(0, 20))
 		if herbe_tilemap.get_cell_source_id(cell) == 0:
 			var pnj = pnj_scene.instantiate()
+			pnj.name = "pnj"
 			pnj.global_position = herbe_tilemap.map_to_local(cell)
 			pnj.add_to_group("pnj")
+			pnj.add_to_group("placeable")
 			add_child(pnj)
 			count -= 1
 
 func generate_sapins(count: int = 50):
-	var map_size = Vector2i(herbe_tilemap.get_used_rect().size)
+	var map_size = herbe_tilemap.get_used_rect().size
 	var origin = herbe_tilemap.get_used_rect().position
-
-	var spawned := 0
 	var tries := 0
-
+	var spawned := 0
 	while spawned < count and tries < count * 10:
 		tries += 1
-		var x = randi_range(origin.x, origin.x + map_size.x - 1)
-		var y = randi_range(origin.y, origin.y + map_size.y - 1)
-		var cell := Vector2i(x, y)
-
-		# ✅ Vérifie que c’est de l’herbe et pas occupé
+		var cell = origin + Vector2i(randi_range(0, map_size.x - 1), randi_range(0, map_size.y - 1))
 		if herbe_tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
 			var sapin = SAPIN_SCENE.instantiate()
-			sapin.position = herbe_tilemap.map_to_local(cell)
-			sapin.add_to_group("placeable")
+			sapin.name = "sapin"
+			sapin.global_position = herbe_tilemap.map_to_local(cell)
 			sapin.add_to_group("sapin")
+			sapin.add_to_group("placeable")
 			add_child(sapin)
-
-			# ✅ Réserve la case dans occupied_cells
 			occupied_cells[cell] = true
 			spawned += 1
