@@ -8,12 +8,10 @@
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnu2h"]
 texture = ExtResource("2_yqjtg")
-texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 13:15/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_uwrxv"]
-tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_lnu2h")
 
 [node name="game" type="Node2D"]

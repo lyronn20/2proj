@@ -1,17 +1,19 @@
 extends Panel
+signal objet_selectionne(nom: String)
 
 @onready var label_coord = $HUD/GestionJeu/coordonées/mouse_coordonnées
 @onready var btn_pause = $HUD/GestionJeu/button/btn_pause
 @onready var btn_play = $HUD/GestionJeu/button/btn_play
 @onready var btn_fast = $HUD/GestionJeu/button/btn_fast
+@onready var inventaire = $HUD/ZoneInventaire
 
 func _ready():
-	# Connexion des boutons
 	btn_pause.pressed.connect(_on_pause)
 	btn_play.pressed.connect(_on_play)
 	btn_fast.pressed.connect(_on_fast)
-	
 
+	# Connexion avec zone_inventaire
+	inventaire.connect("objet_selectionne", Callable(self, "_on_objet_selectionne_recu"))
 
 func _on_pause():
 	Engine.time_scale = 0
@@ -24,3 +26,7 @@ func _on_fast():
 
 func set_mouse_coords(cell: Vector2i):
 	label_coord.text = "Mouse: %s" % str(cell)
+
+# Relai du signal vers game.gd
+func _on_objet_selectionne_recu(nom: String):
+	emit_signal("objet_selectionne", nom)
