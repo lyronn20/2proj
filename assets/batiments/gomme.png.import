@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cayc3gxu2qw6b"
-path="res://.godot/imported/route_pierre.png-7feda161f68498fabe0bafec7a40e66b.ctex"
+uid="uid://c45y4ji3ao85w"
+path="res://.godot/imported/gomme.png-bcf1a89c3a0dc95223d5b1005defe093.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/batiments/route_pierre.png"
-dest_files=["res://.godot/imported/route_pierre.png-7feda161f68498fabe0bafec7a40e66b.ctex"]
+source_file="res://assets/batiments/gomme.png"
+dest_files=["res://.godot/imported/gomme.png-bcf1a89c3a0dc95223d5b1005defe093.ctex"]
 
 [params]
 

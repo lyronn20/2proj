@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7inla5svi1yc"
-path="res://.godot/imported/maison_3.png-cbb42136bd634662029c7bea979b7048.ctex"
+uid="uid://cdqtoka2mp43c"
+path="res://.godot/imported/logo_route.jpg-ea853327323e469b62811daa69ecd414.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/batiments/maison_3.png"
-dest_files=["res://.godot/imported/maison_3.png-cbb42136bd634662029c7bea979b7048.ctex"]
+source_file="res://assets/batiments/logo_route.jpg"
+dest_files=["res://.godot/imported/logo_route.jpg-ea853327323e469b62811daa69ecd414.ctex"]
 
 [params]
 
