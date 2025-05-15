@@ -6,14 +6,20 @@ extends Node2D
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
 
 var last_cell = null
-const TERRAIN_ID = 0  # ID défini dans le terrain set
+const TERRAIN_ID = 0
 var current_preview: Sprite2D = null
 var current_scene: PackedScene = null
 var selected_mode: String = ""
 
+# 👇 Chargement scène PNJ
+var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
+
 func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+	# ✅ Spawn sur herbe uniquement
+	spawn_pnjs(20)
 
 func _process(_delta):
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
@@ -33,20 +39,17 @@ func _unhandled_input(event):
 		var cell = route_tilemap.local_to_map(pos)
 
 		if selected_mode == "gomme":
-			# Supprimer objets cliqués
 			for obj in get_tree().get_nodes_in_group("placeable"):
 				if obj is Node2D and obj.global_position.distance_to(pos) < 16:
 					obj.queue_free()
 					break
 
-			# Supprimer terrain intelligent route
 			route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
-			# Remettre de l’herbe
 			herbe_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
 
 		elif current_scene:
 			var herbe_id = herbe_tilemap.get_cell_source_id(cell)
-			if herbe_id == 0:  # Seulement sur l'herbe (ID = 0)
+			if herbe_id == 0:
 				var instance = current_scene.instantiate()
 				instance.global_position = current_preview.global_position
 				instance.add_to_group("placeable")
@@ -90,3 +93,22 @@ func _on_objet_selectionne(nom: String):
 	current_preview.texture = texture
 	current_preview.modulate.a = 0.5
 	add_child(current_preview)
+
+# ✅ Fonction de spawn intelligent
+func spawn_pnjs(count: int):
+	var tries = 0
+	var max_tries = count * 10
+
+	while count > 0 and tries < max_tries:
+		tries += 1
+		var x = randi_range(0, 1200)
+		var y = randi_range(0, 900)
+		var world_pos = Vector2(x, y)
+		var cell = herbe_tilemap.local_to_map(world_pos)
+
+		if herbe_tilemap.get_cell_source_id(cell) == 0:
+			var pnj = pnj_scene.instantiate()
+			pnj.global_position = herbe_tilemap.map_to_local(cell)
+			pnj.add_to_group("pnj")
+			add_child(pnj)
+			count -= 1
