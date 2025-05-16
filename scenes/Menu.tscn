@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cdqtoka2mp43c" path="res://assets/batiments/logo_route.jpg" id="5_b6cxs"]
 [ext_resource type="Texture2D" uid="uid://c45y4ji3ao85w" path="res://assets/batiments/gomme.png" id="6_aaywf"]
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="6_pp5m5"]
-[ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/extracteur_eau.png" id="7_el213"]
+[ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/scierie.png" id="7_el213"]
 [ext_resource type="Texture2D" uid="uid://drxkfbu1n3d7k" path="res://assets/batiments/clique.png" id="10_2af52"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
@@ -154,7 +154,7 @@ layout_mode = 2
 texture = ExtResource("6_pp5m5")
 expand_mode = 2
 
-[node name="extracteur_eau" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+[node name="scierie" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("7_el213")
 expand_mode = 2

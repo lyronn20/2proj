@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bun2hacihav1e"]
+
+[ext_resource type="Texture2D" uid="uid://bh0d4rqjweo3t" path="res://assets/batiments/carreire_pierre.png" id="1_aqxis"]
+
+[node name="FeuCamp" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(3, -48)
+texture = ExtResource("1_aqxis")

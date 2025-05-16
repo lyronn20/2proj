@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://k57rjrwf2yff"
-path="res://.godot/imported/extracteur_eau.png-587f30884bbadef89bc833b4636d37a0.ctex"
+path="res://.godot/imported/scierie.png-29f5c8743f161f5908b29fcd2742f255.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/batiments/extracteur_eau.png"
-dest_files=["res://.godot/imported/extracteur_eau.png-587f30884bbadef89bc833b4636d37a0.ctex"]
+source_file="res://assets/batiments/scierie.png"
+dest_files=["res://.godot/imported/scierie.png-29f5c8743f161f5908b29fcd2742f255.ctex"]
 
 [params]
 

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5aiul7i85lki"]
+
+[ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/scierie.png" id="1_4xl4w"]
+
+[node name="FeuCamp" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(3, -48)
+texture = ExtResource("1_4xl4w")
