@@ -5,11 +5,15 @@ extends Node2D
 @onready var menu = $CanvasLayer/Menu
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
 
-var last_cell = null
 const TERRAIN_ID = 0
+const SAPIN_SCENE = preload("res://scenes/Sapin.tscn")
+var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
+
+var last_cell = null
 var current_preview: Sprite2D = null
 var current_scene: PackedScene = null
-var selected_mode: String = ""
+var selected_mode := ""
+var occupied_cells := {}
 
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
@@ -17,15 +21,10 @@ var objet_sizes = {
 	"sapin": Vector2i(1, 1)
 }
 
-var occupied_cells := {}
-var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
-const SAPIN_SCENE = preload("res://scenes/Sapin.tscn")
-
 func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
-	# Aucun chargement de sauvegarde ici, on lance la génération normale
 	spawn_pnjs(20)
 	generate_sapins(100)
 
@@ -35,17 +34,15 @@ func _process(_delta):
 		last_cell = cell
 		menu.set_mouse_coords(cell)
 
-	if current_preview and selected_mode != "route":
+	if current_preview:
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
 		grid_pos.x = int(grid_pos.x / size.x) * size.x
 		grid_pos.y = int(grid_pos.y / size.y) * size.y
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
-		current_preview.modulate = Color(1, 1, 1, 0.5) if can_place_object(grid_pos, size) else Color(1, 0, 0, 0.5)
 
-	elif current_preview:
-		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
-		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
+		if selected_mode != "route":
+			current_preview.modulate = Color(1, 1, 1, 0.5) if can_place_object(grid_pos, size) else Color(1, 0, 0, 0.5)
 
 	update_ui_stats()
 
@@ -54,43 +51,45 @@ func _unhandled_input(event):
 		var pos = get_global_mouse_position()
 		var cell = route_tilemap.local_to_map(pos)
 
-		if selected_mode == "gomme":
-			for obj in get_tree().get_nodes_in_group("placeable"):
-				if obj.global_position.distance_to(pos) < 16:
-					occupied_cells.erase(route_tilemap.local_to_map(obj.global_position))
-					obj.queue_free()
-					break
+		match selected_mode:
+			"gomme":
+				for obj in get_tree().get_nodes_in_group("placeable"):
+					if obj.global_position.distance_to(pos) < 16:
+						occupied_cells.erase(route_tilemap.local_to_map(obj.global_position))
+						obj.queue_free()
+						break
+				route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
+				herbe_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
 
-			route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
-			herbe_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
+			"route":
+				placer_route()
 
-		elif selected_mode == "route":
-			placer_route()
-		elif current_scene:
-			var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
-			var base_cell = route_tilemap.local_to_map(pos)
-			base_cell.x = int(base_cell.x / size.x) * size.x
-			base_cell.y = int(base_cell.y / size.y) * size.y
+			_:
+				if current_scene:
+					var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
+					var base_cell = route_tilemap.local_to_map(pos)
+					base_cell.x = int(base_cell.x / size.x) * size.x
+					base_cell.y = int(base_cell.y / size.y) * size.y
 
-			if can_place_object(base_cell, size):
-				var instance = current_scene.instantiate()
-				instance.name = selected_mode
-				instance.global_position = route_tilemap.map_to_local(base_cell)
-				instance.add_to_group("placeable")
-				add_child(instance)
+					if can_place_object(base_cell, size):
+						var instance = current_scene.instantiate()
+						instance.name = selected_mode
+						instance.global_position = route_tilemap.map_to_local(base_cell)
+						instance.add_to_group("placeable")
+						add_child(instance)
 
-				match selected_mode:
-					"sapin": instance.add_to_group("sapin")
-					"pnj": instance.add_to_group("pnj")
-					_: instance.add_to_group("housing")
+						match selected_mode:
+							"sapin": instance.add_to_group("sapin")
+							"pnj": instance.add_to_group("pnj")
+							_: instance.add_to_group("housing")
 
-				for x in range(size.x):
-					for y in range(size.y):
-						occupied_cells[base_cell + Vector2i(x, y)] = true
+						for x in range(size.x):
+							for y in range(size.y):
+								occupied_cells[base_cell + Vector2i(x, y)] = true
 
-				current_preview.queue_free()
-				current_preview = null
-				current_scene = null
+						current_preview.queue_free()
+						current_preview = null
+						current_scene = null
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
@@ -133,9 +132,9 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 	for x in range(size.x):
 		for y in range(size.y):
 			var check_cell = start_cell + Vector2i(x, y)
-			if occupied_cells.has(check_cell):
+			if occupied_cells.has(check_cell) or route_tilemap.get_cell_source_id(check_cell) != -1:
 				return false
-			if route_tilemap.get_cell_source_id(check_cell) != -1:
+			if herbe_tilemap.get_cell_source_id(check_cell) == -1:
 				return false
 	return true
 

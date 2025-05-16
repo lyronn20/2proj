@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://b40dc4dj74kh3"]
+[gd_scene load_steps=23 format=3 uid="uid://b40dc4dj74kh3"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c45y4ji3ao85w" path="res://assets/batiments/gomme.png" id="6_aaywf"]
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="6_pp5m5"]
 [ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/extracteur_eau.png" id="7_el213"]
+[ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
 [ext_resource type="Texture2D" uid="uid://ddspyo1vc8ncd" path="res://assets/batiments/para.png" id="11_pp5m5"]
 
@@ -84,10 +85,24 @@ bg_color = Color(0.352941, 0.231373, 0.113725, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
+border_width_bottom = 2
 border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ycwl"]
+bg_color = Color(0.352941, 0.231373, 0.113725, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="Menu" type="Panel"]
 script = ExtResource("1_11y2r")
@@ -169,6 +184,11 @@ layout_mode = 2
 texture = ExtResource("6_aaywf")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="TextureRect" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+layout_mode = 2
+texture = ExtResource("10_thu7x")
+expand_mode = 2
 
 [node name="Infos_Stats" type="Panel" parent="HUD"]
 offset_right = 250.0
@@ -290,7 +310,7 @@ layout_mode = 0
 offset_left = -53.0
 offset_top = 41.0
 offset_right = 97.0
-offset_bottom = 171.0
+offset_bottom = 201.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_thu7x")
 
 [node name="BtnRegles" type="Button" parent="reglages/menu_reglages"]
@@ -329,12 +349,21 @@ offset_right = 137.0
 offset_bottom = 129.0
 text = "Recommencer"
 
+[node name="BtnQuitter" type="Button" parent="reglages/menu_reglages"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 0
+offset_left = 45.0
+offset_top = 128.0
+offset_right = 109.0
+offset_bottom = 159.0
+text = "Quitter"
+
 [node name="panneau_popup" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = -26.0
-offset_top = 1.0
-offset_right = 174.0
-offset_bottom = 136.0
+offset_left = -16.0
+offset_top = 238.0
+offset_right = 184.0
+offset_bottom = 393.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_2af52")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/panneau_popup"]
@@ -344,3 +373,32 @@ offset_bottom = 40.0
 
 [node name="Label" type="Label" parent="reglages/menu_reglages/panneau_popup/VBoxContainer"]
 layout_mode = 2
+
+[node name="popup_quit" type="Panel" parent="reglages/menu_reglages"]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 250.0
+offset_right = 155.0
+offset_bottom = 380.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_7ycwl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/popup_quit"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="reglages/menu_reglages/popup_quit/VBoxContainer"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+text = "Tu es sûr 
+de vouloir quitter ?"
+
+[node name="BtnConfirmerQuitter" type="Button" parent="reglages/menu_reglages/popup_quit/VBoxContainer"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+text = "CONFIRMER"
+
+[node name="BtnAnnulerQuitter" type="Button" parent="reglages/menu_reglages/popup_quit/VBoxContainer"]
+modulate = Color(0.913725, 0.737255, 0.588235, 1)
+layout_mode = 2
+text = "ANNULER"

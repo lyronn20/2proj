@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="1_pynw4"]
 
 [node name="Sapin" type="Node2D"]
-scale = Vector2(0.7, 0.7)
+scale = Vector2(0.5, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_pynw4")
