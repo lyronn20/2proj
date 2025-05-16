@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://b40dc4dj74kh3"]
+[gd_scene load_steps=24 format=3 uid="uid://b40dc4dj74kh3"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c45y4ji3ao85w" path="res://assets/batiments/gomme.png" id="6_aaywf"]
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="6_pp5m5"]
 [ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/extracteur_eau.png" id="7_el213"]
+[ext_resource type="Texture2D" uid="uid://drxkfbu1n3d7k" path="res://assets/batiments/clique.png" id="10_2af52"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
 [ext_resource type="Texture2D" uid="uid://ddspyo1vc8ncd" path="res://assets/batiments/para.png" id="11_pp5m5"]
@@ -185,7 +186,12 @@ texture = ExtResource("6_aaywf")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="TextureRect" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+[node name="clique" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+layout_mode = 2
+texture = ExtResource("10_2af52")
+expand_mode = 2
+
+[node name="sapin" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("10_thu7x")
 expand_mode = 2
