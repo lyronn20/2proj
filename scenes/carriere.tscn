@@ -2,8 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://bh0d4rqjweo3t" path="res://assets/batiments/carreire_pierre.png" id="1_aqxis"]
 
-[node name="FeuCamp" type="Node2D"]
+[node name="carriere" type="Node2D"]
+scale = Vector2(0.7, 0.7)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(3, -48)
 texture = ExtResource("1_aqxis")

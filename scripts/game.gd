@@ -24,6 +24,7 @@ var current_scene    : PackedScene = null
 var selected_mode    := ""
 var occupied_cells   := {}
 
+
 # Tailles en cellules de chaque objet
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
@@ -133,6 +134,8 @@ func _on_objet_selectionne(nom: String):
 		return
 
 	var texture: Texture2D
+	var scale := Vector2.ONE  # par défaut 1
+
 	match nom:
 		"feu_camp":
 			current_scene = preload("res://scenes/feu_camp.tscn")
@@ -142,23 +145,29 @@ func _on_objet_selectionne(nom: String):
 			texture       = load("res://assets/batiments/hutte.png")
 		"sapin":
 			current_scene = SAPIN_SCENE
-			texture       = load("res://assets/environnement/sapin.png")
+			texture       = load("res://assets/batiments/sapin.png")
+			scale         = Vector2(0.5, 0.5)
 		"scierie":
 			current_scene = SCIERIE_SCENE
 			texture       = load("res://assets/batiments/scierie.png")
+			scale         = Vector2(0.9, 0.9)
 		"puit":
 			current_scene = PUIT_SCENE
 			texture       = load("res://assets/batiments/puit.png")
+			scale         = Vector2(0.7, 0.7)
 		"carriere":
 			current_scene = CARRIERE_SCENE
-			texture       = load("res://assets/batiments/sol_terre.png")
+			texture       = load("res://assets/batiments/carreire_pierre.png")  # corrigé ici
+			scale         = Vector2(0.7, 0.7)
 		_:
 			return
 
 	current_preview = Sprite2D.new()
 	current_preview.texture = texture
 	current_preview.modulate.a = 0.5
+	current_preview.scale = scale
 	add_child(current_preview)
+
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())

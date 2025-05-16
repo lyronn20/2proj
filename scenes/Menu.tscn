@@ -126,9 +126,9 @@ script = ExtResource("2_jmdev")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/ZoneInventaire"]
 layout_mode = 0
-offset_left = 340.0
+offset_left = 500.0
 offset_top = 3.0
-offset_right = 409.0
+offset_right = 861.0
 offset_bottom = 72.0
 alignment = 2
 
