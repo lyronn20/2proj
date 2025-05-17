@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=4 uid="uid://bhs3xfwenrsbx"]
+[gd_scene load_steps=11 format=4 uid="uid://bhs3xfwenrsbx"]
 
 [ext_resource type="Script" uid="uid://dkxjx8q7p23w" path="res://scripts/game.gd" id="1_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://b1r42x5lvt6c" path="res://assets/map/sol_terre.png" id="2_yqjtg"]
@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://b4smxumsk1m41" path="res://scripts/map.gd" id="4_iywne"]
 [ext_resource type="PackedScene" uid="uid://b40dc4dj74kh3" path="res://scenes/Menu.tscn" id="5_iywne"]
 [ext_resource type="PackedScene" uid="uid://4sfbb3t2oebs" path="res://scenes/route.tscn" id="5_p57ef"]
-[ext_resource type="PackedScene" uid="uid://c0285v6qpxxbl" path="res://scenes/GridPreview.tscn" id="7_u5sy4"]
-[ext_resource type="Script" uid="uid://dgnpmk40p45ao" path="res://scripts/gridpreview.gd" id="8_gee14"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p57ef"]
 texture = ExtResource("2_yqjtg")
@@ -208,8 +206,3 @@ script = ExtResource("4_iywne")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Menu" parent="CanvasLayer" instance=ExtResource("5_iywne")]
-
-[node name="GridPreview" parent="." node_paths=PackedStringArray("tilemap") instance=ExtResource("7_u5sy4")]
-script = ExtResource("8_gee14")
-tilemap = NodePath("../Map")
-preview_size = Vector2i(4, 4)

@@ -1,6 +1,6 @@
-# Main.gd
 extends Node2D
 
+@export var tilemap: TileMapLayer
 @onready var route_tilemap: TileMapLayer = $Map/Route/route
 @onready var herbe_tilemap: TileMapLayer = $herbe
 @onready var menu                        = $CanvasLayer/Menu
@@ -12,6 +12,8 @@ const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
 const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
+var grid_preview: Node2D
+
 
 # Un seul feu de camp autorisé (le reste illimité)
 var inventory := {
@@ -42,8 +44,20 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	spawn_pnjs(20)
 	generate_sapins(100)
+	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
+	add_child(grid_preview)
+	grid_preview.z_index = 100
+
 
 func _process(_delta):
+	if current_preview and selected_mode != "route":
+		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
+		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
+		grid_pos.x = int(grid_pos.x / size.x) * size.x
+		grid_pos.y = int(grid_pos.y / size.y) * size.y
+		var world_pos = route_tilemap.map_to_local(grid_pos)
+		grid_preview.visible = true
+		grid_preview.update_grid(world_pos, size)
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
 	if cell != last_cell:
 		last_cell = cell
@@ -58,6 +72,8 @@ func _process(_delta):
 		current_preview.global_position = route_tilemap.map_to_local(grid_pos)
 		if selected_mode != "route":
 			current_preview.modulate = Color(1,1,1,0.5) if can_place_object(grid_pos, size) else Color(1,0,0,0.5)
+
+
 
 	update_ui_stats()
 
@@ -124,6 +140,7 @@ func _unhandled_input(event):
 		placer_route()
 
 func _on_objet_selectionne(nom: String):
+	
 	selected_mode = nom
 	if current_preview:
 		current_preview.queue_free()
@@ -164,9 +181,17 @@ func _on_objet_selectionne(nom: String):
 
 	current_preview = Sprite2D.new()
 	current_preview.texture = texture
+	
 	current_preview.modulate.a = 0.5
 	current_preview.scale = scale
 	add_child(current_preview)
+	
+	# 🟥 Afficher la grille ici
+	
+	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
+	var size = objet_sizes.get(nom, Vector2i(1, 1))
+	grid_pos.x = int(grid_pos.x / size.x) * size.x
+	grid_pos.y = int(grid_pos.y / size.y) * size.y	
 
 
 func placer_route():
