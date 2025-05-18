@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c5aiul7i85lki"]
 
 [ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/scierie.png" id="1_4xl4w"]
-[ext_resource type="Script" uid="uid://bhrab3du301pl" path="res://scripts/scierie.gd" id="1_iofx4"]
+[ext_resource type="Script" path="res://scripts/scierie.gd" id="1_iofx4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iofx4"]
 size = Vector2(91.1111, 72.2222)

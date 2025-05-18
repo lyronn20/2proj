@@ -31,9 +31,7 @@ var objet_sizes = {
 }
 
 var pnj_counter := 1
-var time_of_day := "day"
-var time_timer := 0.0
-var time_cycle_duration := 30.0
+
 
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
@@ -62,11 +60,7 @@ func build_route_astar():
 			route_astar.set_point_solid(pos, not is_route)
 
 func _process(delta):
-	time_timer += delta
-	if time_timer >= time_cycle_duration:
-		time_timer = 0.0
-		time_of_day = "night" if time_of_day == "day" else "day"
-		update_pnj_behavior()
+
 
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
@@ -283,10 +277,7 @@ func assign_pnjs_to_hut(hut: Node2D):
 		p.has_house = true
 		hut.call("add_habitant", p)
 
-func update_pnj_behavior():
-	for pnj in get_tree().get_nodes_in_group("pnj"):
-		pnj.set_time_of_day(time_of_day)
-		
+
 func assign_pnjs_to_work(building: Node2D, metier: String):
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):

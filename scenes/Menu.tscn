@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://b40dc4dj74kh3"]
+[gd_scene load_steps=30 format=3 uid="uid://b40dc4dj74kh3"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -10,10 +10,16 @@
 [ext_resource type="Texture2D" uid="uid://c45y4ji3ao85w" path="res://assets/batiments/gomme.png" id="6_aaywf"]
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="6_pp5m5"]
 [ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/scierie.png" id="7_el213"]
+[ext_resource type="Texture2D" uid="uid://y4m17hg4pf15" path="res://assets/batiments/recolte_baies.png" id="8_7ycwl"]
 [ext_resource type="Texture2D" uid="uid://drxkfbu1n3d7k" path="res://assets/batiments/clique.png" id="10_2af52"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
-[ext_resource type="Texture2D" uid="uid://ddspyo1vc8ncd" path="res://assets/batiments/para.png" id="11_pp5m5"]
+[ext_resource type="Texture2D" uid="uid://c7qn5fkrfr83s" path="res://assets/batiments/baies2.png" id="13_rtd1e"]
+[ext_resource type="Texture2D" uid="uid://bfvvhx5sxnaxy" path="res://assets/batiments/menu-icon.png" id="15_7t7qg"]
+[ext_resource type="Texture2D" uid="uid://dhvsm4b8pf1cf" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
+[ext_resource type="Texture2D" uid="uid://i228ktppg4x6" path="res://assets/batiments/menu-gestion.png" id="16_l3wcu"]
+[ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
+[ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnxe8"]
 bg_color = Color(0.352941, 0.231373, 0.113725, 1)
@@ -27,23 +33,11 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_70nuf"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_bottom_right = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dek3k"]
+texture = ExtResource("18_7t7qg")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qv43e"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8fhjo"]
+texture = ExtResource("16_l3wcu")
 
 [sub_resource type="LabelSettings" id="LabelSettings_11y2r"]
 font_size = 30
@@ -59,51 +53,17 @@ func set_goal(title: String, description: String):
 	lbl_description.text = description
 "
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_el213"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_i7htd"]
+texture = ExtResource("15_7t7qg")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thu7x"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7t7qg"]
+texture = ExtResource("17_5p0sf")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2af52"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_l3wcu"]
+texture = ExtResource("18_7t7qg")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ycwl"]
-bg_color = Color(0.352941, 0.231373, 0.113725, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12549, 0.0705882, 0.0235294, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6c8sk"]
+texture = ExtResource("15_7ycwl")
 
 [node name="Menu" type="Panel"]
 script = ExtResource("1_11y2r")
@@ -159,6 +119,11 @@ layout_mode = 2
 texture = ExtResource("7_el213")
 expand_mode = 2
 
+[node name="baies_recolte" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("8_7ycwl")
+expand_mode = 2
+
 [node name="route" type="HBoxContainer" parent="HUD/ZoneInventaire"]
 layout_mode = 0
 offset_left = 4.0
@@ -196,16 +161,25 @@ layout_mode = 2
 texture = ExtResource("10_thu7x")
 expand_mode = 2
 
+[node name="TextureRect" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+layout_mode = 2
+texture = ExtResource("13_rtd1e")
+expand_mode = 2
+
 [node name="Infos_Stats" type="Panel" parent="HUD"]
-offset_right = 250.0
-offset_bottom = 165.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_70nuf")
+offset_left = -12.0
+offset_top = -30.0
+offset_right = 288.0
+offset_bottom = 220.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_dek3k")
 script = ExtResource("4_o0tnf")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HUD/Infos_Stats"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 23.0
+offset_top = 34.0
+offset_right = 63.0
+offset_bottom = 192.0
 
 [node name="Population" type="Label" parent="HUD/Infos_Stats/VBoxContainer"]
 layout_mode = 2
@@ -236,37 +210,42 @@ layout_mode = 2
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -180.0
-offset_bottom = 70.0
+offset_left = -198.0
+offset_top = -53.0
+offset_right = 2.0
+offset_bottom = 117.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_qv43e")
+theme_override_styles/panel = SubResource("StyleBoxTexture_8fhjo")
 
 [node name="button" type="HBoxContainer" parent="HUD/GestionJeu"]
 layout_mode = 0
-offset_right = 60.0
-offset_bottom = 45.0
+offset_left = 16.0
+offset_top = 61.0
+offset_right = 48.0
+offset_bottom = 69.0
+scale = Vector2(5.81371, 4.08797)
 
 [node name="btn_pause" type="Button" parent="HUD/GestionJeu/button"]
 modulate = Color(0.913434, 0.736336, 0.58943, 1)
 layout_mode = 2
-text = "Pause"
+flat = true
 
 [node name="btn_play" type="Button" parent="HUD/GestionJeu/button"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 2
-text = "Reprendre"
+flat = true
 
 [node name="btn_fast" type="Button" parent="HUD/GestionJeu/button"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 2
-text = "x2"
+flat = true
 
 [node name="coordonées" type="HBoxContainer" parent="HUD/GestionJeu"]
 layout_mode = 0
-offset_left = 8.99994
-offset_top = 49.0
-offset_right = 58.9999
-offset_bottom = 77.0
+offset_left = 10.0
+offset_top = 94.0
+offset_right = 60.0
+offset_bottom = 136.0
 scale = Vector2(0.458231, 0.416195)
 
 [node name="mouse_coordonnées" type="Label" parent="HUD/GestionJeu/coordonées"]
@@ -295,10 +274,10 @@ offset_bottom = 60.0
 
 [node name="reglages" type="Panel" parent="."]
 layout_mode = 1
-offset_left = 900.0
-offset_right = 940.0
+offset_left = 940.0
+offset_right = 980.0
 offset_bottom = 40.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_el213")
+theme_override_styles/panel = SubResource("StyleBoxTexture_i7htd")
 script = ExtResource("11_el213")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="reglages"]
@@ -308,96 +287,97 @@ offset_bottom = 40.0
 
 [node name="TextureRect" type="TextureRect" parent="reglages/HBoxContainer"]
 layout_mode = 2
-texture = ExtResource("11_pp5m5")
-expand_mode = 2
+texture = ExtResource("15_7t7qg")
+expand_mode = 3
 
 [node name="menu_reglages" type="Panel" parent="reglages"]
 layout_mode = 0
-offset_left = -53.0
-offset_top = 41.0
-offset_right = 97.0
-offset_bottom = 201.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_thu7x")
+offset_left = -127.0
+offset_top = 31.0
+offset_right = 23.0
+offset_bottom = 191.0
+scale = Vector2(2, 2)
+theme_override_styles/panel = SubResource("StyleBoxTexture_7t7qg")
 
 [node name="BtnRegles" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_left = 43.0
-offset_top = 1.0
-offset_right = 101.0
-offset_bottom = 32.0
-text = "Regles"
+offset_left = 31.6
+offset_top = 22.4
+offset_right = 116.6
+offset_bottom = 42.4
+flat = true
 
 [node name="BtnTouches" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_left = 37.0
-offset_top = 33.0
-offset_right = 110.0
-offset_bottom = 64.0
-text = "Touches"
+offset_left = 34.0
+offset_top = 49.2
+offset_right = 119.0
+offset_bottom = 69.2
+flat = true
 
 [node name="BtnSauvegarder" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_left = 22.0
-offset_top = 66.0
-offset_right = 128.0
-offset_bottom = 97.0
-text = "Sauvegarder"
+offset_left = 33.2
+offset_top = 76.8
+offset_right = 118.2
+offset_bottom = 96.8
+flat = true
 
 [node name="BtnRecommencer" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_left = 17.0
-offset_top = 98.0
-offset_right = 137.0
-offset_bottom = 129.0
-text = "Recommencer"
+offset_left = 33.6
+offset_top = 106.0
+offset_right = 118.6
+offset_bottom = 126.0
+flat = true
 
 [node name="BtnQuitter" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_left = 45.0
-offset_top = 128.0
-offset_right = 109.0
-offset_bottom = 159.0
-text = "Quitter"
+offset_left = 32.4
+offset_top = 128.8
+offset_right = 117.4
+offset_bottom = 148.8
+flat = true
 
 [node name="panneau_popup" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = -16.0
-offset_top = 238.0
-offset_right = 184.0
-offset_bottom = 393.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_2af52")
+offset_left = -80.5
+offset_top = 185.5
+offset_right = 219.5
+offset_bottom = 435.5
+theme_override_styles/panel = SubResource("StyleBoxTexture_l3wcu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/panneau_popup"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 23.5
+offset_top = 35.5
+offset_right = 63.5
+offset_bottom = 75.5
 
 [node name="Label" type="Label" parent="reglages/menu_reglages/panneau_popup/VBoxContainer"]
 layout_mode = 2
 
 [node name="popup_quit" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = 5.0
-offset_top = 250.0
-offset_right = 155.0
-offset_bottom = 380.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_7ycwl")
+offset_left = -34.0
+offset_top = 187.5
+offset_right = 116.0
+offset_bottom = 317.5
+scale = Vector2(1.4, 1.4)
+theme_override_styles/panel = SubResource("StyleBoxTexture_6c8sk")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/popup_quit"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Label" type="Label" parent="reglages/menu_reglages/popup_quit/VBoxContainer"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
-layout_mode = 2
-text = "Tu es sûr 
-de vouloir quitter ?"
+offset_left = 33.0
+offset_top = 56.0
+offset_right = 134.0
+offset_bottom = 122.0
+scale = Vector2(0.8, 0.8)
 
 [node name="BtnConfirmerQuitter" type="Button" parent="reglages/menu_reglages/popup_quit/VBoxContainer"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)

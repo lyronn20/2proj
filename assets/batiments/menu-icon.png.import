@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drqyynh4wlril"
-path="res://.godot/imported/para.png-7bb1a5d88443c52f436448d3984487c3.ctex"
+uid="uid://bfvvhx5sxnaxy"
+path="res://.godot/imported/menu-icon.png-e0bec36c9ba52982ed04d9736638787c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/batiments/para.png"
-dest_files=["res://.godot/imported/para.png-7bb1a5d88443c52f436448d3984487c3.ctex"]
+source_file="res://assets/batiments/menu-icon.png"
+dest_files=["res://.godot/imported/menu-icon.png-e0bec36c9ba52982ed04d9736638787c.ctex"]
 
 [params]
 
