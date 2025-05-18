@@ -14,20 +14,13 @@ const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var grid_preview: Node2D
 
+var inventory := { "feu_camp": 1 }
+var last_cell = null
+var current_preview: Sprite2D = null
+var current_scene: PackedScene = null
+var selected_mode := ""
+var occupied_cells := {}
 
-# Un seul feu de camp autorisé (le reste illimité)
-var inventory := {
-	"feu_camp": 1
-}
-
-var last_cell        = null
-var current_preview  : Sprite2D    = null
-var current_scene    : PackedScene = null
-var selected_mode    := ""
-var occupied_cells   := {}
-
-
-# Tailles en cellules de chaque objet
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
 	"hutte":    Vector2i(4, 4),
@@ -37,19 +30,44 @@ var objet_sizes = {
 	"carriere": Vector2i(4, 4)
 }
 
+var pnj_counter := 1
+var time_of_day := "day"
+var time_timer := 0.0
+var time_cycle_duration := 30.0
+
+var route_astar := AStarGrid2D.new()
+var grid_size := Vector2i(128, 128)
+
 func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	# initialise le bouton feu_camp
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	spawn_pnjs(20)
 	generate_sapins(100)
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
+	build_route_astar()
 
+func build_route_astar():
+	route_astar.region = Rect2i(Vector2i(0, 0), grid_size)
+	route_astar.cell_size = Vector2(1, 1)
+	route_astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	route_astar.update()
 
-func _process(_delta):
+	for x in range(grid_size.x):
+		for y in range(grid_size.y):
+			var pos = Vector2i(x, y)
+			var is_route = route_tilemap.get_cell_source_id(pos) != -1
+			route_astar.set_point_solid(pos, not is_route)
+
+func _process(delta):
+	time_timer += delta
+	if time_timer >= time_cycle_duration:
+		time_timer = 0.0
+		time_of_day = "night" if time_of_day == "day" else "day"
+		update_pnj_behavior()
+
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
@@ -58,6 +76,7 @@ func _process(_delta):
 		var world_pos = route_tilemap.map_to_local(grid_pos)
 		grid_preview.visible = true
 		grid_preview.update_grid(world_pos, size)
+
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
 	if cell != last_cell:
 		last_cell = cell
@@ -73,8 +92,6 @@ func _process(_delta):
 		if selected_mode != "route":
 			current_preview.modulate = Color(1,1,1,0.5) if can_place_object(grid_pos, size) else Color(1,0,0,0.5)
 
-
-
 	update_ui_stats()
 
 func _unhandled_input(event):
@@ -86,13 +103,11 @@ func _unhandled_input(event):
 			"gomme":
 				for obj in get_tree().get_nodes_in_group("placeable"):
 					if obj.global_position.distance_to(pos) < 16:
-						# libère toutes les cellules qu'occupait l'objet
 						var base = route_tilemap.local_to_map(obj.global_position)
 						var size = objet_sizes[obj.name]
 						for x in range(size.x):
 							for y in range(size.y):
 								occupied_cells.erase(base + Vector2i(x,y))
-						# si c'était un feu de camp, remet en stock
 						if obj.name == "feu_camp":
 							inventory["feu_camp"] += 1
 							menu.update_inventory("feu_camp", inventory["feu_camp"])
@@ -105,7 +120,6 @@ func _unhandled_input(event):
 				placer_route()
 
 			_:
-				# empêche de poser un feu de camp si stock épuisé
 				if selected_mode == "feu_camp" and inventory["feu_camp"] <= 0:
 					print("🚫 Plus de feu de camp disponible.")
 					return
@@ -122,6 +136,11 @@ func _unhandled_input(event):
 						inst.global_position = route_tilemap.map_to_local(base_cell)
 						inst.add_to_group("placeable")
 						add_child(inst)
+						if selected_mode == "scierie":
+							assign_pnjs_to_work(inst, "bucheron")
+						elif selected_mode == "carriere":
+							assign_pnjs_to_work(inst, "mineur")
+
 
 						for x in range(size.x):
 							for y in range(size.y):
@@ -132,6 +151,9 @@ func _unhandled_input(event):
 							menu.update_inventory("feu_camp", inventory["feu_camp"])
 							print("✅ Feu de camp posé, stock restant :", inventory["feu_camp"])
 
+						if selected_mode == "hutte":
+							assign_pnjs_to_hut(inst)
+
 						current_preview.queue_free()
 						current_preview = null
 						current_scene = null
@@ -140,7 +162,6 @@ func _unhandled_input(event):
 		placer_route()
 
 func _on_objet_selectionne(nom: String):
-	
 	selected_mode = nom
 	if current_preview:
 		current_preview.queue_free()
@@ -151,7 +172,7 @@ func _on_objet_selectionne(nom: String):
 		return
 
 	var texture: Texture2D
-	var scale := Vector2.ONE  # par défaut 1
+	var scale := Vector2.ONE
 
 	match nom:
 		"feu_camp":
@@ -174,25 +195,21 @@ func _on_objet_selectionne(nom: String):
 			scale         = Vector2(0.7, 0.7)
 		"carriere":
 			current_scene = CARRIERE_SCENE
-			texture       = load("res://assets/batiments/carreire_pierre.png")  # corrigé ici
+			texture       = load("res://assets/batiments/carreire_pierre.png")
 			scale         = Vector2(0.7, 0.7)
 		_:
 			return
 
 	current_preview = Sprite2D.new()
 	current_preview.texture = texture
-	
 	current_preview.modulate.a = 0.5
 	current_preview.scale = scale
 	add_child(current_preview)
-	
-	# 🟥 Afficher la grille ici
-	
+
 	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
 	var size = objet_sizes.get(nom, Vector2i(1, 1))
 	grid_pos.x = int(grid_pos.x / size.x) * size.x
-	grid_pos.y = int(grid_pos.y / size.y) * size.y	
-
+	grid_pos.y = int(grid_pos.y / size.y) * size.y
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
@@ -250,3 +267,34 @@ func generate_sapins(count: int = 50):
 			add_child(sp)
 			occupied_cells[cell] = true
 			spawned += 1
+
+func assign_pnjs_to_hut(hut: Node2D):
+	var free_pnjs := []
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if not p.has_house:
+			free_pnjs.append(p)
+			if free_pnjs.size() >= 2:
+				break
+
+	for p in free_pnjs:
+		p.name = "PNJ_" + str(pnj_counter)
+		pnj_counter += 1
+		p.maison = hut
+		p.has_house = true
+		hut.call("add_habitant", p)
+
+func update_pnj_behavior():
+	for pnj in get_tree().get_nodes_in_group("pnj"):
+		pnj.set_time_of_day(time_of_day)
+		
+func assign_pnjs_to_work(building: Node2D, metier: String):
+	var free_pnjs := []
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if not p.metier:
+			free_pnjs.append(p)
+			if free_pnjs.size() >= 2:
+				break
+
+	for p in free_pnjs:
+		building.call("add_employe", p)
+		print("👷 " + p.name + " devient " + metier + " (" + building.name + ")")

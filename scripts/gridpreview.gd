@@ -1,9 +1,12 @@
 extends Node2D
 
-@export var manual_offset := Vector2(0, 0)
+@export var manual_offset := Vector2(-8, -24)
 @export var tilemap: TileMapLayer    # Glisse ton TileMapLayer ici dans l’inspecteur
 @export var cell_size := 16          # Taille d’une case, en pixels
-@export var preview_size := Vector2i(4, 4)  # Dimensions de la grille, en nombre de cases
+@export var preview_size := Vector2i(10, 10)  # Dimensions de la grille, en nombre de cases
+@export var center_alpha := 0.6
+@export var edge_alpha := 0.1
+
 
 func _process(_delta):
 	if tilemap == null:
@@ -22,24 +25,31 @@ func update_grid(center_pos: Vector2, size: Vector2i):
 	for child in get_children():
 		child.queue_free()
 
-	# Calcule le coin supérieur-gauche de la grille, centré
-	var offset = Vector2(size.x, size.y) * cell_size * 0.5
-	var start = center_pos - offset
+	# Calcul du coin sup-gauche centré
+	var half = size * cell_size * 0.5
+	var start = center_pos - half
 
-	# Trace les lignes verticales
-	for x in range(size.x + 1):
+	var max_dx = size.x * 0.5
+	var max_dy = size.y * 0.5
+
+	# === verticales intérieures seulement (skip x=0 et x=size.x) ===
+	for x in range(1, size.x):
+		var norm = abs(x - max_dx) / max_dx
+		var alpha = lerp(center_alpha, edge_alpha, norm)
 		var line = Line2D.new()
 		line.width = 1
-		line.default_color = Color(1, 1, 1, 0.5)
+		line.default_color = Color(0, 0, 0, alpha)
 		line.add_point(start + Vector2(x * cell_size, 0))
 		line.add_point(start + Vector2(x * cell_size, size.y * cell_size))
 		add_child(line)
 
-	# Trace les lignes horizontales
-	for y in range(size.y + 1):
+	# === horizontales intérieures seulement (skip y=0 et y=size.y) ===
+	for y in range(1, size.y):
+		var norm = abs(y - max_dy) / max_dy
+		var alpha = lerp(center_alpha, edge_alpha, norm)
 		var line = Line2D.new()
 		line.width = 1
-		line.default_color = Color(1, 1, 1, 0.5)
+		line.default_color = Color(0, 0, 0, alpha)
 		line.add_point(start + Vector2(0, y * cell_size))
 		line.add_point(start + Vector2(size.x * cell_size, y * cell_size))
 		add_child(line)
