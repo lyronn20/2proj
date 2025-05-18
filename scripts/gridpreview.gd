@@ -1,5 +1,6 @@
 extends Node2D
 
+@export var manual_offset := Vector2(0, 0)
 @export var tilemap: TileMapLayer    # Glisse ton TileMapLayer ici dans l’inspecteur
 @export var cell_size := 16          # Taille d’une case, en pixels
 @export var preview_size := Vector2i(4, 4)  # Dimensions de la grille, en nombre de cases
@@ -8,14 +9,11 @@ func _process(_delta):
 	if tilemap == null:
 		return
 
-	# 1) Récupère la cellule sous la souris (coordonnées en tuiles)
 	var cell = tilemap.local_to_map(get_global_mouse_position())
-	# 2) Transforme en position locale (pixels) à l’intérieur du TileMap
 	var local_pos = tilemap.map_to_local(cell)
-	# 3) Convertis en position monde, en tenant compte de la position du TileMapLayer dans la scène
-	position = tilemap.global_position + local_pos
+	# on ajoute manual_offset ici
+	position = tilemap.global_position + local_pos + manual_offset
 
-	# 4) Redessine la grille, centrée sur (0,0) local de ce Node2D
 	update_grid(Vector2.ZERO, preview_size)
 
 
