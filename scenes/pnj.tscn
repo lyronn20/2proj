@@ -3,9 +3,6 @@
 [ext_resource type="Texture2D" uid="uid://boi513drhquv2" path="res://assets/pnj/npc01_spritesheet.png" id="1_0yhv8"]
 [ext_resource type="Script" uid="uid://b17ue3ybyypcv" path="res://scripts/pnj.gd" id="1_xg58l"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_xg58l"]
-size = Vector2(39, 81)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_0yhv8"]
 atlas = ExtResource("1_0yhv8")
 region = Rect2(0, 0, 30, 48)
@@ -80,14 +77,11 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0yhv8"]
 size = Vector2(20, 45)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xg58l"]
+size = Vector2(20, 38)
+
 [node name="Pnj" type="CharacterBody2D"]
 script = ExtResource("1_xg58l")
-
-[node name="ClickArea" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
-position = Vector2(0.5, -28.5)
-shape = SubResource("RectangleShape2D_xg58l")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(1, -24)
@@ -100,20 +94,16 @@ position = Vector2(2, -24.5)
 shape = SubResource("RectangleShape2D_0yhv8")
 
 [node name="Energybar" type="Node2D" parent="."]
-visible = false
-
-[node name="ColorRect" type="ColorRect" parent="Energybar"]
-custom_minimum_size = Vector2(40, 6)
-offset_left = -15.0
-offset_top = -51.0
-offset_right = 25.0
-offset_bottom = -40.0
-color = Color(0.556953, 0.556953, 0.556953, 1)
 
 [node name="Fill" type="ColorRect" parent="Energybar"]
-custom_minimum_size = Vector2(20, 3)
-offset_left = -5.0
-offset_top = -50.0
-offset_right = 15.0
-offset_bottom = -43.0
+offset_left = -17.0
+offset_top = -18.0
+offset_right = 7.0
+offset_bottom = -11.0
 color = Color(0, 1, 0, 1)
+
+[node name="ClickArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
+position = Vector2(1, -23)
+shape = SubResource("RectangleShape2D_xg58l")
