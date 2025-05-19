@@ -7,3 +7,24 @@ func add_employe(pnj):
 		employes.append(pnj)
 		pnj.metier = "bucheron"
 		pnj.lieu_travail = self
+
+func _ready():
+	var area = Area2D.new()
+	area.name = "ClickArea"
+	area.input_pickable = true
+	add_child(area)
+
+	var shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(64, 64)
+	shape.shape = rect
+	area.add_child(shape)
+
+	area.connect("input_event", Callable(self, "_on_click"))
+
+func _on_click(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.pressed:
+		var ids := []
+		for p in employes:
+			ids.append(p.id)
+		print("🪓 Scierie cliquée ! PNJ IDs :", ids)

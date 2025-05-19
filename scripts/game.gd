@@ -12,6 +12,7 @@ const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
 const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
+var next_id := 1
 var grid_preview: Node2D
 
 var inventory := { "feu_camp": 1 }
@@ -31,7 +32,9 @@ var objet_sizes = {
 }
 
 var pnj_counter := 1
-
+var time_of_day := "day"
+var time_timer := 0.0
+var time_cycle_duration := 30.0
 
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
@@ -60,7 +63,10 @@ func build_route_astar():
 			route_astar.set_point_solid(pos, not is_route)
 
 func _process(delta):
-
+	time_timer += delta
+	if time_timer >= time_cycle_duration:
+		time_timer = 0.0
+		time_of_day = "night" if time_of_day == "day" else "day"
 
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
@@ -68,7 +74,7 @@ func _process(delta):
 		grid_pos.x = int(grid_pos.x / size.x) * size.x
 		grid_pos.y = int(grid_pos.y / size.y) * size.y
 		var world_pos = route_tilemap.map_to_local(grid_pos)
-		grid_preview.visible = true
+		grid_preview.visible = false
 		grid_preview.update_grid(world_pos, size)
 
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
@@ -236,6 +242,8 @@ func spawn_pnjs(count: int):
 		if herbe_tilemap.get_cell_source_id(cell) == 0:
 			var pn = pnj_scene.instantiate()
 			pn.name = "pnj"
+			pn.id = next_id
+			next_id += 1
 			pn.global_position = herbe_tilemap.map_to_local(cell)
 			pn.add_to_group("pnj")
 			pn.add_to_group("placeable")
@@ -276,8 +284,7 @@ func assign_pnjs_to_hut(hut: Node2D):
 		p.maison = hut
 		p.has_house = true
 		hut.call("add_habitant", p)
-
-
+		
 func assign_pnjs_to_work(building: Node2D, metier: String):
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):

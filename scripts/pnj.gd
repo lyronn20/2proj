@@ -28,6 +28,11 @@ var energy := 100
 
 var chemin: Array[Vector2i] = []
 var current_step := 0
+var id: int = 0
+var faim := 100.0
+var soif := 100.0
+var mission := ""
+
 
 func _ready():
 	sprite.play("walk")
@@ -36,6 +41,10 @@ func _ready():
 	click_area.connect("input_event", Callable(self, "_on_click"))
 
 func _process(delta):
+	faim -= delta * 0.3
+	soif -= delta * 0.5
+	faim = clamp(faim, 0, 100)
+	soif = clamp(soif, 0, 100)
 	# Travailler tant qu'il a de l'énergie
 	if is_going_to_work and lieu_travail:
 		if energy <= 20:
@@ -86,7 +95,8 @@ func _process(delta):
 func _on_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:
 		show_energy = !show_energy
-		print("🖱️ Clic sur : ", name, " → Energie visible :", show_energy)
+		print("🖱️ PNJ ID:", id)
+
 
 func move_randomly(delta):
 	var next_pos = position + direction * speed * delta
@@ -140,3 +150,8 @@ func suivre_chemin(delta):
 	sprite.flip_h = dir.x < 0
 	if position.distance_to(target) < 5:
 		current_step += 1
+
+
+func assigner_mission(m: String):
+	mission = m
+	print("📝 PNJ ", id, " a reçu la mission :", m)

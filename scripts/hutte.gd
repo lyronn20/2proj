@@ -22,4 +22,7 @@ func _ready():
 
 func _on_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:
-		print("🏠 Hutte cliquée ! PNJ :", habitants.map(func(p): return p.name))
+		var ids := []
+		for p in habitants:
+			ids.append(p.id)
+		print("🏠 Hutte cliquée ! PNJ IDs :", ids)

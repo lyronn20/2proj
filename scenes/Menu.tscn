@@ -16,7 +16,7 @@
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
 [ext_resource type="Texture2D" uid="uid://c7qn5fkrfr83s" path="res://assets/batiments/baies2.png" id="13_rtd1e"]
 [ext_resource type="Texture2D" uid="uid://bfvvhx5sxnaxy" path="res://assets/batiments/menu-icon.png" id="15_7t7qg"]
-[ext_resource type="Texture2D" uid="uid://dhvsm4b8pf1cf" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
+[ext_resource type="Texture2D" uid="uid://cdv8jkqlf57g3" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
 [ext_resource type="Texture2D" uid="uid://i228ktppg4x6" path="res://assets/batiments/menu-gestion.png" id="16_l3wcu"]
 [ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
 [ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
