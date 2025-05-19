@@ -2,11 +2,12 @@ extends Control
 
 @onready var batiment_panel := $Batiment
 @onready var vbox := $Batiment/VBoxContainer
+
 @onready var pnj_panel := $PNJ
 @onready var pnj_content := $PNJ/VBoxContainer
-
-
-
+@onready var bar_faim := $PNJ/VBoxContainer/BarFaim
+@onready var bar_soif := $PNJ/VBoxContainer/BarSoif
+@onready var bar_energie := $PNJ/VBoxContainer/BarEnergie
 
 func _ready():
 	await get_tree().process_frame
@@ -41,28 +42,71 @@ func update_dashboard(batiment: Node = null):
 				vbox.add_child(p_label)
 
 
+
+func make_label(text: String) -> Label:
+	var lbl = Label.new()
+	lbl.text = text
+	lbl.add_theme_color_override("font_color", Color("#e9bc96"))
+	return lbl
+
+func make_bar(value: float) -> ProgressBar:
+	var bar = ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = 100
+	bar.step = 1
+	bar.value = value
+	bar.custom_minimum_size = Vector2(0, 16)
+	return bar
+
+
 func update_pnj_panel(pnj: Node):
 	pnj_panel.visible = true
 	batiment_panel.visible = false
+
 	for child in pnj_content.get_children():
 		child.queue_free()
 
-	var label_id = Label.new()
-	label_id.text = "🧍 ID: " + str(pnj.id)
-	label_id.add_theme_color_override("font_color", Color("#e9bc96"))
-	pnj_content.add_child(label_id)
+	pnj_content.add_child(make_label("🍗 Faim"))
+	pnj_content.add_child(make_colored_bar(pnj.faim, Color(1, 0.2, 0.2)))  # rouge
 
-	var label_metier = Label.new()
-	label_metier.text = "🏷️ Métier: " + str(pnj.metier)
-	label_metier.add_theme_color_override("font_color", Color("#e9bc96"))
-	pnj_content.add_child(label_metier)
+	pnj_content.add_child(make_label("💧 Soif"))
+	pnj_content.add_child(make_colored_bar(pnj.soif, Color(0.2, 0.6, 1)))   # bleu
 
-	var label_faim = Label.new()
-	label_faim.text = "🍗 Faim: " + str(round(pnj.faim)) + "%"
-	label_faim.add_theme_color_override("font_color", Color("#e9bc96"))
-	pnj_content.add_child(label_faim)
+	pnj_content.add_child(make_label("⚡ Énergie"))
+	pnj_content.add_child(make_colored_bar(pnj.energy, Color(0.3, 1, 0.3))) # vert
 
-	var label_soif = Label.new()
-	label_soif.text = "💧 Soif: " + str(round(pnj.soif)) + "%"
-	label_soif.add_theme_color_override("font_color", Color("#e9bc96"))
-	pnj_content.add_child(label_soif)
+	pnj_content.add_child(make_label("🧍 ID: " + str(pnj.id)))
+	pnj_content.add_child(make_label("🏷️ Métier: " + str(pnj.metier)))
+
+
+
+func make_colored_bar(value: float, color: Color) -> ProgressBar:
+	var bar = ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = 100
+	bar.step = 1
+	bar.value = value
+	bar.custom_minimum_size = Vector2(0, 18)
+
+	# Crée un style de fond sombre
+	var background_style = StyleBoxFlat.new()
+	background_style.bg_color = Color(0.1, 0.1, 0.1, 0.8)  # fond presque noir avec transparence
+	background_style.set_border_width_all(1)
+	background_style.border_color = Color(0.3, 0.3, 0.3)
+
+	# Crée un style de remplissage coloré
+	var fill_style = StyleBoxFlat.new()
+	fill_style.bg_color = color
+	fill_style.set_corner_radius_all(3)
+
+	# Applique les styles
+	bar.add_theme_stylebox_override("background", background_style)
+	bar.add_theme_stylebox_override("fill", fill_style)
+
+	# Ajoute un texte blanc lisible
+	bar.add_theme_color_override("font_color", Color(1, 1, 1))
+	bar.add_theme_color_override("font_outline_color", Color.BLACK)
+	bar.add_theme_constant_override("outline_size", 1)
+
+
+	return bar
