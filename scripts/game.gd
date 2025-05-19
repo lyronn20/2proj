@@ -9,6 +9,8 @@ extends Node2D
 
 const TERRAIN_ID        = 0
 const SAPIN_SCENE       = preload("res://scenes/sapin.tscn")
+const BAIES       = preload("res://scenes/baies.tscn")
+const COLLECT_BAIES       = preload("res://scenes/collect_baies.tscn")
 const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
 const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
@@ -30,6 +32,8 @@ var objet_sizes = {
 	"sapin":    Vector2i(4, 4),
 	"scierie":  Vector2i(4, 4),
 	"puit":     Vector2i(4, 4),
+	"baies":     Vector2i(2, 2),
+	"collect_baies":     Vector2i(4, 4),
 	"carriere": Vector2i(4, 4)
 }
 
@@ -151,13 +155,18 @@ func _unhandled_input(event):
 						inst.name = selected_mode + "_" + str(randi() % 100000)
 						inst.global_position = route_tilemap.map_to_local(base_cell)
 						inst.add_to_group("placeable")
+						inst.add_to_group("batiment")  # 🔥 ← ajoute cette ligne ici
 						add_child(inst)
 						get_node("CanvasLayer/TableauBord").update_dashboard(inst)
+
 
 						if selected_mode == "scierie":
 							assign_pnjs_to_work(inst, "bucheron")
 						elif selected_mode == "carriere":
 							assign_pnjs_to_work(inst, "mineur")
+						elif selected_mode == "collect_baies":
+							reset_all_pnjs()
+							assign_pnjs_to_work(inst, "cueilleur")
 						elif selected_mode == "hutte":
 							assign_pnjs_to_hut(inst)
 
@@ -228,6 +237,14 @@ func _on_objet_selectionne(nom: String):
 			current_scene = CARRIERE_SCENE
 			texture       = load("res://assets/batiments/carreire_pierre.png")
 			scale         = Vector2(0.7, 0.7)
+		"baies":
+			current_scene = BAIES
+			texture       = load("res://assets/batiments/baies2.png")
+			scale         = Vector2(0.4, 0.4)
+		"collect_baies":
+			current_scene = COLLECT_BAIES
+			texture       = load("res://assets/batiments/recolte_baies.png")
+			scale         = Vector2(0.15, 0.15)
 		_:
 			return
 
@@ -306,66 +323,71 @@ func generate_sapins(count: int = 50):
 func assign_pnjs_to_hut(hut: Node2D):
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if not p.has_house:          # ça marche maintenant
+		if not p.has_house:
 			free_pnjs.append(p)
 			if free_pnjs.size() >= 2:
 				break
 
 	for p in free_pnjs:
-		p.name       = "PNJ_" + str(pnj_counter)
+		p.name = "PNJ_" + str(pnj_counter)
 		pnj_counter += 1
-		p.has_house  = true         # on marque qu’il a maintenant une maison
-		p.maison     = hut
+		p.has_house = true
+		p.maison = hut
 		hut.call("add_habitant", p)
+
+func reset_all_pnjs():
+	for p in get_tree().get_nodes_in_group("pnj"):
+		p.metier = ""
+		p.mission = ""
+		p.lieu_travail = null
+		p.chemin.clear()
+		p.following_route = false
 		
 func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 	var assigned := 0
 	var route_cells := _get_route_cells()
+
+	# 🧼 Libération des PNJ déjà assignés à ce métier
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.metier != "": continue
+		if p.metier == metier:
+			p.metier = ""
+			p.lieu_travail = null
+			p.mission = ""
+			p.chemin.clear()
+			p.following_route = false
 
-		# a) Assignation du métier/mission
-		p.metier       = metier
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if p.metier != "":
+			continue
+
+		p.metier = metier
 		p.lieu_travail = building
-		p.mission      = "aller_travailler"
+		p.mission = "aller_travailler"
+		p.name = "PNJ_" + str(pnj_counter)
+		pnj_counter += 1
 
-		# b) Cellule brute sous PNJ et bâtiment
 		var raw_start = route_tilemap.local_to_map(p.global_position)
-		var raw_goal  = route_tilemap.local_to_map(building.global_position)
+		var raw_goal = route_tilemap.local_to_map(building.global_position)
 
-		# c) Snap si nécessaire sur route existante
-		var start = raw_start
-		if raw_start not in route_cells:
-			start = _find_nearest_route_cell(raw_start)
-		var goal = raw_goal
-		if raw_goal not in route_cells:
-			goal = _find_nearest_route_cell(raw_goal)
+		var start = raw_start if raw_start in route_cells else _find_nearest_route_cell(raw_start)
+		var goal  = raw_goal  if raw_goal  in route_cells else _find_nearest_route_cell(raw_goal)
 
-		# d) Calcul A* sur routes
 		var cell_path = route_astar.get_point_path(start, goal)
 
-		# e) Conversion en positions monde
 		p.chemin.clear()
 		var half = route_astar.cell_size * 0.5
-		if cell_path.size() > 0:
-			for cell in cell_path:
-				p.chemin.append(route_tilemap.map_to_local(cell) + half)
-		else:
-			# **Fallback** : pas de route => marche directe vers le bâtiment
-			# on saute directement au global_position de la carrière
-			p.chemin.append(building.global_position)
+		for cell in cell_path:
+			p.chemin.append(route_tilemap.map_to_local(cell) + half)
 
-		# f) On ajoute toujours la position exacte du bâtiment en bout
-		if cell_path.size() > 0:
-			p.chemin.append(building.global_position)
-
-		# g) Initialisation du suivi
-		p.current_step    = 0
+		p.chemin.append(building.global_position)
+		p.current_step = 0
 		p.following_route = true
 		p.call_deferred("update")
 
-		# h) On embauche
-		building.call("add_employe", p)
+
+
+		if building.has_method("add_employe"):
+			building.call("add_employe", p)
 
 		assigned += 1
 		if assigned >= 2:

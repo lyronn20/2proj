@@ -119,7 +119,7 @@ layout_mode = 2
 texture = ExtResource("7_el213")
 expand_mode = 2
 
-[node name="baies_recolte" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+[node name="collect_baies" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("8_7ycwl")
 expand_mode = 2
@@ -161,7 +161,7 @@ layout_mode = 2
 texture = ExtResource("10_thu7x")
 expand_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+[node name="baies" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("13_rtd1e")
 expand_mode = 2

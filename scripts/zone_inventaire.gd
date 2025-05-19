@@ -8,6 +8,8 @@ signal objet_selectionne(nom: String)
 @onready var puit        = $HBoxContainer/puit
 @onready var carriere    = $HBoxContainer/carriere
 @onready var route_terre = $route/sol_terre
+@onready var collect_baies   = $HBoxContainer/collect_baies
+@onready var baies    = $route/baies
 @onready var gomme       = $route/Gomme
 
 func _ready():
@@ -18,6 +20,8 @@ func _ready():
 	scierie.connect("gui_input", Callable(self, "_on_scierie_input"))
 	puit.connect("gui_input", Callable(self, "_on_puit_input"))
 	carriere.connect("gui_input", Callable(self, "_on_carriere_input"))
+	collect_baies.connect("gui_input", Callable(self, "_on_collect_baies_input"))
+	baies.connect("gui_input", Callable(self, "_on_baies_input"))
 
 func _on_feu_camp_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -46,3 +50,11 @@ func _on_puit_input(event):
 func _on_carriere_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		emit_signal("objet_selectionne", "carriere")
+		
+func _on_collect_baies_input(event):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		emit_signal("objet_selectionne", "collect_baies")
+
+func _on_baies_input(event):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		emit_signal("objet_selectionne", "baies")
