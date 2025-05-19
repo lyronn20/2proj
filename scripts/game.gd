@@ -78,7 +78,7 @@ func _process(delta):
 		grid_preview.update_grid(world_pos, size)
 
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
-	if cell != last_cell:
+	if cell != last_cell: 	
 		last_cell = cell
 		menu.set_mouse_coords(cell)
 
@@ -107,7 +107,7 @@ func _unhandled_input(event):
 						var size = objet_sizes[obj.name]
 						for x in range(size.x):
 							for y in range(size.y):
-								occupied_cells.erase(base + Vector2i(x,y))
+								occupied_cells.erase(base + Vector2i(x, y))
 						if obj.name == "feu_camp":
 							inventory["feu_camp"] += 1
 							menu.update_inventory("feu_camp", inventory["feu_camp"])
@@ -132,31 +132,47 @@ func _unhandled_input(event):
 
 					if can_place_object(base_cell, size):
 						var inst = current_scene.instantiate()
-						inst.name = selected_mode
+						inst.name = selected_mode + "_" + str(randi() % 100000)
 						inst.global_position = route_tilemap.map_to_local(base_cell)
 						inst.add_to_group("placeable")
 						add_child(inst)
+						get_node("CanvasLayer/TableauBord").update_dashboard(inst)
+
 						if selected_mode == "scierie":
 							assign_pnjs_to_work(inst, "bucheron")
 						elif selected_mode == "carriere":
 							assign_pnjs_to_work(inst, "mineur")
-
+						elif selected_mode == "hutte":
+							assign_pnjs_to_hut(inst)
 
 						for x in range(size.x):
 							for y in range(size.y):
-								occupied_cells[base_cell + Vector2i(x,y)] = true
+								occupied_cells[base_cell + Vector2i(x, y)] = true
 
 						if selected_mode == "feu_camp":
 							inventory["feu_camp"] -= 1
 							menu.update_inventory("feu_camp", inventory["feu_camp"])
 							print("✅ Feu de camp posé, stock restant :", inventory["feu_camp"])
 
-						if selected_mode == "hutte":
-							assign_pnjs_to_hut(inst)
-
 						current_preview.queue_free()
 						current_preview = null
 						current_scene = null
+
+		# 🎯 Ajout : clic en dehors des bâtiments = on vide le tableau
+		var clicked_batiment := false
+		var mouse_pos = get_global_mouse_position()
+
+		for bat in get_tree().get_nodes_in_group("batiment"):
+			if bat.has_node("ClickArea"):
+				var area = bat.get_node("ClickArea")
+				if area is Area2D:
+					if area.get_global_transform().origin.distance_to(mouse_pos) < 32:
+						clicked_batiment = true
+						break
+
+
+		if not clicked_batiment:
+			get_node("CanvasLayer/TableauBord").update_dashboard()
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()

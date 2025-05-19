@@ -7,8 +7,9 @@ func add_habitant(pnj):
 		habitants.append(pnj)
 
 func _ready():
+	add_to_group("batiment")
 	var area = Area2D.new()
-	area.name = "ClickArea"
+	area.name = "ClickArea"	
 	area.input_pickable = true
 	add_child(area)
 
@@ -22,7 +23,4 @@ func _ready():
 
 func _on_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:
-		var ids := []
-		for p in habitants:
-			ids.append(p.id)
-		print("🏠 Hutte cliquée ! PNJ IDs :", ids)
+		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)

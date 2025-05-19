@@ -9,6 +9,7 @@ func add_employe(pnj):
 		pnj.lieu_travail = self
 
 func _ready():
+	add_to_group("batiment")
 	var area = Area2D.new()
 	area.name = "ClickArea"
 	area.input_pickable = true
@@ -24,7 +25,4 @@ func _ready():
 
 func _on_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:
-		var ids := []
-		for p in employes:
-			ids.append(p.id)
-		print("⛏️ Carrière cliquée ! PNJ IDs :", ids)
+		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
