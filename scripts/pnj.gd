@@ -97,6 +97,10 @@ func _on_click(viewport, event, shape_idx):
 		show_energy = !show_energy
 		print("🖱️ PNJ ID:", id)
 
+		var tableau := get_node_or_null("/root/game/CanvasLayer/TableauBord")
+		if tableau and tableau.has_method("update_pnj_panel"):
+			tableau.update_pnj_panel(self)
+
 
 func move_randomly(delta):
 	var next_pos = position + direction * speed * delta
