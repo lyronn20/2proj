@@ -1,3 +1,4 @@
+## game.gd
 extends Node2D
 
 @export var tilemap: TileMapLayer
@@ -13,15 +14,16 @@ const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
-var grid_preview: Node2D
+
+var last_cell: Vector2i = Vector2i()
+var current_preview: Sprite2D  = null
+var current_scene:   PackedScene = null
+var selected_mode:   String      = ""
+var grid_preview:    Node2D      = null
+var pnj_counter := 1
 
 var inventory := { "feu_camp": 1 }
-var last_cell = null
-var current_preview: Sprite2D = null
-var current_scene: PackedScene = null
-var selected_mode := ""
 var occupied_cells := {}
-
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
 	"hutte":    Vector2i(4, 4),
@@ -31,36 +33,77 @@ var objet_sizes = {
 	"carriere": Vector2i(4, 4)
 }
 
-var pnj_counter := 1
 var time_of_day := "day"
 var time_timer := 0.0
 var time_cycle_duration := 30.0
 
+# A* grid
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
 
 func _ready():
+	# UI & spawn
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
-	spawn_pnjs(20)
+	spawn_pnjs(3)
 	generate_sapins(100)
+
+	# on recrée le preview grid
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
+
+	# debug: simulate route L-shape (0,0)->(10,5)
+	for y in range(0, 6):
+		var c = Vector2i(0, y)
+		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+		occupied_cells.erase(c)
+	for x in range(1, 11):
+		var c = Vector2i(x, 5)
+		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+		occupied_cells.erase(c)
+
+	# build & test A*
 	build_route_astar()
+	var cnt = _get_route_cells().size()
+	print("🛣️ Nombre de tuiles route dans l'ASTAR :", cnt)
+	_test_path()
+
+
+func _cell_to_id(cell: Vector2i) -> int:
+	return cell.x + cell.y * grid_size.x
+
+func _get_route_cells() -> Array:
+	var cells = []
+	for cell in route_tilemap.get_used_cells():
+		if route_tilemap.get_cell_source_id(cell) != -1:
+			cells.append(cell)
+	return cells
 
 func build_route_astar():
-	route_astar.region = Rect2i(Vector2i(0, 0), grid_size)
+	route_astar.region    = Rect2i(0, 0, grid_size.x, grid_size.y)
 	route_astar.cell_size = Vector2(1, 1)
-	route_astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	route_astar.update()
+	var r = route_astar.region
+	for x in range(r.position.x, r.position.x + r.size.x):
+		for y in range(r.position.y, r.position.y + r.size.y):
+			var cell = Vector2i(x, y)
+			if route_tilemap.get_cell_source_id(cell) == -1:
+				route_astar.set_point_solid(cell, true)
 
-	for x in range(grid_size.x):
-		for y in range(grid_size.y):
-			var pos = Vector2i(x, y)
-			var is_route = route_tilemap.get_cell_source_id(pos) != -1
-			route_astar.set_point_solid(pos, not is_route)
+func _test_path():
+	var start = Vector2i(0, 0)
+	var goal  = Vector2i(10, 5)
+	var id_path = route_astar.get_id_path(start, goal)
+	if id_path.size() > 0:
+		print("🔍 Chemin (IDs) trouvé :", id_path)
+		var world_path = route_astar.get_point_path(start, goal)
+		print("🔍 Chemin (positions) trouvé :", world_path)
+	else:
+		print("❌ Aucun chemin trouvé entre", start, "et", goal)
+
+
 
 func _process(delta):
 	time_timer += delta
@@ -68,6 +111,7 @@ func _process(delta):
 		time_timer = 0.0
 		time_of_day = "night" if time_of_day == "day" else "day"
 
+	# preview grid (placement bâtiments / routes)
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
@@ -77,11 +121,13 @@ func _process(delta):
 		grid_preview.visible = false
 		grid_preview.update_grid(world_pos, size)
 
+	# coordonnées de la souris dans l'UI
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
-	if cell != last_cell: 	
+	if cell != last_cell:
 		last_cell = cell
 		menu.set_mouse_coords(cell)
 
+	# position et couleur du sprite preview
 	if current_preview:
 		var size = objet_sizes[selected_mode]
 		var gp = get_global_mouse_position()
@@ -93,6 +139,7 @@ func _process(delta):
 			current_preview.modulate = Color(1,1,1,0.5) if can_place_object(grid_pos, size) else Color(1,0,0,0.5)
 
 	update_ui_stats()
+
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -231,6 +278,8 @@ func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
 	if not occupied_cells.has(c):
 		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+		# on met à jour l’ASTAR
+		build_route_astar()
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 	for x in range(size.x):
@@ -289,26 +338,74 @@ func generate_sapins(count: int = 50):
 func assign_pnjs_to_hut(hut: Node2D):
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if not p.has_house:
+		if not p.has_house:          # ça marche maintenant
 			free_pnjs.append(p)
 			if free_pnjs.size() >= 2:
 				break
 
 	for p in free_pnjs:
-		p.name = "PNJ_" + str(pnj_counter)
+		p.name       = "PNJ_" + str(pnj_counter)
 		pnj_counter += 1
-		p.maison = hut
-		p.has_house = true
+		p.has_house  = true         # on marque qu’il a maintenant une maison
+		p.maison     = hut
 		hut.call("add_habitant", p)
 		
-func assign_pnjs_to_work(building: Node2D, metier: String):
+func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
+	# 1) On prend jusqu'à 2 PNJ sans métier
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if not p.metier:
+		if p.metier == "":
 			free_pnjs.append(p)
 			if free_pnjs.size() >= 2:
 				break
 
+	# 2) Préchargement des cases "route"
+	var route_cells := _get_route_cells()
+
 	for p in free_pnjs:
+		# a) Assignation du métier et de la mission
+		p.metier       = metier
+		p.lieu_travail = building
+		p.mission      = "aller_travailler"
+
+		# b) Cellule brute sous PNJ et sous bâtiment
+		var raw_start : Vector2i = route_tilemap.local_to_map(p.global_position)
+		var raw_goal  : Vector2i = route_tilemap.local_to_map(building.global_position)
+
+		# c) Snap au plus proche "route"
+		var start = raw_start
+		if raw_start not in route_cells:
+			start = _find_nearest_route_cell(raw_start)
+
+		var goal = raw_goal
+		if raw_goal not in route_cells:
+			goal = _find_nearest_route_cell(raw_goal)
+
+		# d) Calcul du chemin A* (liste de cellules)
+		var cell_path : PackedVector2Array = route_astar.get_point_path(start, goal)
+
+		# e) Conversion en positions monde (centres de tuiles)
+		p.chemin.clear()
+		# <-- ici on récupère la taille de cellule depuis l'ASTAR
+		var half = route_astar.cell_size * 0.5
+		for cell in cell_path:
+			p.chemin.append(route_tilemap.map_to_local(cell) + half)
+
+		# f) Initialisation du suivi du chemin
+		p.current_step    = 0
+		p.following_route = true
+		p.call_deferred("update")  # pour redessiner en _draw() si besoin
+
+		# g) On embauche le PNJ
 		building.call("add_employe", p)
-		print("👷 " + p.name + " devient " + metier + " (" + building.name + ")")
+
+
+func _find_nearest_route_cell(cell: Vector2i) -> Vector2i:
+	var best = cell
+	var best_dist = INF
+	for rc in _get_route_cells():
+		var d = rc.distance_to(cell)
+		if d < best_dist:
+			best_dist = d
+			best = rc
+	return best

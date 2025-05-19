@@ -48,17 +48,22 @@ func _on_bouton_clicked(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		menu.visible = !menu.visible
 
-func _on_regles_pressed():
-	_affiche_popup("Règles du jeu,\nDéveloppe ta ville,\nplace des bâtiments,\noptimise tes ressources.")
-
-func _on_touches_pressed():
-	_affiche_popup("Contrôles :\n- Clic gauche = placer objet\n- R = route\n- Gomme = supprimer\n- Échap = fermer\n- M = menu")
 
 func _on_reset_pressed():
 	get_tree().reload_current_scene()
 
+func _on_regles_pressed():
+	_fermer_tous_les_popups()
+	_affiche_popup("Règles du jeu,\nDéveloppe ta ville,\nplace des bâtiments,\noptimise tes ressources.")
+
+func _on_touches_pressed():
+	_fermer_tous_les_popups()
+	_affiche_popup("Contrôles :\n- Clic gauche = placer objet\n- R = route\n- Gomme = supprimer\n- Échap = fermer\n- M = menu")
+
 func _on_quit_pressed():
+	_fermer_tous_les_popups()
 	panneau_confirmation.visible = true
+
 
 func _on_confirm_quit():
 	get_tree().quit()
@@ -72,3 +77,8 @@ func _affiche_popup(texte: String):
 	label_popup.add_theme_color_override("font_color", Color("#e9bc96"))
 	label_popup.text = texte
 	panneau_popup.visible = true
+	
+	
+func _fermer_tous_les_popups():
+	panneau_popup.visible = false
+	panneau_confirmation.visible = false
