@@ -53,6 +53,15 @@ func _ready():
 	energy_bar_container.visible = false
 	click_area.connect("input_event", Callable(self, "_on_click"))
 
+	# ───────────────────────────────
+	#  DÉSACTIVATION DES COLLISIONS ENTRE PNJ
+	# ───────────────────────────────
+	# On garde le PNJ sur la couche 1,
+	# mais on enlève toutes les couches dans son mask :
+	# il ne détectera donc plus aucun autre corps (ni PNJ, ni décor, ni bâtiment).
+	collision_layer = 1
+	collision_mask  = 0
+
 func _process(delta):
 	# 1) Statistiques
 	faim -= delta * 0.3
@@ -99,10 +108,8 @@ func follow_path(delta):
 		elif mission == "retour_maison":
 			# On est arrivé à la hutte : on passe à l'état recharge
 			mission = "recharger"
-		print("✅ PNJ", id, "arrivé en", mission)
 		return
 	var target_pos = chemin[current_step]
-	print("→ PNJ", id, "étape", current_step, "vers", target_pos)
 	var dir = (target_pos - global_position).normalized()
 	velocity = dir * speed
 	move_and_slide()

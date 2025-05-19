@@ -33,10 +33,6 @@ var objet_sizes = {
 	"carriere": Vector2i(4, 4)
 }
 
-var time_of_day := "day"
-var time_timer := 0.0
-var time_cycle_duration := 30.0
-
 # A* grid
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
@@ -46,29 +42,19 @@ func _ready():
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
+	
+	# crée les PNJ et les sapins
 	spawn_pnjs(3)
 	generate_sapins(100)
 
-	# on recrée le preview grid
+	# preview grid pour le placement
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
 
-	# debug: simulate route L-shape (0,0)->(10,5)
-	for y in range(0, 6):
-		var c = Vector2i(0, y)
-		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
-		occupied_cells.erase(c)
-	for x in range(1, 11):
-		var c = Vector2i(x, 5)
-		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
-		occupied_cells.erase(c)
-
-	# build & test A*
+	# construit le graphe A* à partir du TileMap "route"
 	build_route_astar()
 	var cnt = _get_route_cells().size()
-	print("🛣️ Nombre de tuiles route dans l'ASTAR :", cnt)
-	_test_path()
 
 
 func _cell_to_id(cell: Vector2i) -> int:
@@ -82,9 +68,12 @@ func _get_route_cells() -> Array:
 	return cells
 
 func build_route_astar():
+	# 1) Définition de la région à couvrir
 	route_astar.region    = Rect2i(0, 0, grid_size.x, grid_size.y)
 	route_astar.cell_size = Vector2(1, 1)
+	# 2) Mise à jour automatique du graphe à partir des cellules « route »
 	route_astar.update()
+	# 3) Toutes les cellules non-route deviennent infranchissables
 	var r = route_astar.region
 	for x in range(r.position.x, r.position.x + r.size.x):
 		for y in range(r.position.y, r.position.y + r.size.y):
@@ -92,26 +81,7 @@ func build_route_astar():
 			if route_tilemap.get_cell_source_id(cell) == -1:
 				route_astar.set_point_solid(cell, true)
 
-func _test_path():
-	var start = Vector2i(0, 0)
-	var goal  = Vector2i(10, 5)
-	var id_path = route_astar.get_id_path(start, goal)
-	if id_path.size() > 0:
-		print("🔍 Chemin (IDs) trouvé :", id_path)
-		var world_path = route_astar.get_point_path(start, goal)
-		print("🔍 Chemin (positions) trouvé :", world_path)
-	else:
-		print("❌ Aucun chemin trouvé entre", start, "et", goal)
-
-
-
 func _process(delta):
-	time_timer += delta
-	if time_timer >= time_cycle_duration:
-		time_timer = 0.0
-		time_of_day = "night" if time_of_day == "day" else "day"
-
-	# preview grid (placement bâtiments / routes)
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
@@ -168,7 +138,6 @@ func _unhandled_input(event):
 
 			_:
 				if selected_mode == "feu_camp" and inventory["feu_camp"] <= 0:
-					print("🚫 Plus de feu de camp disponible.")
 					return
 
 				if current_scene:
@@ -199,7 +168,6 @@ func _unhandled_input(event):
 						if selected_mode == "feu_camp":
 							inventory["feu_camp"] -= 1
 							menu.update_inventory("feu_camp", inventory["feu_camp"])
-							print("✅ Feu de camp posé, stock restant :", inventory["feu_camp"])
 
 						current_preview.queue_free()
 						current_preview = null
@@ -351,54 +319,57 @@ func assign_pnjs_to_hut(hut: Node2D):
 		hut.call("add_habitant", p)
 		
 func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
-	# 1) On prend jusqu'à 2 PNJ sans métier
-	var free_pnjs := []
-	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.metier == "":
-			free_pnjs.append(p)
-			if free_pnjs.size() >= 2:
-				break
-
-	# 2) Préchargement des cases "route"
+	var assigned := 0
 	var route_cells := _get_route_cells()
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if p.metier != "": continue
 
-	for p in free_pnjs:
-		# a) Assignation du métier et de la mission
+		# a) Assignation du métier/mission
 		p.metier       = metier
 		p.lieu_travail = building
 		p.mission      = "aller_travailler"
 
-		# b) Cellule brute sous PNJ et sous bâtiment
-		var raw_start : Vector2i = route_tilemap.local_to_map(p.global_position)
-		var raw_goal  : Vector2i = route_tilemap.local_to_map(building.global_position)
+		# b) Cellule brute sous PNJ et bâtiment
+		var raw_start = route_tilemap.local_to_map(p.global_position)
+		var raw_goal  = route_tilemap.local_to_map(building.global_position)
 
-		# c) Snap au plus proche "route"
+		# c) Snap si nécessaire sur route existante
 		var start = raw_start
 		if raw_start not in route_cells:
 			start = _find_nearest_route_cell(raw_start)
-
 		var goal = raw_goal
 		if raw_goal not in route_cells:
 			goal = _find_nearest_route_cell(raw_goal)
 
-		# d) Calcul du chemin A* (liste de cellules)
-		var cell_path : PackedVector2Array = route_astar.get_point_path(start, goal)
+		# d) Calcul A* sur routes
+		var cell_path = route_astar.get_point_path(start, goal)
 
-		# e) Conversion en positions monde (centres de tuiles)
+		# e) Conversion en positions monde
 		p.chemin.clear()
-		# <-- ici on récupère la taille de cellule depuis l'ASTAR
 		var half = route_astar.cell_size * 0.5
-		for cell in cell_path:
-			p.chemin.append(route_tilemap.map_to_local(cell) + half)
+		if cell_path.size() > 0:
+			for cell in cell_path:
+				p.chemin.append(route_tilemap.map_to_local(cell) + half)
+		else:
+			# **Fallback** : pas de route => marche directe vers le bâtiment
+			# on saute directement au global_position de la carrière
+			p.chemin.append(building.global_position)
 
-		# f) Initialisation du suivi du chemin
+		# f) On ajoute toujours la position exacte du bâtiment en bout
+		if cell_path.size() > 0:
+			p.chemin.append(building.global_position)
+
+		# g) Initialisation du suivi
 		p.current_step    = 0
 		p.following_route = true
-		p.call_deferred("update")  # pour redessiner en _draw() si besoin
+		p.call_deferred("update")
 
-		# g) On embauche le PNJ
+		# h) On embauche
 		building.call("add_employe", p)
 
+		assigned += 1
+		if assigned >= 2:
+			break
 
 func _find_nearest_route_cell(cell: Vector2i) -> Vector2i:
 	var best = cell
