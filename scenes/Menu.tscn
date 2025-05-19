@@ -277,6 +277,7 @@ layout_mode = 1
 offset_left = 940.0
 offset_right = 980.0
 offset_bottom = 40.0
+scale = Vector2(1.2, 1.2)
 theme_override_styles/panel = SubResource("StyleBoxTexture_i7htd")
 script = ExtResource("11_el213")
 
@@ -292,11 +293,11 @@ expand_mode = 3
 
 [node name="menu_reglages" type="Panel" parent="reglages"]
 layout_mode = 0
-offset_left = -127.0
-offset_top = 31.0
-offset_right = 23.0
-offset_bottom = 191.0
-scale = Vector2(2, 2)
+offset_left = -110.0
+offset_top = 29.1667
+offset_right = 40.0
+offset_bottom = 189.167
+scale = Vector2(1.8, 1.8)
 theme_override_styles/panel = SubResource("StyleBoxTexture_7t7qg")
 
 [node name="BtnRegles" type="Button" parent="reglages/menu_reglages"]
@@ -346,10 +347,10 @@ flat = true
 
 [node name="panneau_popup" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = -80.5
-offset_top = 185.5
-offset_right = 219.5
-offset_bottom = 435.5
+offset_left = -81.4815
+offset_top = 144.444
+offset_right = 218.519
+offset_bottom = 394.444
 theme_override_styles/panel = SubResource("StyleBoxTexture_l3wcu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/panneau_popup"]
@@ -364,11 +365,11 @@ layout_mode = 2
 
 [node name="popup_quit" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = -34.0
+offset_left = -19.4444
 offset_top = 187.5
-offset_right = 116.0
+offset_right = 130.556
 offset_bottom = 317.5
-scale = Vector2(1.4, 1.4)
+scale = Vector2(1.2, 1.2)
 theme_override_styles/panel = SubResource("StyleBoxTexture_6c8sk")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/popup_quit"]
