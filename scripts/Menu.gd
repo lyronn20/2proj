@@ -6,7 +6,17 @@ signal objet_selectionne(nom: String)
 @onready var btn_play    = $HUD/GestionJeu/button/btn_play
 @onready var btn_fast    = $HUD/GestionJeu/button/btn_fast
 @onready var inventaire  = $HUD/ZoneInventaire
-
+@onready var feu_camp    = $HBoxContainer/feu_camp
+@onready var hutte       = $HBoxContainer/hutte
+@onready var sapin       = $route/sapin
+@onready var scierie     = $HBoxContainer/scierie
+@onready var puit        = $HBoxContainer/puit
+@onready var carriere    = $HBoxContainer/carriere
+@onready var route_terre = $route/sol_terre
+@onready var collect_baies   = $HBoxContainer/collect_baies
+@onready var baies    = $route/baies
+@onready var pierre   = $route/pierre
+@onready var gomme       = $route/Gomme
 var time_scales = [2.0, 4.0, 8.0]
 
 func _ready():
@@ -67,3 +77,4 @@ func update_inventory(item_name: String, count: int) -> void:
 	btn.visible = (count > 0)
 	if btn is BaseButton:
 		btn.disabled = (count <= 0)
+		

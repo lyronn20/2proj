@@ -1,9 +1,10 @@
 extends Node
+
 @onready var lbl_title = $Label
 @onready var lbl_description = $RichTextLabel
 
+var route_tilemap: TileMapLayer 
 var current_goal_index := 0
-
 var goals = [
 	{
 		"title": "Poser un feu de camp",
@@ -50,6 +51,13 @@ var goals = [
 func _ready():
 	update_goal_display()
 
+	# 🔍 Recherche automatique du TileMap de routes dans la scène
+	# (modifie si ton chemin est différent)
+	if get_tree().get_root().has_node("game/Map/Route/route"):
+		route_tilemap = get_tree().get_root().get_node("game/Map/Route/route")
+	else:
+		push_warning("❌ TileMap de route introuvable. Vérifie le chemin dans goal.gd")
+
 func update_goal_display():
 	if current_goal_index < goals.size():
 		var goal = goals[current_goal_index]
@@ -59,14 +67,24 @@ func update_goal_display():
 		lbl_title.text = "✅ Objectifs terminés"
 		lbl_description.text = "Félicitations !"
 
-func valider_goal(goal_id: String):
-	print("✅ Tentative de validation de goal:", goal_id)
+		if get_parent().has_method("debloquer_objet"):
+			get_parent().debloquer_objet()
 
+func valider_goal(goal_id: String):
 	if current_goal_index < goals.size() and goals[current_goal_index].id == goal_id:
 		print("🎯 Goal validé :", goal_id)
 		current_goal_index += 1
 		update_goal_display()
 
-	if current_goal_index < goals.size() and goals[current_goal_index].id == goal_id:
-		current_goal_index += 1
-		update_goal_display()
+func _process(_delta):
+	if current_goal_index >= goals.size():
+		return
+
+	if goals[current_goal_index].id == "route_terre" and route_tilemap:
+		var count = 0
+		for cell in route_tilemap.get_used_cells():
+			if route_tilemap.get_cell_source_id(cell) != -1:
+				count += 1
+
+		if count >= 5:
+			valider_goal("route_terre")

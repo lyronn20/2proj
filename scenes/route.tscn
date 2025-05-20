@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://b1r42x5lvt6c" path="res://assets/map/sol_terre.png" id="1_ujwdj"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kq5fu"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ujwdj"]
 texture = ExtResource("1_ujwdj")
 0:1/0 = 0
 0:1/0/terrain_set = 0
@@ -116,7 +116,7 @@ texture = ExtResource("1_ujwdj")
 terrain_set_0/mode = 0
 terrain_set_0/terrain_0/name = "route"
 terrain_set_0/terrain_0/color = Color(0.107665, 0.459759, 0.197441, 1)
-sources/0 = SubResource("TileSetAtlasSource_kq5fu")
+sources/0 = SubResource("TileSetAtlasSource_ujwdj")
 
 [node name="Route" type="Node2D"]
 

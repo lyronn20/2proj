@@ -11,6 +11,8 @@ extends Node2D
 
 
 const TERRAIN_ID        = 0
+const FEU_CAMP_SCENE	=preload("res://scenes/feu_camp.tscn")
+const HUTTE_SCENE		=preload("res://scenes/hutte.tscn")
 const SAPIN_SCENE       = preload("res://scenes/sapin.tscn")
 const BAIES       = preload("res://scenes/baies.tscn")
 const COLLECT_BAIES       = preload("res://scenes/collect_baies.tscn")
@@ -226,11 +228,12 @@ func _on_objet_selectionne(nom: String):
 
 	match nom:
 		"feu_camp":
-			current_scene = preload("res://scenes/feu_camp.tscn")
+			current_scene = FEU_CAMP_SCENE
 			texture       = load("res://assets/batiments/feu_camp.png")
 		"hutte":
-			current_scene = preload("res://scenes/hutte.tscn")
+			current_scene = HUTTE_SCENE
 			texture       = load("res://assets/batiments/hutte.png")
+			scale 		  = Vector2(1.35,1.35)
 		"sapin":
 			current_scene = SAPIN_SCENE
 			texture       = load("res://assets/batiments/sapin.png")
