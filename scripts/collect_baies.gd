@@ -29,12 +29,15 @@ func _on_click(viewport, event, shape_idx):
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
 
 func get_nearby_baies() -> Array:
+	# 1) Récupère toutes les baies du groupe
+	var all_baies = get_tree().get_nodes_in_group("baies")
 	var radius := 15 * 64
 	var baies := []
-	for b in get_tree().get_nodes_in_group("baies"):
-		if is_instance_valid(b) and b.visible and b.global_position.distance_to(global_position) <= radius:
+	for b in all_baies:
+		if b.visible and b.global_position.distance_to(global_position) <= radius:
 			baies.append(b)
 	return baies
+
 
 func add_fruit(amount: int):
 	baies_stock += amount

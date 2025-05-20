@@ -1,6 +1,6 @@
 # pnj.gd
 extends CharacterBody2D
-
+@export var recharge_hold_time := 15.0  # en secondes
 # === Nodes & references ===
 @onready var sprite: AnimatedSprite2D    = $AnimatedSprite2D
 @onready var herbe_tilemap: TileMapLayer = get_node("/root/game/herbe")
@@ -80,9 +80,10 @@ func _ready():
 		search_next_tree()
 	elif metier == "cueilleur":
 		mission = "aller_travailler"
+		search_next_baie()       # ← on lance bien la recherche
 	elif metier == "mineur":
 		mission = "aller_travailler"
-		search_next_rock()
+		search_next_rock()	
 
 
 func _process(delta):
@@ -132,7 +133,15 @@ func follow_path(delta):
 		# 🎯 Gestion classique à l’arrivée
 		match mission:
 			"aller_travailler":
-				mission = "travailler"
+				# on démarre le travail adapté à notre métier
+				if metier == "cueilleur":
+					mission = "cueillir"
+				elif metier == "bucheron":
+					mission = "bucheron"
+				elif metier == "mineur":
+					mission = "mineur"
+				else:
+					mission = "travailler"
 			"aller_abattre":
 				mission = "bucheron"
 			"aller_cueillir":
@@ -151,6 +160,7 @@ func follow_path(delta):
 
 	if global_position.distance_to(target_pos) < 2:
 		current_step += 1
+
 
 
 func do_work(delta):
@@ -313,37 +323,38 @@ func go_to(pos: Vector2, new_mission: String = ""):
 
 	
 func do_collect_baie(delta):
+	# 1) Si l'énergie est trop faible, on rentre se ressourcer
 	if energy <= travail_threshold:
 		energy = 0
 		mission = "retour_maison"
 		prepare_return_path()
 		return
 
+	# 2) Si on a une baie valide
 	if current_baie and is_instance_valid(current_baie):
+		var dist = global_position.distance_to(current_baie.global_position)
+		if dist > 8:
+			return  # Trop loin, on attend d’être proche
+
+		# On s’arrête pour cueillir
 		velocity = Vector2.ZERO
 		energy -= delta * travail_rate
-		if energy <= travail_threshold:
-			energy = 0
-			mission = "retour_maison"
-			prepare_return_path()
-			return
-
 		cutting_timer += delta
+
 		if cutting_timer >= cutting_duration:
-			# 🌱 Lance le respawn
-			if lieu_travail and lieu_travail.has_method("respawn_baie"):
-				lieu_travail.respawn_baie(current_baie.global_position)
-
-			current_baie.queue_free()
+			# On « cueille » la baie : on lance son respawn interne
+			current_baie.respawn()
 			cutting_timer = 0.0
-			current_baie = null
 
-			if lieu_travail.has_method("add_fruit"):
+			# On stocke les fruits dans la scierie (ou ferme)
+			if lieu_travail and lieu_travail.has_method("add_fruit"):
 				lieu_travail.call("add_fruit", 1)
 
+			# Petite pause avant de chercher la suivante
 			await get_tree().create_timer(0.5).timeout
 			search_next_baie()
 	else:
+		# Pas de cible ou baie détruite : on réessaie après un court délai
 		current_baie = null
 		await get_tree().create_timer(0.5).timeout
 		search_next_baie()
@@ -352,18 +363,20 @@ func do_collect_baie(delta):
 func _physics_process(delta):
 	if following_route:
 		follow_path(delta)
-	elif mission in ["travailler", "bucheron", "cueilleur", "mineur", "recharger"]:
+
+	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger"]:
 		match mission:
 			"travailler":
 				do_work(delta)
 			"bucheron":
 				do_chop_tree(delta)
-			"cueilleur":
+			"cueillir":          # ← on passe de "cueilleur" à "cueillir"
 				do_collect_baie(delta)
 			"mineur":
-				do_mine(delta)         # <— on déclenche le minage
+				do_mine(delta)
 			"recharger":
 				do_recharge(delta)
+				
 	elif mission == "retour_travail":
 		if metier == "cueilleur":
 			go_to(lieu_travail.global_position, "aller_travailler")
@@ -382,6 +395,7 @@ func search_next_baie():
 		return
 
 	var toutes_les_baies = lieu_travail.get_nearby_baies()
+
 	var baies = []
 	for b in toutes_les_baies:
 		if is_instance_valid(b) and b.visible:

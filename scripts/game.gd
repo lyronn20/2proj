@@ -51,7 +51,7 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	
 	# crée les PNJ et les sapins
-	spawn_pnjs(20)
+	spawn_pnjs(3)
 	generate_sapins(100)
 
 	# preview grid pour le placement

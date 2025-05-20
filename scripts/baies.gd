@@ -1,22 +1,23 @@
+# baie.gd
 extends Node2D
 
-@onready var sprite = $Sprite2D
-@export var respawn_delay := 10.0
-
-var is_active := true
+@export var respawn_delay := 60.0  # secondes
 
 func _ready():
 	add_to_group("baies")
-	visible = true
-	is_active = true
 
 func respawn():
-	is_active = false
+	# 1) on cache et désactive la baie
 	visible = false
 	set_process(false)
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.disabled = true
 
+	# 2) on attend le délai
 	await get_tree().create_timer(respawn_delay).timeout
 
+	# 3) on réaffiche et réactive la baie
 	visible = true
 	set_process(true)
-	is_active = true
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.disabled = false
