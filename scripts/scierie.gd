@@ -2,9 +2,12 @@ extends Node2D
 
 var employes: Array = []
 var wood_stock := 0
+static var compteur := 1
 
 func _ready():
 	add_to_group("batiment")
+	set_meta("nom_affichage", "Scierie : "+ str(compteur))
+	compteur += 1
 	_setup_click_area()
 
 func add_employe(pnj):

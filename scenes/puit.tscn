@@ -1,9 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://bnei0pbdkryx"]
+[gd_scene load_steps=4 format=3 uid="uid://bnei0pbdkryx"]
 
+[ext_resource type="Script" uid="uid://c82xc4c5saesq" path="res://scripts/puit.gd" id="1_n0qyr"]
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="1_r6nm1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r6nm1"]
+size = Vector2(85.7143, 104.286)
 
 [node name="Puit" type="Node2D"]
 scale = Vector2(0.7, 0.7)
+script = ExtResource("1_n0qyr")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_r6nm1")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2.85715, -2.14286)
+scale = Vector2(1, 1)
+shape = SubResource("RectangleShape2D_r6nm1")

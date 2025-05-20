@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://g706a8i8n52c"]
 
 [ext_resource type="Texture2D" uid="uid://bjf4f3tenb7ba" path="res://assets/batiments/hutte.png" id="1_26p58"]
-[ext_resource type="Script" path="res://scripts/hutte.gd" id="1_ie1qe"]
+[ext_resource type="Script" uid="uid://d2gsgk8yooqbp" path="res://scripts/hutte.gd" id="1_ie1qe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ie1qe"]
 size = Vector2(39, 38)

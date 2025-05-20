@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://i228ktppg4x6" path="res://assets/batiments/menu-gestion.png" id="16_l3wcu"]
 [ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
 [ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
+[ext_resource type="Script" uid="uid://b6h32hfs8um4s" path="res://scripts/goal.gd" id="18_dek3k"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnxe8"]
 bg_color = Color(0.352941, 0.231373, 0.113725, 1)
@@ -42,17 +43,6 @@ texture = ExtResource("16_l3wcu")
 
 [sub_resource type="LabelSettings" id="LabelSettings_11y2r"]
 font_size = 30
-
-[sub_resource type="GDScript" id="GDScript_o0tnf"]
-script/source = "extends Panel
-
-@onready var lbl_title = $lbl_goal_title
-@onready var lbl_description = $lbl_goal_description
-
-func set_goal(title: String, description: String):
-	lbl_title.text = \"🎯 \" + title
-	lbl_description.text = description
-"
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_i7htd"]
 texture = ExtResource("15_7t7qg")
@@ -263,20 +253,20 @@ label_settings = SubResource("LabelSettings_11y2r")
 offset_top = 165.0
 offset_right = 300.0
 offset_bottom = 245.0
-script = SubResource("GDScript_o0tnf")
+script = ExtResource("18_dek3k")
 
 [node name="Label" type="Label" parent="HUD/Goal"]
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+offset_right = 299.0
+offset_bottom = 83.0
 text = "Goal:"
 
 [node name="RichTextLabel" type="RichTextLabel" parent="HUD/Goal"]
 layout_mode = 0
 offset_top = 20.0
-offset_right = 40.0
-offset_bottom = 60.0
+offset_right = 300.0
+offset_bottom = 77.0
 
 [node name="reglages" type="Panel" parent="."]
 layout_mode = 1

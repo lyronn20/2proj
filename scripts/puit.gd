@@ -1,19 +1,20 @@
 extends Node2D
 
-var habitants: Array = []
-var nom_affichage := "Hutte"
+var employes: Array = []
+var nom_affichage := "Puit"
 static var compteur := 1
 
-func add_habitant(pnj):
-	if not habitants.has(pnj):
-		habitants.append(pnj)
+func add_employe(pnj):
+	if not employes.has(pnj):
+		employes.append(pnj)
 
 func _ready():
 	add_to_group("batiment")
-	set_meta("nom_affichage", "Hutte : "+ str(compteur))
+	set_meta("nom_affichage", "Puit : " + str(compteur))
 	compteur += 1
+
 	var area = Area2D.new()
-	area.name = "ClickArea"	
+	area.name = "ClickArea"
 	area.input_pickable = true
 	add_child(area)
 

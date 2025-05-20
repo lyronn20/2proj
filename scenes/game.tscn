@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=4 uid="uid://bhs3xfwenrsbx"]
+[gd_scene load_steps=14 format=4 uid="uid://bhs3xfwenrsbx"]
 
 [ext_resource type="Script" uid="uid://dkxjx8q7p23w" path="res://scripts/game.gd" id="1_lnu2h"]
 [ext_resource type="Script" uid="uid://b4smxumsk1m41" path="res://scripts/map.gd" id="4_iywne"]
 [ext_resource type="PackedScene" uid="uid://6hf7amn2ycd6" path="res://scenes/Menu.tscn" id="5_iywne"]
 [ext_resource type="PackedScene" uid="uid://4sfbb3t2oebs" path="res://scenes/route.tscn" id="5_p57ef"]
 [ext_resource type="PackedScene" uid="uid://cbursyl2q3mos" path="res://scenes/TableauBord.tscn" id="5_u5sy4"]
+[ext_resource type="PackedScene" uid="uid://bnei0pbdkryx" path="res://scenes/puit.tscn" id="7_gee14"]
 [ext_resource type="PackedScene" uid="uid://c0285v6qpxxbl" path="res://scenes/GridPreview.tscn" id="7_u5sy4"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_iywne"]
@@ -219,3 +220,5 @@ script = ExtResource("4_iywne")
 visible = false
 tilemap = NodePath("../Map")
 preview_size = Vector2i(4, 4)
+
+[node name="Puit" parent="GridPreview" instance=ExtResource("7_gee14")]

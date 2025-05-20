@@ -1,6 +1,7 @@
 extends Node2D
 
 var baies_stock := 0
+static var compteur := 1
 @onready var baie_scene: PackedScene = preload("res://scenes/baies.tscn")
 
 var employes: Array = []
@@ -10,7 +11,8 @@ func add_employe(pnj: Node2D):
 
 func _ready():
 	add_to_group("batiment")
-
+	set_meta("nom_affichage", "Collecteur : "+ str(compteur))
+	compteur += 1
 	var area = Area2D.new()
 	area.name = "ClickArea"
 	area.input_pickable = true

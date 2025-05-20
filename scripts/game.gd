@@ -6,6 +6,9 @@ extends Node2D
 @onready var herbe_tilemap: TileMapLayer = $herbe
 @onready var menu                        = $CanvasLayer/Menu
 @onready var stats                       = $CanvasLayer/Menu/HUD/Infos_Stats
+@onready var goal_panel 				 = $CanvasLayer/Menu/HUD/Goal
+
+
 
 const TERRAIN_ID        = 0
 const SAPIN_SCENE       = preload("res://scenes/sapin.tscn")
@@ -43,6 +46,7 @@ var objet_sizes = {
 # A* grid
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
+
 
 func _ready():
 	# UI & spawn
@@ -155,6 +159,9 @@ func _unhandled_input(event):
 
 					if can_place_object(base_cell, size):
 						var inst = current_scene.instantiate()
+						if goal_panel and goal_panel.has_method("valider_goal"):
+							goal_panel.valider_goal(selected_mode)
+
 						inst.name = selected_mode + "_" + str(randi() % 100000)
 						inst.global_position = route_tilemap.map_to_local(base_cell)
 						inst.add_to_group("placeable")

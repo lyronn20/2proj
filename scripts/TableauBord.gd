@@ -15,7 +15,7 @@ func _ready():
 	update_dashboard()
 
 func update_dashboard(batiment: Node = null):
-	pnj_panel.visible = false  # cache le panneau PNJ quand on montre un bâtiment
+	pnj_panel.visible = false
 	batiment_panel.visible = false
 	for child in vbox.get_children():
 		child.queue_free()
@@ -23,8 +23,13 @@ func update_dashboard(batiment: Node = null):
 	if batiment:
 		batiment_panel.visible = true
 
+		# ➕ Utilise `nom_affichage` s'il existe, sinon fallback sur le name brut
+		var nom := batiment.name
+		if batiment.has_meta("nom_affichage"):
+			nom = batiment.get_meta("nom_affichage")
+
 		var label = Label.new()
-		label.text = "🏠 " + batiment.name
+		label.text = "🏠 " + nom
 		label.add_theme_color_override("font_color", Color("#e9bc96"))
 		vbox.add_child(label)
 
@@ -40,8 +45,6 @@ func update_dashboard(batiment: Node = null):
 				p_label.text = "  → PNJ ID: " + str(p.id)
 				p_label.add_theme_color_override("font_color", Color("#e9bc96"))
 				vbox.add_child(p_label)
-
-
 
 func make_label(text: String) -> Label:
 	var lbl = Label.new()
