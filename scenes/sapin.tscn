@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bir28wkkygf38"]
+[gd_scene load_steps=3 format=3 uid="uid://bir28wkkygf38"]
 
+[ext_resource type="Script" uid="uid://r5wjwdbfqna2" path="res://scenes/sapin.gd" id="1_ii1bp"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="1_pynw4"]
 
 [node name="Sapin" type="Node2D"]
 scale = Vector2(0.5, 0.5)
+script = ExtResource("1_ii1bp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(2, -152)

@@ -53,6 +53,10 @@ var cutting_duration := 1  # secondes
 
 var current_baie: Node2D = null
 
+var current_rock: Node2D = null
+var mining_timer := 0.0
+var mining_duration := 1.0   # en secondes
+
 
 func _ready():
 	# lancement de la marche aléatoire
@@ -76,7 +80,9 @@ func _ready():
 		search_next_tree()
 	elif metier == "cueilleur":
 		mission = "aller_travailler"
-		search_next_baie()
+	elif metier == "mineur":
+		mission = "aller_travailler"
+		search_next_rock()
 
 
 func _process(delta):
@@ -89,7 +95,7 @@ func _process(delta):
 	# 2) Devrait-on afficher la barre ?
 	#    - Si on a cliqué (show_energy)
 	#    - OU si on est en train de TRAVAILLER
-	var should_show = show_energy or mission in ["travailler", "cueillir", "bucheron"]
+	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur","bucheron"]
 	energy_bar_container.visible = should_show
 	if should_show:
 		energy_bar_container.position = Vector2(0, -40)
@@ -116,16 +122,14 @@ func follow_path(delta):
 		# 🔁 Gestion spéciale après recharge
 		if mission == "retour_travail":
 			if metier == "cueilleur":
-				mission = "travailler"
 				search_next_baie()
 			elif metier == "bucheron":
-				mission = "travailler"
 				search_next_tree()
 			elif metier == "mineur":
-				mission = "travailler"
+				search_next_rock()
 			return
 
-		# 🎯 Gestion classique
+		# 🎯 Gestion classique à l’arrivée
 		match mission:
 			"aller_travailler":
 				mission = "travailler"
@@ -133,34 +137,33 @@ func follow_path(delta):
 				mission = "bucheron"
 			"aller_cueillir":
 				mission = "cueillir"
+			"aller_mineur":
+				mission = "mineur"
 			"retour_maison":
 				mission = "recharger"
 		return
 
+	# déplacement vers la prochaine étape du chemin
 	var target_pos = chemin[current_step]
 	var dir = (target_pos - global_position).normalized()
 	velocity = dir * speed
 	move_and_slide()
+
 	if global_position.distance_to(target_pos) < 2:
 		current_step += 1
 
 
-
 func do_work(delta):
-	if metier == "bucheron":
-		search_next_tree()
-	elif metier == "cueilleur":
-		search_next_baie()
-	elif metier == "mineur":
-		# Simule le travail du mineur
-		show_energy = true
-		energy -= delta * travail_rate
-		if energy <= travail_threshold:
-			energy = 0
-			mission = "retour_maison"
-			prepare_return_path()
-	else:
-		mission = ""
+	match metier:
+		"bucheron":
+			search_next_tree()
+		"cueilleur":
+			search_next_baie()
+		"mineur":
+			search_next_rock()
+		_:
+			mission = ""
+
 
 
 func do_recharge(delta):
@@ -242,14 +245,19 @@ func do_chop_tree(delta):
 		cutting_timer += delta
 
 		if cutting_timer >= cutting_duration:
+			# on détruit l'arbre
 			current_tree.queue_free()
+			# on retire sa position
+			if lieu_travail and lieu_travail.has_method("remove_tree_at"):
+				lieu_travail.remove_tree_at(current_tree.global_position)
 			cutting_timer = 0.0
 			current_tree = null
+			# stockage
 			if lieu_travail and lieu_travail.has_method("add_wood"):
 				lieu_travail.call("add_wood", 1)
-
 			await get_tree().create_timer(0.5).timeout
 			search_next_tree()
+
 	else:
 		current_tree = null
 		search_next_tree()
@@ -344,19 +352,25 @@ func do_collect_baie(delta):
 func _physics_process(delta):
 	if following_route:
 		follow_path(delta)
-	elif mission in ["travailler", "bucheron", "cueillir", "recharger"]:
+	elif mission in ["travailler", "bucheron", "cueilleur", "mineur", "recharger"]:
 		match mission:
-			"travailler": do_work(delta)
-			"bucheron": do_chop_tree(delta)
-			"cueillir": do_collect_baie(delta)
-			"recharger": do_recharge(delta)
+			"travailler":
+				do_work(delta)
+			"bucheron":
+				do_chop_tree(delta)
+			"cueilleur":
+				do_collect_baie(delta)
+			"mineur":
+				do_mine(delta)         # <— on déclenche le minage
+			"recharger":
+				do_recharge(delta)
 	elif mission == "retour_travail":
 		if metier == "cueilleur":
 			go_to(lieu_travail.global_position, "aller_travailler")
 		elif metier == "bucheron":
 			go_to(lieu_travail.global_position, "aller_travailler")
 		elif metier == "mineur":
-			mission = "travailler"
+			go_to(lieu_travail.global_position, "aller_travailler")
 	else:
 		move_randomly(delta)
 
@@ -390,3 +404,72 @@ func search_next_baie():
 	current_baie = closest
 	go_to(current_baie.global_position)
 	mission = "aller_cueillir"
+	
+func search_next_rock():
+	if not lieu_travail or not lieu_travail.has_method("get_nearby_rocks"):
+		mission = "retour_maison"
+		prepare_return_path()
+		return
+
+	# Affiche tous les noeuds groupés "rock"
+	var all_rocks = get_tree().get_nodes_in_group("rock")
+
+	# Affiche la position de la carrière et le rayon
+	var radius := 10 * 64
+
+	# Récupère la liste filtrée
+	var rocks = lieu_travail.get_nearby_rocks()
+
+	if rocks.is_empty():
+		mission = "retour_maison"
+		prepare_return_path()
+		return
+
+	# Choix de la plus proche
+	var closest = rocks[0]
+	var dist = global_position.distance_to(closest.global_position)
+	for r in rocks:
+		var d = global_position.distance_to(r.global_position)
+		if d < dist:
+			closest = r
+			dist = d
+
+	current_rock = closest	
+	go_to(current_rock.global_position, "aller_mineur")
+
+
+
+
+func do_mine(delta):
+	# Si l'énergie est trop faible, on rentre
+	if energy <= travail_threshold:
+		energy = 0
+		mission = "retour_maison"
+		prepare_return_path()
+		return
+
+	if current_rock and is_instance_valid(current_rock):
+		var dist = global_position.distance_to(current_rock.global_position)
+		if dist > 8:
+			return  # Trop loin, on attend de s’approcher
+
+		# On s’arrête pour miner
+		velocity = Vector2.ZERO
+		energy -= delta * travail_rate
+		mining_timer += delta
+
+		if mining_timer >= mining_duration:
+			# On « mine » la pierre : on la cache et lance son respawn interne
+			current_rock.respawn()
+			mining_timer = 0.0
+			# Stockage dans la carrière
+			if lieu_travail and lieu_travail.has_method("add_stone"):
+				lieu_travail.call("add_stone", 1)
+			# Petite pause avant de chercher la suivante
+			await get_tree().create_timer(0.5).timeout
+			search_next_rock()
+	else:
+		# Si plus de roche ciblée ou détruite, on réessaie après un court délai
+		current_rock = null
+		await get_tree().create_timer(0.5).timeout
+		search_next_rock()

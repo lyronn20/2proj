@@ -1,28 +1,38 @@
 extends Node2D
 
-var employes: Array = []
-
-func add_employe(pnj):
-	if not employes.has(pnj):
-		employes.append(pnj)
-		pnj.metier = "mineur"
-		pnj.lieu_travail = self
+var pierre_stock := 0
 
 func _ready():
 	add_to_group("batiment")
+	_setup_click_area()
+
+func _setup_click_area():
 	var area = Area2D.new()
 	area.name = "ClickArea"
 	area.input_pickable = true
 	add_child(area)
-
 	var shape = CollisionShape2D.new()
 	var rect = RectangleShape2D.new()
 	rect.size = Vector2(64, 64)
 	shape.shape = rect
 	area.add_child(shape)
-
 	area.connect("input_event", Callable(self, "_on_click"))
 
-func _on_click(viewport, event, shape_idx):
+func _on_click(_vp, event, _si):
 	if event is InputEventMouseButton and event.pressed:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
+
+func get_nearby_rocks() -> Array:
+	var rocks := []
+	var radius := 10 * 64
+	for rock in get_tree().get_nodes_in_group("rock"):
+		if rock.visible and rock.global_position.distance_to(global_position) <= radius:
+			rocks.append(rock)
+	return rocks
+
+func add_stone(amount: int):
+	pierre_stock += amount
+	print("📦 pierre stockée :", pierre_stock)
+
+func get_stock() -> int:
+	return pierre_stock

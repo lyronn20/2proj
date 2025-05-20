@@ -14,6 +14,8 @@ const COLLECT_BAIES       = preload("res://scenes/collect_baies.tscn")
 const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
 const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
+const PIERRE    = preload("res://scenes/pierre.tscn")
+
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
 
@@ -33,6 +35,7 @@ var objet_sizes = {
 	"scierie":  Vector2i(4, 4),
 	"puit":     Vector2i(4, 4),
 	"baies":     Vector2i(2, 2),
+	"pierre":     Vector2i(2, 2),
 	"collect_baies":     Vector2i(4, 4),
 	"carriere": Vector2i(4, 4)
 }
@@ -48,7 +51,7 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	
 	# crée les PNJ et les sapins
-	spawn_pnjs(3)
+	spawn_pnjs(20)
 	generate_sapins(100)
 
 	# preview grid pour le placement
@@ -245,6 +248,10 @@ func _on_objet_selectionne(nom: String):
 			current_scene = COLLECT_BAIES
 			texture       = load("res://assets/batiments/recolte_baies.png")
 			scale         = Vector2(0.15, 0.15)
+		"pierre":
+			current_scene = PIERRE
+			texture       = load("res://assets/batiments/roche.png")
+			scale         = Vector2(0.4, 0.4)
 		_:
 			return
 
