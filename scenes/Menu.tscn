@@ -1,10 +1,11 @@
-[gd_scene load_steps=33 format=3 uid="uid://6hf7amn2ycd6"]
+[gd_scene load_steps=34 format=3 uid="uid://6hf7amn2ycd6"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
 [ext_resource type="Texture2D" uid="uid://dqfnsql0v5t3c" path="res://assets/batiments/feu_camp.png" id="2_o0tnf"]
 [ext_resource type="Texture2D" uid="uid://bjf4f3tenb7ba" path="res://assets/batiments/hutte.png" id="3_jmdev"]
 [ext_resource type="Script" uid="uid://c45umn6d46ogd" path="res://scripts/infos_stats.gd" id="4_o0tnf"]
+[ext_resource type="Texture2D" uid="uid://bhsaa8mx3pem6" path="res://assets/batiments/croix_bloquer.png" id="4_rehui"]
 [ext_resource type="Texture2D" uid="uid://bh0d4rqjweo3t" path="res://assets/batiments/carreire_pierre.png" id="5_4umqm"]
 [ext_resource type="Texture2D" uid="uid://cdqtoka2mp43c" path="res://assets/batiments/logo_route.jpg" id="5_b6cxs"]
 [ext_resource type="Texture2D" uid="uid://c45y4ji3ao85w" path="res://assets/batiments/gomme.png" id="6_aaywf"]
@@ -92,19 +93,64 @@ texture = ExtResource("2_o0tnf")
 expand_mode = 2
 stretch_mode = 3
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/feu_camp"]
+z_index = 1
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 40.0
+texture = ExtResource("4_rehui")
+expand_mode = 5
+
 [node name="hutte" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("3_jmdev")
 expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/hutte"]
+z_index = 1
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 360.0
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("4_rehui")
 
 [node name="carriere" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("5_4umqm")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/carriere"]
+z_index = 1
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 360.0
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("4_rehui")
+
 [node name="puit" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("6_pp5m5")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/puit"]
+z_index = 1
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("4_rehui")
+
+[node name="ferme" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("9_8fhjo")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/ferme"]
+z_index = 1
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
 expand_mode = 2
 
 [node name="scierie" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
@@ -112,14 +158,25 @@ layout_mode = 2
 texture = ExtResource("7_el213")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/scierie"]
+z_index = 1
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
 [node name="collect_baies" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("8_7ycwl")
 expand_mode = 2
 
-[node name="ferme" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
-layout_mode = 2
-texture = ExtResource("9_8fhjo")
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/collect_baies"]
+z_index = 1
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
 expand_mode = 2
 
 [node name="route" type="HBoxContainer" parent="HUD/ZoneInventaire"]

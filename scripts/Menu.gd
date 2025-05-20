@@ -17,6 +17,7 @@ signal objet_selectionne(nom: String)
 @onready var baies    = $route/baies
 @onready var pierre   = $route/pierre
 @onready var gomme       = $route/Gomme
+var menu
 var time_scales = [2.0, 4.0, 8.0]
 
 func _ready():
@@ -27,6 +28,8 @@ func _ready():
 
 	# 2) Initialiser l’affichage du bouton rapide
 	_update_fast_button()
+	menu = get_node("/root/game/CanvasLayer/Menu")
+
 
 func _on_pause():
 	Engine.time_scale = 0.0
@@ -78,3 +81,40 @@ func update_inventory(item_name: String, count: int) -> void:
 	if btn is BaseButton:
 		btn.disabled = (count <= 0)
 		
+func set_locked_buttons(goal_accompli: int):
+	var all_buttons = {
+		"feu_camp": 0,
+		"hutte": 1,
+		"carriere": 2,
+		"puit": 3,
+		"scierie": 4,
+		"collect_baies": 5,
+		"ferme": 6
+	}
+
+	for btn_name in all_buttons.keys():
+		var required_goal = all_buttons[btn_name]
+		var btn = inventaire.get_node("HBoxContainer/" + btn_name)
+		var croix = btn.get_node_or_null("verrou")
+		if croix:
+			croix.visible = goal_accompli < required_goal
+		# Et tu peux désactiver les boutons aussi si tu veux :
+		if btn is BaseButton:
+			btn.disabled = goal_accompli < required_goal
+			
+func set_bloque(nom: String, bloque: bool):
+	var noeud = get_node_or_null("HBoxContainer/" + nom)
+	if noeud:
+		var verrou = noeud.get_node_or_null("Verrou")
+		if verrou and verrou is TextureRect:
+			verrou.visible = bloque
+			
+func is_locked(nom: String) -> bool:
+	if not inventaire:
+		return false
+	var noeud = inventaire.get_node_or_null("HBoxContainer/" + nom)
+	if noeud:
+		var verrou = noeud.get_node_or_null("verrou")
+		if verrou and verrou is TextureRect:
+			return verrou.visible
+	return false

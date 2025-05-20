@@ -5,6 +5,8 @@ extends Node
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
+var goal_accompli = 0
+var menu 
 var goals = [
 	{
 		"title": "Poser un feu de camp",
@@ -51,12 +53,17 @@ var goals = [
 func _ready():
 	update_goal_display()
 
-	# 🔍 Recherche automatique du TileMap de routes dans la scène
-	# (modifie si ton chemin est différent)
 	if get_tree().get_root().has_node("game/Map/Route/route"):
 		route_tilemap = get_tree().get_root().get_node("game/Map/Route/route")
 	else:
 		push_warning("❌ TileMap de route introuvable. Vérifie le chemin dans goal.gd")
+
+	# 🔗 Lier le menu
+	if get_tree().get_root().has_node("game/CanvasLayer/Menu"):
+		menu = get_tree().get_root().get_node("game/CanvasLayer/Menu")
+	else:
+		push_warning("❌ Menu introuvable dans goal.gd")
+
 
 func update_goal_display():
 	if current_goal_index < goals.size():
@@ -74,7 +81,14 @@ func valider_goal(goal_id: String):
 	if current_goal_index < goals.size() and goals[current_goal_index].id == goal_id:
 		print("🎯 Goal validé :", goal_id)
 		current_goal_index += 1
+		goal_accompli += 1  # ✅ on incrémente ici
 		update_goal_display()
+
+		# 🔓 débloquer les objets dans le menu en fonction du progrès
+		if menu:
+			menu.set_locked_buttons(goal_accompli)
+
+
 
 func _process(_delta):
 	if current_goal_index >= goals.size():

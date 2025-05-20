@@ -25,7 +25,7 @@ const BLE		=preload("res://scenes/blé.tscn")
 
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
-
+var goal_accompli : = 0
 var last_cell: Vector2i = Vector2i()
 var current_preview: Sprite2D  = null
 var current_scene:   PackedScene = null
@@ -55,23 +55,26 @@ var grid_size := Vector2i(128, 128)
 
 
 func _ready():
-	# UI & spawn
+	menu = get_node("/root/game/CanvasLayer/Menu")
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
-	
-	# crée les PNJ et les sapins
+
+	# Verrouille tout sauf feu_camp
+	menu.set_locked_buttons(goal_accompli)
+
+	# Création PNJ & monde
 	spawn_pnjs(20)
 	generate_sapins(100)
 
-	# preview grid pour le placement
+	# Grille de placement
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
 
-	# construit le graphe A* à partir du TileMap "route"
+	# Chemins de navigation
 	build_route_astar()
-	var cnt = _get_route_cells().size()
 
 
 func _cell_to_id(cell: Vector2i) -> int:
@@ -130,7 +133,7 @@ func _process(delta):
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var pos  = get_global_mouse_position()
+		var pos = get_global_mouse_position()
 		var cell = route_tilemap.local_to_map(pos)
 
 		match selected_mode:
@@ -144,9 +147,6 @@ func _unhandled_input(event):
 						for x in range(size.x):
 							for y in range(size.y):
 								occupied_cells.erase(base + Vector2i(x, y))
-						if obj.name == "feu_camp":
-							inventory["feu_camp"] += 1
-							menu.update_inventory("feu_camp", inventory["feu_camp"])
 						obj.queue_free()
 						break
 				route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
@@ -156,9 +156,6 @@ func _unhandled_input(event):
 				placer_route()
 
 			_:
-				if selected_mode == "feu_camp" and inventory["feu_camp"] <= 0:
-					return
-
 				if current_scene:
 					var size = objet_sizes[selected_mode]
 					var base_cell = route_tilemap.local_to_map(pos)
@@ -173,10 +170,9 @@ func _unhandled_input(event):
 						inst.name = selected_mode + "_" + str(randi() % 100000)
 						inst.global_position = route_tilemap.map_to_local(base_cell)
 						inst.add_to_group("placeable")
-						inst.add_to_group("batiment")  # 🔥 ← ajoute cette ligne ici
+						inst.add_to_group("batiment")
 						add_child(inst)
 						get_node("CanvasLayer/TableauBord").update_dashboard(inst)
-
 
 						if selected_mode == "scierie":
 							assign_pnjs_to_work(inst, "bucheron")
@@ -194,15 +190,11 @@ func _unhandled_input(event):
 							for y in range(size.y):
 								occupied_cells[base_cell + Vector2i(x, y)] = true
 
-						if selected_mode == "feu_camp":
-							inventory["feu_camp"] -= 1
-							menu.update_inventory("feu_camp", inventory["feu_camp"])
-
 						current_preview.queue_free()
 						current_preview = null
 						current_scene = null
 
-		# 🎯 Ajout : clic en dehors des bâtiments = on vide le tableau
+		# Si on clique en dehors d’un bâtiment, on efface le tableau
 		var clicked_batiment := false
 		var mouse_pos = get_global_mouse_position()
 
@@ -214,12 +206,13 @@ func _unhandled_input(event):
 						clicked_batiment = true
 						break
 
-
 		if not clicked_batiment:
 			get_node("CanvasLayer/TableauBord").update_dashboard()
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
+
+
 
 func _on_objet_selectionne(nom: String):
 	selected_mode = nom
@@ -285,7 +278,7 @@ func _on_objet_selectionne(nom: String):
 	current_preview.texture = texture
 	current_preview.modulate.a = 0.5
 	current_preview.scale = scale
-	current_preview.z_index = 1  # ✅ ajouté ici
+	current_preview.z_index = 1 
 	add_child(current_preview)
 
 	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
@@ -304,14 +297,32 @@ func placer_route():
 		build_route_astar()
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
+	# ⛔ Vérifie si l’objet est verrouillé
+	print("🔍 menu =", menu)
+	print("🔍 selected_mode =", selected_mode)
+
+	if menu == null:
+		print("❌ menu est null !")
+	elif not menu.has_method("is_locked"):
+		print("❌ menu n'a pas is_locked")
+	else:
+		var verrou = menu.is_locked(selected_mode)
+		print("✅ Résultat de is_locked :", verrou)
+		if verrou:
+			return false
+
+		
+
+
 	for x in range(size.x):
 		for y in range(size.y):
-			var cc = start_cell + Vector2i(x,y)
+			var cc = start_cell + Vector2i(x, y)
 			if occupied_cells.has(cc) or route_tilemap.get_cell_source_id(cc) != -1:
 				return false
 			if herbe_tilemap.get_cell_source_id(cc) == -1:
 				return false
 	return true
+
 
 func update_ui_stats():
 	stats.update_stats(
@@ -437,3 +448,9 @@ func _find_nearest_route_cell(cell: Vector2i) -> Vector2i:
 			best_dist = d
 			best = rc
 	return best
+
+
+func debloquer_objet(nom: String):
+	var bouton = $ZoneInventaire/HBoxContainer.get_node_or_null(nom)
+	if bouton and bouton.has_node("Croix"):
+		bouton.get_node("Croix").visible = false
