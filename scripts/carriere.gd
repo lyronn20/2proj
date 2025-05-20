@@ -36,7 +36,7 @@ func _on_click(_vp, event, _si):
 
 func get_nearby_rocks() -> Array:
 	var rocks := []
-	var radius := 10 * 64
+	var radius := 2 * 64
 	for rock in get_tree().get_nodes_in_group("rock"):
 		if rock.visible and rock.global_position.distance_to(global_position) <= radius:
 			rocks.append(rock)

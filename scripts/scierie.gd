@@ -34,7 +34,7 @@ func _on_click(_vp, event, _si):
 
 func get_nearby_trees() -> Array:
 	var all_trees = get_tree().get_nodes_in_group("sapin")
-	var radius := 10 * 64
+	var radius := 3 * 64
 	var trees := []
 	for tree in all_trees:
 		if tree.global_position.distance_to(global_position) <= radius:

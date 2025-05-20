@@ -33,7 +33,7 @@ func _on_click(viewport, event, shape_idx):
 func get_nearby_baies() -> Array:
 	# 1) Récupère toutes les baies du groupe
 	var all_baies = get_tree().get_nodes_in_group("baies")
-	var radius := 15 * 64
+	var radius := 2 * 64
 	var baies := []
 	for b in all_baies:
 		if b.visible and b.global_position.distance_to(global_position) <= radius:

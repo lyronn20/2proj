@@ -38,7 +38,7 @@ var occupied_cells := {}
 var objet_sizes = {
 	"feu_camp": Vector2i(4, 4),
 	"hutte":    Vector2i(4, 4),
-	"sapin":    Vector2i(4, 4),
+	"sapin":    Vector2i(2, 2),
 	"scierie":  Vector2i(4, 4),
 	"puit":     Vector2i(4, 4),
 	"baies":     Vector2i(2, 2),

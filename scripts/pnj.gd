@@ -261,29 +261,41 @@ func do_chop_tree(delta):
 		var dist = global_position.distance_to(current_tree.global_position)
 
 		if dist > 8:
-			return  # Trop loin, on attend de s’approcher
+			return
 
 		velocity = Vector2.ZERO
 		energy -= delta * travail_rate
 		cutting_timer += delta
 
 		if cutting_timer >= cutting_duration:
-			# on détruit l'arbre
+			# 🪓 Supprimer l'arbre
+			var base_cell = herbe_tilemap.local_to_map(current_tree.global_position)
+
+			# Taille correcte de l'arbre (tu peux l'adapter ici si besoin)
+			var size = game.objet_sizes.get("sapin", Vector2i(1, 1))
+
+			for x in range(size.x):
+				for y in range(size.y):
+					var cell = base_cell + Vector2i(x, y)
+					game.occupied_cells.erase(cell)  # ✅ On libère TOUTES les cases
+
 			current_tree.queue_free()
-			# on retire sa position
+
 			if lieu_travail and lieu_travail.has_method("remove_tree_at"):
 				lieu_travail.remove_tree_at(current_tree.global_position)
+
 			cutting_timer = 0.0
 			current_tree = null
-			# stockage
+
 			if lieu_travail and lieu_travail.has_method("add_wood"):
 				lieu_travail.call("add_wood", 1)
+
 			await get_tree().create_timer(0.5).timeout
 			search_next_tree()
-
 	else:
 		current_tree = null
 		search_next_tree()
+
 
 		
 func search_next_tree():
