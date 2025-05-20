@@ -7,6 +7,7 @@
 size = Vector2(39, 38)
 
 [node name="Hutte" type="Node2D"]
+z_index = 1
 scale = Vector2(1.35, 1.35)
 script = ExtResource("1_ie1qe")
 

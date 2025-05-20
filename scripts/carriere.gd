@@ -2,6 +2,13 @@ extends Node2D
 
 var pierre_stock := 0
 static var compteur := 1
+var employes: Array = []
+
+func add_employe(pnj: Node2D):
+	employes.append(pnj)
+
+func get_employes() -> Array:
+	return employes
 
 func _ready():
 	add_to_group("batiment")
@@ -14,11 +21,13 @@ func _setup_click_area():
 	area.name = "ClickArea"
 	area.input_pickable = true
 	add_child(area)
+
 	var shape = CollisionShape2D.new()
 	var rect = RectangleShape2D.new()
 	rect.size = Vector2(64, 64)
 	shape.shape = rect
 	area.add_child(shape)
+
 	area.connect("input_event", Callable(self, "_on_click"))
 
 func _on_click(_vp, event, _si):

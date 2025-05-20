@@ -11,7 +11,7 @@ func add_employe(pnj: Node2D):
 
 func _ready():
 	add_to_group("batiment")
-	set_meta("nom_affichage", "Collecteur : "+ str(compteur))
+	set_meta("nom_affichage", "Ferme : "+ str(compteur))
 	compteur += 1
 	var area = Area2D.new()
 	area.name = "ClickArea"

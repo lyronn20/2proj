@@ -45,6 +45,12 @@ func update_dashboard(batiment: Node = null):
 				p_label.text = "  → PNJ ID: " + str(p.id)
 				p_label.add_theme_color_override("font_color", Color("#e9bc96"))
 				vbox.add_child(p_label)
+		
+		# Affiche le stock si disponible
+		if batiment.has_method("get_stock"):
+			var stock = batiment.get_stock()
+			vbox.add_child(make_label("📦 Stock : " + str(stock)))
+
 
 func make_label(text: String) -> Label:
 	var lbl = Label.new()

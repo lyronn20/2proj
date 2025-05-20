@@ -61,7 +61,7 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	
 	# crée les PNJ et les sapins
-	spawn_pnjs(3)
+	spawn_pnjs(20)
 	generate_sapins(100)
 
 	# preview grid pour le placement
@@ -138,7 +138,9 @@ func _unhandled_input(event):
 				for obj in get_tree().get_nodes_in_group("placeable"):
 					if obj.global_position.distance_to(pos) < 16:
 						var base = route_tilemap.local_to_map(obj.global_position)
-						var size = objet_sizes[obj.name]
+						var nom_base = obj.name.split("_")[0]
+						var size = objet_sizes.get(nom_base, Vector2i(1,1))
+
 						for x in range(size.x):
 							for y in range(size.y):
 								occupied_cells.erase(base + Vector2i(x, y))
@@ -269,13 +271,13 @@ func _on_objet_selectionne(nom: String):
 			texture       = load("res://assets/batiments/roche.png")
 			scale         = Vector2(0.4, 0.4)
 		"ferme":
-			current_scene= FERME
-			texture		 = load("res://assets/batiments/ferme.png")
-			scale		 = Vector2(0.18 , 0.18)
+			current_scene = FERME
+			texture       = load("res://assets/batiments/ferme.png")
+			scale         = Vector2(0.18 , 0.18)
 		"blé":
-			current_scene= BLE
-			texture		 = load("res://assets/batiments/blé2.png")
-			scale		 = Vector2(0.5 , 0.5)
+			current_scene = BLE
+			texture       = load("res://assets/batiments/blé2.png")
+			scale         = Vector2(0.5 , 0.5)
 		_:
 			return
 
@@ -283,12 +285,16 @@ func _on_objet_selectionne(nom: String):
 	current_preview.texture = texture
 	current_preview.modulate.a = 0.5
 	current_preview.scale = scale
+	current_preview.z_index = 1  # ✅ ajouté ici
 	add_child(current_preview)
 
 	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
 	var size = objet_sizes.get(nom, Vector2i(1, 1))
 	grid_pos.x = int(grid_pos.x / size.x) * size.x
 	grid_pos.y = int(grid_pos.y / size.y) * size.y
+
+
+
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
@@ -378,9 +384,9 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 	var assigned := 0
 	var route_cells := _get_route_cells()
 
-	# 🧼 Libération des PNJ déjà assignés à ce métier
+	# 🧼 Libération des PNJ déjà assignés à CE bâtiment
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.metier == metier:
+		if p.lieu_travail == building:
 			p.metier = ""
 			p.lieu_travail = null
 			p.mission = ""
@@ -388,8 +394,8 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 			p.following_route = false
 
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.metier != "":
-			continue
+		if p.metier != "" or p.lieu_travail != null:
+			continue  # 🔒 Ignorer les PNJ déjà affectés ailleurs
 
 		p.metier = metier
 		p.lieu_travail = building
@@ -415,9 +421,7 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 		p.following_route = true
 		p.call_deferred("update")
 
-
-
-		if building.has_method("add_employe"):
+		if building.has_method("add_employe") and not building.employes.has(p):
 			building.call("add_employe", p)
 
 		assigned += 1

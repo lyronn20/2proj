@@ -7,6 +7,7 @@
 size = Vector2(57, 55)
 
 [node name="Ferme" type="Node2D"]
+z_index = 1
 script = ExtResource("1_aakfg")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

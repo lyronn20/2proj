@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://dqfnsql0v5t3c" path="res://assets/batiments/feu_camp.png" id="1_nhbc3"]
 
 [node name="FeuCamp" type="Node2D"]
+z_index = 1
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_nhbc3")
