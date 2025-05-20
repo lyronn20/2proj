@@ -20,6 +20,8 @@ const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
 const PUIT_SCENE        = preload("res://scenes/puit.tscn")
 const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
 const PIERRE    = preload("res://scenes/pierre.tscn")
+const FERME		=preload("res://scenes/ferme.tscn")
+const BLE		=preload("res://scenes/blé.tscn")
 
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
@@ -42,7 +44,9 @@ var objet_sizes = {
 	"baies":     Vector2i(2, 2),
 	"pierre":     Vector2i(2, 2),
 	"collect_baies":     Vector2i(4, 4),
-	"carriere": Vector2i(4, 4)
+	"carriere": Vector2i(4, 4),
+	"ferme": Vector2i(4,4),
+	"blé": Vector2i(2,2)
 }
 
 # A* grid
@@ -176,6 +180,8 @@ func _unhandled_input(event):
 							assign_pnjs_to_work(inst, "bucheron")
 						elif selected_mode == "carriere":
 							assign_pnjs_to_work(inst, "mineur")
+						elif selected_mode == "ferme":
+							assign_pnjs_to_work(inst, "fermier")
 						elif selected_mode == "collect_baies":
 							reset_all_pnjs()
 							assign_pnjs_to_work(inst, "cueilleur")
@@ -262,6 +268,14 @@ func _on_objet_selectionne(nom: String):
 			current_scene = PIERRE
 			texture       = load("res://assets/batiments/roche.png")
 			scale         = Vector2(0.4, 0.4)
+		"ferme":
+			current_scene= FERME
+			texture		 = load("res://assets/batiments/ferme.png")
+			scale		 = Vector2(0.18 , 0.18)
+		"blé":
+			current_scene= BLE
+			texture		 = load("res://assets/batiments/blé2.png")
+			scale		 = Vector2(0.5 , 0.5)
 		_:
 			return
 

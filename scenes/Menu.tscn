@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://6hf7amn2ycd6"]
+[gd_scene load_steps=33 format=3 uid="uid://6hf7amn2ycd6"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://p1118rg4soyh" path="res://assets/batiments/puit.png" id="6_pp5m5"]
 [ext_resource type="Texture2D" uid="uid://k57rjrwf2yff" path="res://assets/batiments/scierie.png" id="7_el213"]
 [ext_resource type="Texture2D" uid="uid://y4m17hg4pf15" path="res://assets/batiments/recolte_baies.png" id="8_7ycwl"]
+[ext_resource type="Texture2D" uid="uid://cckwxm8h64e85" path="res://assets/batiments/ferme.png" id="9_8fhjo"]
 [ext_resource type="Texture2D" uid="uid://drxkfbu1n3d7k" path="res://assets/batiments/clique.png" id="10_2af52"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
@@ -18,6 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://dsggi1onvob0" path="res://assets/batiments/roche.png" id="14_i7htd"]
 [ext_resource type="Texture2D" uid="uid://bfvvhx5sxnaxy" path="res://assets/batiments/menu-icon.png" id="15_7t7qg"]
 [ext_resource type="Texture2D" uid="uid://cdv8jkqlf57g3" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
+[ext_resource type="Texture2D" uid="uid://cuciey26eau1g" path="res://assets/batiments/blé2.png" id="16_760fv"]
 [ext_resource type="Texture2D" uid="uid://i228ktppg4x6" path="res://assets/batiments/menu-gestion.png" id="16_l3wcu"]
 [ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
 [ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
@@ -77,9 +79,9 @@ script = ExtResource("2_jmdev")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HUD/ZoneInventaire"]
 layout_mode = 0
-offset_left = 500.0
+offset_left = 800.0
 offset_top = 3.0
-offset_right = 861.0
+offset_right = 1307.0
 offset_bottom = 72.0
 alignment = 2
 
@@ -113,6 +115,11 @@ expand_mode = 2
 [node name="collect_baies" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2
 texture = ExtResource("8_7ycwl")
+expand_mode = 2
+
+[node name="ferme" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("9_8fhjo")
 expand_mode = 2
 
 [node name="route" type="HBoxContainer" parent="HUD/ZoneInventaire"]
@@ -160,6 +167,11 @@ expand_mode = 2
 [node name="pierre" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("14_i7htd")
+expand_mode = 2
+
+[node name="blé" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+layout_mode = 2
+texture = ExtResource("16_760fv")
 expand_mode = 2
 
 [node name="Infos_Stats" type="Panel" parent="HUD"]

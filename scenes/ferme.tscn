@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bx26o3m23uwkq"]
+
+[ext_resource type="Script" uid="uid://dvx88ns1msoeo" path="res://scripts/ferme.gd" id="1_aakfg"]
+[ext_resource type="Texture2D" uid="uid://cckwxm8h64e85" path="res://assets/batiments/ferme.png" id="1_b8bfn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b8bfn"]
+size = Vector2(57, 55)
+
+[node name="Ferme" type="Node2D"]
+script = ExtResource("1_aakfg")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.17, 0.17)
+texture = ExtResource("1_b8bfn")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(-1.5, -1.5)
+shape = SubResource("RectangleShape2D_b8bfn")

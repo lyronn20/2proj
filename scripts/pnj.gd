@@ -84,6 +84,10 @@ func _ready():
 	elif metier == "mineur":
 		mission = "aller_travailler"
 		search_next_rock()	
+	elif metier == "fermier":
+		mission = "aller_travailler"
+		search_next_ble()
+
 
 
 func _process(delta):
@@ -96,7 +100,7 @@ func _process(delta):
 	# 2) Devrait-on afficher la barre ?
 	#    - Si on a cliqué (show_energy)
 	#    - OU si on est en train de TRAVAILLER
-	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur","bucheron"]
+	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur","bucheron","fermier"]
 	energy_bar_container.visible = should_show
 	if should_show:
 		energy_bar_container.position = Vector2(0, -40)
@@ -128,6 +132,8 @@ func follow_path(delta):
 				search_next_tree()
 			elif metier == "mineur":
 				search_next_rock()
+			elif metier == "fermier":
+				search_next_ble()
 			return
 
 		# 🎯 Gestion classique à l’arrivée
@@ -140,6 +146,8 @@ func follow_path(delta):
 					mission = "bucheron"
 				elif metier == "mineur":
 					mission = "mineur"
+				elif metier == "fermier":
+					mission = "recolter_ble"
 				else:
 					mission = "travailler"
 			"aller_abattre":
@@ -148,6 +156,8 @@ func follow_path(delta):
 				mission = "cueillir"
 			"aller_mineur":
 				mission = "mineur"
+			"aller_recolter_ble":
+				mission = "recolter_ble"	
 			"retour_maison":
 				mission = "recharger"
 		return
@@ -171,8 +181,11 @@ func do_work(delta):
 			search_next_baie()
 		"mineur":
 			search_next_rock()
+		"fermier":
+			search_next_ble()
 		_:
 			mission = ""
+
 
 
 
@@ -364,7 +377,7 @@ func _physics_process(delta):
 	if following_route:
 		follow_path(delta)
 
-	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger"]:
+	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble"]:
 		match mission:
 			"travailler":
 				do_work(delta)
@@ -376,6 +389,9 @@ func _physics_process(delta):
 				do_mine(delta)
 			"recharger":
 				do_recharge(delta)
+			"recolter_ble":
+				do_collect_ble(delta)
+
 				
 	elif mission == "retour_travail":
 		if metier == "cueilleur":
@@ -487,3 +503,65 @@ func do_mine(delta):
 		current_rock = null
 		await get_tree().create_timer(0.5).timeout
 		search_next_rock()
+
+
+func search_next_ble():
+	if not lieu_travail or not lieu_travail.has_method("get_nearby_ble"):
+		mission = "retour_maison"
+		prepare_return_path()
+		return
+
+	var tous_les_ble = lieu_travail.get_nearby_ble()
+	var bles = []
+	for b in tous_les_ble:
+		if is_instance_valid(b) and b.visible:
+			bles.append(b)
+
+	if bles.is_empty():
+		current_baie = null
+		await get_tree().create_timer(3.0).timeout
+		search_next_ble()
+		return
+
+	var closest: Node2D = bles[0]
+	var dist = global_position.distance_to(closest.global_position)
+	for b in bles:
+		var d = global_position.distance_to(b.global_position)
+		if d < dist:
+			closest = b
+			dist = d
+
+	current_baie = closest
+	go_to(current_baie.global_position)
+	mission = "aller_recolter_ble"
+	
+	
+func do_collect_ble(delta):
+	if energy <= travail_threshold:
+		energy = 0
+		mission = "retour_maison"
+		prepare_return_path()
+		return
+
+	if current_baie and is_instance_valid(current_baie):
+		var dist = global_position.distance_to(current_baie.global_position)
+		if dist > 8:
+			return
+
+		velocity = Vector2.ZERO
+		energy -= delta * travail_rate
+		cutting_timer += delta
+
+		if cutting_timer >= cutting_duration:
+			current_baie.respawn()
+			cutting_timer = 0.0
+
+			if lieu_travail and lieu_travail.has_method("add_wheat"):
+				lieu_travail.call("add_wheat", 1)
+
+			await get_tree().create_timer(0.5).timeout
+			search_next_ble()
+	else:
+		current_baie = null
+		await get_tree().create_timer(0.5).timeout
+		search_next_ble()

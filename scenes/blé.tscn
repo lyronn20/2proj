@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://d3sf3h8uewpq1"]
+
+[ext_resource type="Texture2D" uid="uid://cuciey26eau1g" path="res://assets/batiments/blé2.png" id="1_71i3j"]
+[ext_resource type="Script" uid="uid://bpmyvmcfs7vv" path="res://scripts/blé.gd" id="1_ss4wm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_71i3j"]
+size = Vector2(78, 82)
+
+[node name="Blé" type="Node2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_ss4wm")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_71i3j")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2, 1)
+shape = SubResource("RectangleShape2D_71i3j")
