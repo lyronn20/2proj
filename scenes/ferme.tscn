@@ -8,14 +8,16 @@ size = Vector2(57, 55)
 
 [node name="Ferme" type="Node2D"]
 z_index = 1
+position = Vector2(12.5, 14)
 script = ExtResource("1_aakfg")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(17.5, 17)
 scale = Vector2(0.17, 0.17)
 texture = ExtResource("1_b8bfn")
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(-1.5, -1.5)
+position = Vector2(16.5, 17)
 shape = SubResource("RectangleShape2D_b8bfn")

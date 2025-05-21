@@ -87,9 +87,9 @@ func set_locked_buttons(goal_accompli: int):
 		"hutte": 1,
 		"carriere": 2,
 		"puit": 3,
-		"scierie": 4,
+		"ferme": 4,
 		"collect_baies": 5,
-		"ferme": 6
+		"scierie": 6
 	}
 
 	for btn_name in all_buttons.keys():

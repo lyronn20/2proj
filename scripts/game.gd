@@ -53,6 +53,12 @@ var objet_sizes = {
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
 
+var repeatable_modes = ["baies", "sapin", "blé", "pierre"]
+
+# flag & timer pour le click-and-hold
+var is_holding_place := false
+var hold_place_timer := 0.0
+var hold_place_interval := 0.01   
 
 func _ready():
 	menu = get_node("/root/game/CanvasLayer/Menu")
@@ -102,11 +108,14 @@ func build_route_astar():
 				route_astar.set_point_solid(cell, true)
 
 func _process(delta):
+	# 1) Si preview verrouillée → on la supprime et on sort
 	if current_preview and menu.is_locked(selected_mode):
 		current_preview.queue_free()
 		current_preview = null
 		current_scene = null
 		return
+
+	# 2) Mise à jour du grid_preview (si vous en avez un)
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
@@ -116,13 +125,13 @@ func _process(delta):
 		grid_preview.visible = false
 		grid_preview.update_grid(world_pos, size)
 
-	# coordonnées de la souris dans l'UI
+	# 3) Coordonnées de la souris dans l’UI
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
 	if cell != last_cell:
 		last_cell = cell
 		menu.set_mouse_coords(cell)
 
-	# position et couleur du sprite preview
+	# 4) Mise à jour de la preview (position + couleur)
 	if current_preview:
 		var size = objet_sizes[selected_mode]
 		var gp = get_global_mouse_position()
@@ -133,90 +142,169 @@ func _process(delta):
 		if selected_mode != "route":
 			current_preview.modulate = Color(1,1,1,0.5) if can_place_object(grid_pos, size) else Color(1,0,0,0.5)
 
+	# 5) Si on est en “hold” et que c’est un mode répétable (ou la gomme), on agit
+	if is_holding_place:
+		hold_place_timer += delta
+		if hold_place_timer >= hold_place_interval:
+			hold_place_timer = 0
+			if selected_mode == "gomme":
+				_erase_object_at_mouse()
+			else:
+				_place_object_at_mouse()
+	# 6) Mise à jour du HUD stat
 	update_ui_stats()
+
+func _place_object_at_mouse():
+	# 1) Calcul de la cellule alignée
+	var pos       = get_global_mouse_position()
+	var size      = objet_sizes.get(selected_mode, Vector2i(1,1))
+	var base_cell = route_tilemap.local_to_map(pos)
+	base_cell.x = int(base_cell.x / size.x) * size.x
+	base_cell.y = int(base_cell.y / size.y) * size.y
+
+	# 2) Vérif placement
+	if not can_place_object(base_cell, size):
+		return
+
+	# 3) Validation de la mission
+	if goal_panel and goal_panel.has_method("valider_goal"):
+		goal_panel.valider_goal(selected_mode)
+
+	# 4) Instanciation
+	var inst = current_scene.instantiate()
+	inst.name            = "%s_%d" % [selected_mode, randi() % 100000]
+	inst.global_position = route_tilemap.map_to_local(base_cell)
+	inst.add_to_group("placeable")
+	inst.add_to_group("batiment")
+	add_child(inst)
+	get_node("CanvasLayer/TableauBord").update_dashboard(inst)
+
+	# 5) Gestion spéciale feu de camp
+	if selected_mode == "feu_camp":
+		inventory["feu_camp"] -= 1
+		menu.update_inventory("feu_camp", inventory["feu_camp"])
+		menu.set_bloque("feu_camp", true)
+
+	# 6) Affectation PNJ
+	match selected_mode:
+		"scierie":
+			assign_pnjs_to_work(inst, "bucheron")
+		"carriere":
+			assign_pnjs_to_work(inst, "mineur")
+		"ferme":
+			assign_pnjs_to_work(inst, "fermier")
+		"collect_baies":
+			reset_all_pnjs()
+			assign_pnjs_to_work(inst, "cueilleur")
+		"hutte":
+			assign_pnjs_to_hut(inst)
+		_:
+			pass
+
+	# 7) Marquage des cellules
+	for x in range(size.x):
+		for y in range(size.y):
+			occupied_cells[base_cell + Vector2i(x, y)] = true
+
+	# 8) Si ce n’est pas un mode répétable, on détruit la preview
+	if not (selected_mode in repeatable_modes):
+		current_preview.queue_free()
+		current_preview = null
+		current_scene = null
 
 
 func _unhandled_input(event):
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var pos = get_global_mouse_position()
-		var cell = route_tilemap.local_to_map(pos)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			# ——— Si mode répétable ou gomme, on démarre le hold + action immédiate
+			if selected_mode in repeatable_modes or selected_mode == "gomme":
+				is_holding_place = true
+				hold_place_timer  = 0
+				if selected_mode == "gomme":
+					_erase_object_at_mouse()
+				else:
+					_place_object_at_mouse()
+			else:
+				# ——— Sinon, on garde la logique ponctuelle existante
+				var pos  = get_global_mouse_position()
+				var cell = route_tilemap.local_to_map(pos)
 
-		match selected_mode:
-			"gomme":
-				for obj in get_tree().get_nodes_in_group("placeable"):
-					if obj.global_position.distance_to(pos) < 16:
-						var base = route_tilemap.local_to_map(obj.global_position)
-						var nom_base = obj.name.split("_")[0]
-						var size = objet_sizes.get(nom_base, Vector2i(1,1))
+				match selected_mode:
+					"gomme":
+						# (on peut garder ici une suppression ponctuelle, 
+						#  mais le hold sera prioritaire)
+						_erase_object_at_mouse()
 
-						for x in range(size.x):
-							for y in range(size.y):
-								occupied_cells.erase(base + Vector2i(x, y))
-						obj.queue_free()
-						break
-				route_tilemap.set_cells_terrain_connect([cell], 0, -1, -1)
-				herbe_tilemap.set_cells_terrain_connect([cell], 0, TERRAIN_ID, 0)
+					"route":
+						placer_route()
 
-			"route":
-				placer_route()
+					_:
+						if current_scene:
+							_place_object_at_mouse()
 
-			_:
-				if current_scene:
-					var size = objet_sizes[selected_mode]
-					var base_cell = route_tilemap.local_to_map(pos)
-					base_cell.x = int(base_cell.x / size.x) * size.x
-					base_cell.y = int(base_cell.y / size.y) * size.y
-
-					if can_place_object(base_cell, size):
-						var inst = current_scene.instantiate()
-						if goal_panel and goal_panel.has_method("valider_goal"):
-							goal_panel.valider_goal(selected_mode)
-
-						inst.name = selected_mode + "_" + str(randi() % 100000)
-						inst.global_position = route_tilemap.map_to_local(base_cell)
-						inst.add_to_group("placeable")
-						inst.add_to_group("batiment")
-						add_child(inst)
-						get_node("CanvasLayer/TableauBord").update_dashboard(inst)
-
-						if selected_mode == "scierie":
-							assign_pnjs_to_work(inst, "bucheron")
-						elif selected_mode == "carriere":
-							assign_pnjs_to_work(inst, "mineur")
-						elif selected_mode == "ferme":
-							assign_pnjs_to_work(inst, "fermier")
-						elif selected_mode == "collect_baies":
-							reset_all_pnjs()
-							assign_pnjs_to_work(inst, "cueilleur")
-						elif selected_mode == "hutte":
-							assign_pnjs_to_hut(inst)
-
-						for x in range(size.x):
-							for y in range(size.y):
-								occupied_cells[base_cell + Vector2i(x, y)] = true
-
-						current_preview.queue_free()
-						current_preview = null
-						current_scene = null
-
-		# Si on clique en dehors d’un bâtiment, on efface le tableau
-		var clicked_batiment := false
-		var mouse_pos = get_global_mouse_position()
-
-		for bat in get_tree().get_nodes_in_group("batiment"):
-			if bat.has_node("ClickArea"):
-				var area = bat.get_node("ClickArea")
-				if area is Area2D:
-					if area.get_global_transform().origin.distance_to(mouse_pos) < 32:
-						clicked_batiment = true
-						break
-
-		if not clicked_batiment:
-			get_node("CanvasLayer/TableauBord").update_dashboard()
+		else:
+			# ► relâchement → on stoppe le hold
+			is_holding_place = false
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
 
+	# ► click hors bâtiment pour vider le dashboard (lors de release)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		var clicked_batiment := false
+		var mpos = get_global_mouse_position()
+		for bat in get_tree().get_nodes_in_group("batiment"):
+			if bat.has_node("ClickArea"):
+				var area = bat.get_node("ClickArea")
+				if area is Area2D and area.get_global_transform().origin.distance_to(mpos) < 32:
+					clicked_batiment = true
+					break
+		if not clicked_batiment:
+			get_node("CanvasLayer/TableauBord").update_dashboard()
+
+
+	# ——— Après tout input souris, on gère le “click hors bâtiment” 
+	#     pour vider le dashboard (uniquement si c’était un clic release)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		var clicked_batiment := false
+		var mpos = get_global_mouse_position()
+		for bat in get_tree().get_nodes_in_group("batiment"):
+			if bat.has_node("ClickArea"):
+				var area = bat.get_node("ClickArea")
+				if area is Area2D and area.get_global_transform().origin.distance_to(mpos) < 32:
+					clicked_batiment = true
+					break
+		if not clicked_batiment:
+			get_node("CanvasLayer/TableauBord").update_dashboard()
+
+func _erase_object_at_mouse():
+	var pos = get_global_mouse_position()
+	for obj in get_tree().get_nodes_in_group("placeable"):
+		# ← on ne touche pas aux PNJ
+		if obj.is_in_group("pnj"):
+			continue
+
+		if obj.global_position.distance_to(pos) < 16:
+			var base     = route_tilemap.local_to_map(obj.global_position)
+			var nom_base = obj.name.split("_")[0]
+			var size     = objet_sizes.get(nom_base, Vector2i(1,1))
+
+			# nettoyage de chaque tuile et restauration du terrain
+			for x in range(size.x):
+				for y in range(size.y):
+					var c = base + Vector2i(x, y)
+					occupied_cells.erase(c)
+					route_tilemap.set_cells_terrain_connect([c], 0, -1, -1)
+					herbe_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+
+			# si c’est un feu de camp, on le re-débloque
+			if nom_base == "feu_camp":
+				inventory["feu_camp"] += 1
+				menu.update_inventory("feu_camp", inventory["feu_camp"])
+				menu.set_bloque("feu_camp", false)
+
+			obj.queue_free()
+			break
 
 
 func _on_objet_selectionne(nom: String):
@@ -302,9 +390,6 @@ func placer_route():
 		build_route_astar()
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
-	# ⛔ Vérifie si l’objet est verrouillé
-	print("🔍 menu =", menu)
-	print("🔍 selected_mode =", selected_mode)
 
 	if menu == null:
 		print("❌ menu est null !")
