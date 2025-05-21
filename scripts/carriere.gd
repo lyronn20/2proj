@@ -44,10 +44,11 @@ func get_nearby_rocks() -> Array:
 
 func add_stone(amount: int):
 	pierre_stock += amount
-	var game = get_tree().current_scene
-	if game and game.has_method("print_total_carriere_stock"):
-		game.print_total_carriere_stock()
+	var tb = get_node("/root/game/CanvasLayer/TableauBord")
+	if tb.has_method("update_total_stock"):
+		tb.update_total_stock()
 
 
-func get_stock() -> int:
-	return pierre_stock
+
+func get_stock():
+	return {"pierre": pierre_stock}

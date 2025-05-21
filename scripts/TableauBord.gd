@@ -8,11 +8,17 @@ extends Control
 @onready var bar_faim := $PNJ/VBoxContainer/BarFaim
 @onready var bar_soif := $PNJ/VBoxContainer/BarSoif
 @onready var bar_energie := $PNJ/VBoxContainer/BarEnergie
+@onready var stock_panel := $Total_stock/HBoxContainer
+
 
 func _ready():
 	await get_tree().process_frame
-	batiment_panel.visible = false  # caché au démarrage
+	batiment_panel.visible = false
 	update_dashboard()
+	await get_tree().create_timer(0.1).timeout
+	update_total_stock()
+	print("✅ total stock lancé")  # ← ce print DOIT apparaître
+
 
 func update_dashboard(batiment: Node = null):
 	pnj_panel.visible = false
@@ -119,3 +125,37 @@ func make_colored_bar(value: float, color: Color) -> ProgressBar:
 
 
 	return bar
+	
+	
+	
+func update_total_stock():
+	var stock_total := {
+		"blé": 0,
+		"bois": 0,
+		"pierre": 0,
+		"baies": 0
+	}
+
+	for node in get_tree().get_nodes_in_group("batiment"):
+		if node.has_method("get_stock"):
+			var stock = node.get_stock()
+			if typeof(stock) == TYPE_DICTIONARY:
+				for key in stock:
+					if stock_total.has(key):
+						stock_total[key] += stock[key]
+
+	for child in stock_panel.get_children():
+		child.queue_free()
+
+	var icons = {
+		"blé": "🌾",
+		"bois": "🪵",
+		"pierre": "🪨",
+		"baies": "🍓"
+	}
+
+	for res in ["blé", "bois", "pierre", "baies"]:
+		var label = Label.new()
+		label.text = icons[res] + " " + res + " : " + str(stock_total[res])
+		label.add_theme_color_override("font_color", Color("#e9bc96"))
+		stock_panel.add_child(label)

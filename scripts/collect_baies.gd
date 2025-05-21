@@ -44,10 +44,14 @@ func get_nearby_baies() -> Array:
 
 func add_fruit(amount: int):
 	baies_stock += amount
-	get_tree().current_scene.print_total_baies_stock()
+	var tb = get_node("/root/game/CanvasLayer/TableauBord")
+	if tb and tb.has_method("update_total_stock"):
+		tb.update_total_stock()
 
-func get_stock() -> int:
-	return baies_stock
+
+func get_stock():
+	return {"baies": baies_stock}
+
 
 func respawn_baie(pos: Vector2):
 	await get_tree().create_timer(60).timeout

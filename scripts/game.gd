@@ -8,8 +8,6 @@ extends Node2D
 @onready var stats                       = $CanvasLayer/Menu/HUD/Infos_Stats
 @onready var goal_panel 				 = $CanvasLayer/Menu/HUD/Goal
 
-
-
 const TERRAIN_ID        = 0
 const FEU_CAMP_SCENE	=preload("res://scenes/feu_camp.tscn")
 const HUTTE_SCENE		=preload("res://scenes/hutte.tscn")
@@ -216,6 +214,19 @@ func _place_object_at_mouse():
 
 
 func _unhandled_input(event):
+	# ► Clic droit : désélection automatique
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		# On vide la preview et on remet en mode normal
+		selected_mode = ""
+		if current_preview:
+			current_preview.queue_free()
+			current_preview = null
+			current_scene = null
+		# On remet à jour le dashboard sans cible
+		get_node("CanvasLayer/TableauBord").update_dashboard()
+		return
+
+	# ► Clic gauche : inspection / placement / gomme
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos = get_global_mouse_position()
 
@@ -253,7 +264,7 @@ func _unhandled_input(event):
 			# 3) Relâchement → stoppe le hold
 			is_holding_place = false
 
-			# 4) Click hors bâtiment → vide le dashboard
+			# 4) Clic hors bâtiment → vide le dashboard
 			var clicked_batiment := false
 			for bat in get_tree().get_nodes_in_group("batiment"):
 				if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
@@ -262,6 +273,7 @@ func _unhandled_input(event):
 			if not clicked_batiment:
 				get_node("CanvasLayer/TableauBord").update_dashboard()
 
+	# ► Touche R pour tracer la route
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
 
@@ -357,14 +369,20 @@ func _on_objet_selectionne(nom: String):
 	grid_pos.y = int(grid_pos.y / size.y) * size.y
 	current_preview.global_position = route_tilemap.map_to_local(grid_pos)
 
-
-
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
-	if not occupied_cells.has(c):
-		route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
-		# on met à jour l’ASTAR
-		build_route_astar()
+
+	# —– Si ce n’est pas de l’herbe, on refuse (donc on empêche l’eau)
+	if herbe_tilemap.get_cell_source_id(c) == -1:
+		return
+
+	# —– Si déjà occupé ou déjà une route
+	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1:
+		return
+
+	# —– Sinon on place et on rebuild l’ASTAR
+	route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+	build_route_astar()
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 

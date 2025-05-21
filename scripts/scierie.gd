@@ -44,7 +44,9 @@ func get_nearby_trees() -> Array:
 
 func add_wood(amount: int):
 	wood_stock += amount
-	get_tree().current_scene.print_total_wood_stock()
-
-func get_stock() -> int:
-	return wood_stock
+	var tb = get_node("/root/game/CanvasLayer/TableauBord")
+	if tb and tb.has_method("update_total_stock"):
+		tb.update_total_stock()
+		
+func get_stock():
+	return {"bois": wood_stock}

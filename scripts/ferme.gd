@@ -44,11 +44,15 @@ func get_nearby_ble() -> Array:
 
 func add_wheat(amount: int):
 	ble_stock += amount
-	get_tree().current_scene.print_total_ble_stock()
+	var tb = get_node("/root/game/CanvasLayer/TableauBord")
+	if tb and tb.has_method("update_total_stock"):
+		tb.update_total_stock()
 
 
-func get_stock() -> int:
-	return ble_stock
+
+func get_stock():
+	return {"blé": ble_stock}
+
 
 func respawn_ble(pos: Vector2):
 	await get_tree().create_timer(60).timeout
