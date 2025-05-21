@@ -71,7 +71,7 @@ func _on_quit_pressed():
 
 func _on_confirm_quit():
 	get_tree().quit()
-
+	
 func _on_cancel_quit():
 	panneau_confirmation.visible = false
 	

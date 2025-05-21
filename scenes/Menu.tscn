@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://6hf7amn2ycd6"]
+[gd_scene load_steps=35 format=3 uid="uid://6hf7amn2ycd6"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -25,6 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
 [ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
 [ext_resource type="Script" uid="uid://b6h32hfs8um4s" path="res://scripts/goal.gd" id="18_dek3k"]
+[ext_resource type="AudioStream" uid="uid://6253umu3qx27" path="res://song/background_song.wav" id="26_yvxia"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnxe8"]
 bg_color = Color(0.352941, 0.231373, 0.113725, 1)
@@ -457,7 +458,12 @@ text = "ANNULER"
 
 [node name="BtnCharger" type="Button" parent="reglages/menu_reglages"]
 modulate = Color(0.931566, 0.723984, 0.623297, 1)
+layout_mode = 0
 offset_left = 67.6
 offset_top = 157.0
 offset_right = 145.6
 offset_bottom = 174.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("26_yvxia")
+autoplay = true

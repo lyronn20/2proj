@@ -102,6 +102,11 @@ func build_route_astar():
 				route_astar.set_point_solid(cell, true)
 
 func _process(delta):
+	if current_preview and menu.is_locked(selected_mode):
+		current_preview.queue_free()
+		current_preview = null
+		current_scene = null
+		return
 	if current_preview and selected_mode != "route":
 		var size = objet_sizes.get(selected_mode, Vector2i(1, 1))
 		var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())

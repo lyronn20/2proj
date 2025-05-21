@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://p7p2h1lwbdo8"]
+
+[ext_resource type="AudioStream" uid="uid://6253umu3qx27" path="res://song/background_song.wav" id="1_nbeep"]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer"]
+stream = ExtResource("1_nbeep")
+autoplay = true
