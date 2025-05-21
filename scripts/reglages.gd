@@ -11,6 +11,8 @@ extends Panel
 @onready var btn_regles = $menu_reglages/BtnRegles
 @onready var btn_touches = $menu_reglages/BtnTouches
 @onready var btn_reset = $menu_reglages/BtnRecommencer
+@onready var btn_sauvegarder = $menu_reglages/BtnSauvegarder
+@onready var btn_charger = $menu_reglages/BtnCharger
 @onready var btn_quit = $menu_reglages/BtnQuitter
 
 func _ready():
@@ -25,6 +27,8 @@ func _ready():
 	btn_regles.pressed.connect(_on_regles_pressed)
 	btn_touches.pressed.connect(_on_touches_pressed)
 	btn_reset.pressed.connect(_on_reset_pressed)
+	btn_sauvegarder.pressed.connect(_on_sauvegarder_pressed)
+	btn_charger.pressed.connect(_on_charger_pressed)
 	btn_quit.pressed.connect(_on_quit_pressed)
 
 	btn_confirm_quit.pressed.connect(_on_confirm_quit)
@@ -70,6 +74,14 @@ func _on_confirm_quit():
 
 func _on_cancel_quit():
 	panneau_confirmation.visible = false
+	
+func _on_sauvegarder_pressed():
+	get_node("/root/game").sauvegarder_jeu()
+	
+func _on_charger_pressed():
+	var game_node = get_node("/root/game")
+	if game_node and game_node.has_method("charger_jeu"):
+		game_node.charger_jeu()
 
 func _affiche_popup(texte: String):
 	var style = label_popup.get_theme_stylebox("normal").duplicate()

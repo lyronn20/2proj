@@ -360,7 +360,7 @@ func generate_sapins(count: int = 50):
 		)
 		if herbe_tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
 			var sp = SAPIN_SCENE.instantiate()
-			sp.name = "sapin"
+			sp.name = "sapin_" + str(randi() % 100000)
 			sp.global_position = herbe_tilemap.map_to_local(cell)
 			sp.add_to_group("sapin")
 			sp.add_to_group("placeable")
@@ -454,3 +454,140 @@ func debloquer_objet(nom: String):
 	var bouton = $ZoneInventaire/HBoxContainer.get_node_or_null(nom)
 	if bouton and bouton.has_node("Croix"):
 		bouton.get_node("Croix").visible = false
+
+func sauvegarder_jeu():
+	var save = FileAccess.open("user://sauvegarde.save", FileAccess.WRITE)
+
+	# 🔹 Sauver les PNJ
+	var pnj_data = []
+	for pnj in get_tree().get_nodes_in_group("pnj"):
+		pnj_data.append({
+			"position": pnj.global_position,
+			"id": pnj.id,
+			"metier": pnj.metier,
+			"faim": pnj.faim,
+			"soif": pnj.soif,
+			"energie": pnj.energy
+		})
+	save.store_var(pnj_data)
+
+	# 🔹 Sauver tous les objets placeables (y compris sapins)
+	var objets_data = []
+	for obj in get_tree().get_nodes_in_group("placeable"):
+		objets_data.append({
+			"type": obj.name,
+			"position": obj.global_position
+		})
+	save.store_var(objets_data)
+
+	save.close()
+	print("✅ Sauvegarde effectuée")
+
+func charger_jeu():
+	if not FileAccess.file_exists("user://sauvegarde.save"):
+		print("⚠️ Aucun fichier de sauvegarde trouvé")
+		return
+
+	var file = FileAccess.open("user://sauvegarde.save", FileAccess.READ)
+
+	# Supprimer anciens PNJ et objets
+	for p in get_tree().get_nodes_in_group("pnj"):
+		p.queue_free()
+	for o in get_tree().get_nodes_in_group("placeable"):
+		o.queue_free()
+
+	# Charger PNJ
+	var pnj_data = file.get_var()
+	var scene_pnj = preload("res://scenes/pnj.tscn")
+	for data in pnj_data:
+		var p = scene_pnj.instantiate()
+		p.global_position = data["position"]
+		p.id = data["id"]
+		p.metier = data["metier"]
+		p.faim = data["faim"]
+		p.soif = data["soif"]
+		p.energy = data["energie"]
+		p.name = "PNJ_" + str(p.id)
+		p.add_to_group("pnj")
+		p.add_to_group("placeable")
+		add_child(p)
+
+	# Charger bâtiments et sapins
+	var objets_data = file.get_var()
+	for data in objets_data:
+		var name = data["type"]
+		var pos = data["position"]
+		var scene: PackedScene = null
+
+		if name.begins_with("sapin"):
+			scene = preload("res://scenes/sapin.tscn")
+		elif name.begins_with("feu_camp"):
+			scene = preload("res://scenes/feu_camp.tscn")
+		elif name.begins_with("hutte"):
+			scene = preload("res://scenes/hutte.tscn")
+		elif name.begins_with("scierie"):
+			scene = preload("res://scenes/scierie.tscn")
+		elif name.begins_with("carriere"):
+			scene = preload("res://scenes/carriere.tscn")
+		elif name.begins_with("puit"):
+			scene = preload("res://scenes/puit.tscn")
+		elif name.begins_with("collect_baies"):
+			scene = preload("res://scenes/collect_baies.tscn")
+		elif name.begins_with("baies"):
+			scene = preload("res://scenes/baies.tscn")
+		elif name.begins_with("pierre"):
+			scene = preload("res://scenes/pierre.tscn")
+
+
+		if scene:
+			var inst = scene.instantiate()
+			inst.name = name
+			inst.global_position = pos
+			inst.add_to_group("placeable")
+
+			if name.begins_with("sapin") or name.begins_with("baies") or name.begins_with("pierre"):
+				if name.begins_with("sapin"):
+					inst.add_to_group("sapin")
+				var cell = herbe_tilemap.local_to_map(pos)
+				occupied_cells[cell] = true
+			else:
+				inst.add_to_group("batiment")
+
+			add_child(inst)
+
+	# Réattribuer les PNJ à leur lieu de travail
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if p.metier == "":
+			continue
+
+		var cible = null
+		for b in get_tree().get_nodes_in_group("batiment"):
+			if b.has_method("add_employe") and not b.employes.has(p):
+				cible = b
+				break
+
+		if cible:
+			p.lieu_travail = cible
+			p.mission = "aller_travailler"
+
+			var start = route_tilemap.local_to_map(p.global_position)
+			var goal = route_tilemap.local_to_map(cible.global_position)
+
+			if route_tilemap.get_cell_source_id(start) == -1:
+				start = _find_nearest_route_cell(start)
+			if route_tilemap.get_cell_source_id(goal) == -1:
+				goal = _find_nearest_route_cell(goal)
+
+			var path = route_astar.get_point_path(start, goal)
+			p.chemin.clear()
+			var half = route_astar.cell_size * 0.5
+			for cell in path:
+				p.chemin.append(route_tilemap.map_to_local(cell) + half)
+			p.chemin.append(cible.global_position)
+
+			p.current_step = 0
+			p.following_route = true
+			cible.add_employe(p)
+
+	file.close()
+	print("✅ Partie chargée manuellement")

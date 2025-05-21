@@ -454,3 +454,10 @@ text = "CONFIRMER"
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 2
 text = "ANNULER"
+
+[node name="BtnCharger" type="Button" parent="reglages/menu_reglages"]
+modulate = Color(0.931566, 0.723984, 0.623297, 1)
+offset_left = 67.6
+offset_top = 157.0
+offset_right = 145.6
+offset_bottom = 174.0
