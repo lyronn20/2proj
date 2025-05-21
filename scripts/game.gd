@@ -478,8 +478,15 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 			p.following_route = false
 
 	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.metier != "" or p.lieu_travail != null:
-			continue  # 🔒 Ignorer les PNJ déjà affectés ailleurs
+		# Si déjà employé dans un autre bâtiment → on skippe
+		var est_deja_employe = false
+		for b in get_tree().get_nodes_in_group("batiment"):
+			if b.has_method("add_employe") and b.employes.has(p):
+				est_deja_employe = true
+				break
+		if est_deja_employe:
+			continue
+
 
 		p.metier = metier
 		p.lieu_travail = building
@@ -610,6 +617,11 @@ func charger_jeu():
 			scene = preload("res://scenes/baies.tscn")
 		elif name.begins_with("pierre"):
 			scene = preload("res://scenes/pierre.tscn")
+		elif name.begins_with("ferme"):
+			scene = preload("res://scenes/ferme.tscn")
+		elif name.begins_with("blé"):
+			scene = preload("res://scenes/blé.tscn")
+
 
 
 		if scene:
@@ -618,7 +630,7 @@ func charger_jeu():
 			inst.global_position = pos
 			inst.add_to_group("placeable")
 
-			if name.begins_with("sapin") or name.begins_with("baies") or name.begins_with("pierre"):
+			if name.begins_with("sapin") or name.begins_with("baies") or name.begins_with("pierre") or name.begins_with("blé"):
 				if name.begins_with("sapin"):
 					inst.add_to_group("sapin")
 				var cell = herbe_tilemap.local_to_map(pos)
