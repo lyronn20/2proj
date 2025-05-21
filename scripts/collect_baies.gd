@@ -11,6 +11,7 @@ func add_employe(pnj: Node2D):
 
 func _ready():
 	add_to_group("batiment")
+	add_to_group("baies")  
 	set_meta("nom_affichage", "Collecteur : "+ str(compteur))
 	compteur += 1
 	var area = Area2D.new()
@@ -43,7 +44,7 @@ func get_nearby_baies() -> Array:
 
 func add_fruit(amount: int):
 	baies_stock += amount
-	print("📦 Baies stocke :", baies_stock)
+	get_tree().current_scene.print_total_baies_stock()
 
 func get_stock() -> int:
 	return baies_stock

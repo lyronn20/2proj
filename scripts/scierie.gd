@@ -6,6 +6,7 @@ static var compteur := 1
 
 func _ready():
 	add_to_group("batiment")
+	add_to_group("scierie") 
 	set_meta("nom_affichage", "Scierie : "+ str(compteur))
 	compteur += 1
 	_setup_click_area()
@@ -43,7 +44,7 @@ func get_nearby_trees() -> Array:
 
 func add_wood(amount: int):
 	wood_stock += amount
-	print("📦 Bois stocké :", wood_stock)
+	get_tree().current_scene.print_total_wood_stock()
 
 func get_stock() -> int:
 	return wood_stock

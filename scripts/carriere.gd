@@ -44,7 +44,10 @@ func get_nearby_rocks() -> Array:
 
 func add_stone(amount: int):
 	pierre_stock += amount
-	print("📦 pierre stockée :", pierre_stock)
+	var game = get_tree().current_scene
+	if game and game.has_method("print_total_carriere_stock"):
+		game.print_total_carriere_stock()
+
 
 func get_stock() -> int:
 	return pierre_stock

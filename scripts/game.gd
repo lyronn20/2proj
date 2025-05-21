@@ -176,6 +176,8 @@ func _place_object_at_mouse():
 	inst.global_position = route_tilemap.map_to_local(base_cell)
 	inst.add_to_group("placeable")
 	inst.add_to_group("batiment")
+	if selected_mode == "carriere":
+		inst.add_to_group("carriere")
 	add_child(inst)
 	get_node("CanvasLayer/TableauBord").update_dashboard(inst)
 
@@ -215,67 +217,54 @@ func _place_object_at_mouse():
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		var mouse_pos = get_global_mouse_position()
+
 		if event.pressed:
-			# ——— Si mode répétable ou gomme, on démarre le hold + action immédiate
+			# 1) Inspection au simple clic : bâtiments
+			for bat in get_tree().get_nodes_in_group("batiment"):
+				if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
+					get_node("CanvasLayer/TableauBord").update_dashboard(bat)
+					return
+			#    puis PNJ
+			for pnj in get_tree().get_nodes_in_group("pnj"):
+				if pnj.global_position.distance_to(mouse_pos) < 16:
+					get_node("CanvasLayer/TableauBord").update_dashboard(pnj)
+					return
+
+			# 2) Si pas d’inspection, on démarre click-and-hold ou action unique
 			if selected_mode in repeatable_modes or selected_mode == "gomme":
 				is_holding_place = true
-				hold_place_timer  = 0
+				hold_place_timer  = 0.0
 				if selected_mode == "gomme":
 					_erase_object_at_mouse()
 				else:
 					_place_object_at_mouse()
 			else:
-				# ——— Sinon, on garde la logique ponctuelle existante
-				var pos  = get_global_mouse_position()
-				var cell = route_tilemap.local_to_map(pos)
-
 				match selected_mode:
 					"gomme":
-						# (on peut garder ici une suppression ponctuelle, 
-						#  mais le hold sera prioritaire)
 						_erase_object_at_mouse()
-
 					"route":
 						placer_route()
-
 					_:
 						if current_scene:
 							_place_object_at_mouse()
 
 		else:
-			# ► relâchement → on stoppe le hold
+			# 3) Relâchement → stoppe le hold
 			is_holding_place = false
+
+			# 4) Click hors bâtiment → vide le dashboard
+			var clicked_batiment := false
+			for bat in get_tree().get_nodes_in_group("batiment"):
+				if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
+					clicked_batiment = true
+					break
+			if not clicked_batiment:
+				get_node("CanvasLayer/TableauBord").update_dashboard()
 
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		placer_route()
 
-	# ► click hors bâtiment pour vider le dashboard (lors de release)
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		var clicked_batiment := false
-		var mpos = get_global_mouse_position()
-		for bat in get_tree().get_nodes_in_group("batiment"):
-			if bat.has_node("ClickArea"):
-				var area = bat.get_node("ClickArea")
-				if area is Area2D and area.get_global_transform().origin.distance_to(mpos) < 32:
-					clicked_batiment = true
-					break
-		if not clicked_batiment:
-			get_node("CanvasLayer/TableauBord").update_dashboard()
-
-
-	# ——— Après tout input souris, on gère le “click hors bâtiment” 
-	#     pour vider le dashboard (uniquement si c’était un clic release)
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		var clicked_batiment := false
-		var mpos = get_global_mouse_position()
-		for bat in get_tree().get_nodes_in_group("batiment"):
-			if bat.has_node("ClickArea"):
-				var area = bat.get_node("ClickArea")
-				if area is Area2D and area.get_global_transform().origin.distance_to(mpos) < 32:
-					clicked_batiment = true
-					break
-		if not clicked_batiment:
-			get_node("CanvasLayer/TableauBord").update_dashboard()
 
 func _erase_object_at_mouse():
 	var pos = get_global_mouse_position()
@@ -305,6 +294,7 @@ func _erase_object_at_mouse():
 
 			obj.queue_free()
 			break
+
 
 
 func _on_objet_selectionne(nom: String):
@@ -534,6 +524,41 @@ func debloquer_objet(nom: String):
 	var bouton = $ZoneInventaire/HBoxContainer.get_node_or_null(nom)
 	if bouton and bouton.has_node("Croix"):
 		bouton.get_node("Croix").visible = false
+
+func print_total_carriere_stock() -> int:
+	var total_pierre := 0
+	for carre in get_tree().get_nodes_in_group("carriere"):
+		# On utilise la méthode get_stock() plutôt que carre.has()
+		if carre.has_method("get_stock"):
+			total_pierre += carre.get_stock()
+	print("📦 Total pierre stockée par toutes les carrières : %d" % total_pierre)
+	return total_pierre
+# Total des baies de tous les collecteurs de baies
+func print_total_baies_stock() -> int:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("baies"):
+		if node.has_method("get_stock"):
+			total += node.get_stock()
+	print("🍓 Total baies stockées                             : %d" % total)
+	return total
+
+# Total du blé de toutes les fermes
+func print_total_ble_stock() -> int:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("ble"):
+		if node.has_method("get_stock"):
+			total += node.get_stock()
+	print("🌾 Total blé stocké                                  : %d" % total)
+	return total
+
+# Total du bois de toutes les scieries
+func print_total_wood_stock() -> int:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("scierie"):
+		if node.has_method("get_stock"):
+			total += node.get_stock()
+	print("🪵 Total bois stocké                                 : %d" % total)
+	return total
 
 func sauvegarder_jeu():
 	var save = FileAccess.open("user://sauvegarde.save", FileAccess.WRITE)

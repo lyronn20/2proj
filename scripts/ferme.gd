@@ -11,6 +11,7 @@ func add_employe(pnj: Node2D):
 
 func _ready():
 	add_to_group("batiment")
+	add_to_group("ble")   
 	set_meta("nom_affichage", "Ferme : "+ str(compteur))
 	compteur += 1
 	var area = Area2D.new()
@@ -43,7 +44,7 @@ func get_nearby_ble() -> Array:
 
 func add_wheat(amount: int):
 	ble_stock += amount
-	print("🌾 Blé stocké :", ble_stock)
+	get_tree().current_scene.print_total_ble_stock()
 
 
 func get_stock() -> int:
@@ -60,3 +61,4 @@ func respawn_ble(pos: Vector2):
 
 func get_employes():
 	return employes
+	
