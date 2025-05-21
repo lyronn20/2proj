@@ -27,7 +27,7 @@ var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
 var goal_accompli : = 0
 var last_cell: Vector2i = Vector2i()
-var current_preview: Sprite2D  = null
+var current_preview: Node2D = null
 var current_scene:   PackedScene = null
 var selected_mode:   String      = ""
 var grid_preview:    Node2D      = null
@@ -309,76 +309,63 @@ func _erase_object_at_mouse():
 
 func _on_objet_selectionne(nom: String):
 	selected_mode = nom
+
+	# Supprime l’ancienne preview si elle existe
 	if current_preview:
 		current_preview.queue_free()
 		current_preview = null
 		current_scene = null
 
+	# Pas de preview pour la gomme ni la route
 	if nom == "gomme" or nom == "route":
 		return
 
-	var texture: Texture2D
-	var scale := Vector2.ONE
-
+	# Sélectionne la scène à instancier
 	match nom:
 		"feu_camp":
 			current_scene = FEU_CAMP_SCENE
-			texture       = load("res://assets/batiments/feu_camp.png")
 		"hutte":
 			current_scene = HUTTE_SCENE
-			texture       = load("res://assets/batiments/hutte.png")
-			scale 		  = Vector2(1.35,1.35)
 		"sapin":
 			current_scene = SAPIN_SCENE
-			texture       = load("res://assets/batiments/sapin.png")
-			scale         = Vector2(0.5, 0.5)
-		"scierie":
-			current_scene = SCIERIE_SCENE
-			texture       = load("res://assets/batiments/scierie.png")
-			scale         = Vector2(0.9, 0.9)
-		"puit":
-			current_scene = PUIT_SCENE
-			texture       = load("res://assets/batiments/puit.png")
-			scale         = Vector2(0.7, 0.7)
-		"carriere":
-			current_scene = CARRIERE_SCENE
-			texture       = load("res://assets/batiments/carreire_pierre.png")
-			scale         = Vector2(0.7, 0.7)
 		"baies":
 			current_scene = BAIES
-			texture       = load("res://assets/batiments/baies2.png")
-			scale         = Vector2(0.4, 0.4)
 		"collect_baies":
 			current_scene = COLLECT_BAIES
-			texture       = load("res://assets/batiments/recolte_baies.png")
-			scale         = Vector2(0.15, 0.15)
+		"scierie":
+			current_scene = SCIERIE_SCENE
+		"puit":
+			current_scene = PUIT_SCENE
+		"carriere":
+			current_scene = CARRIERE_SCENE
 		"pierre":
 			current_scene = PIERRE
-			texture       = load("res://assets/batiments/roche.png")
-			scale         = Vector2(0.4, 0.4)
 		"ferme":
 			current_scene = FERME
-			texture       = load("res://assets/batiments/ferme.png")
-			scale         = Vector2(0.18 , 0.18)
 		"blé":
 			current_scene = BLE
-			texture       = load("res://assets/batiments/blé2.png")
-			scale         = Vector2(0.5 , 0.5)
 		_:
 			return
 
-	current_preview = Sprite2D.new()
-	current_preview.texture = texture
-	current_preview.modulate.a = 0.5
-	current_preview.scale = scale
-	current_preview.z_index = 1 
+	# Instancie la vraie scène en mode preview
+	current_preview = current_scene.instantiate()
+	current_preview.modulate = Color(1, 1, 1, 0.5)
+	current_preview.z_index = 1
+
+	# (Optionnel) désactive collisions et zones de clic de la preview
+	if current_preview.has_node("CollisionShape2D"):
+		current_preview.get_node("CollisionShape2D").disabled = true
+	if current_preview.has_node("ClickArea"):
+		current_preview.get_node("ClickArea").set_deferred("monitoring", false)
+
 	add_child(current_preview)
 
+	# Positionne immédiatement la preview sur la grille
+	var size     = objet_sizes.get(nom, Vector2i(1,1))
 	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())
-	var size = objet_sizes.get(nom, Vector2i(1, 1))
 	grid_pos.x = int(grid_pos.x / size.x) * size.x
 	grid_pos.y = int(grid_pos.y / size.y) * size.y
-
+	current_preview.global_position = route_tilemap.map_to_local(grid_pos)
 
 
 
@@ -397,12 +384,8 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 		print("❌ menu n'a pas is_locked")
 	else:
 		var verrou = menu.is_locked(selected_mode)
-		print("✅ Résultat de is_locked :", verrou)
 		if verrou:
 			return false
-
-		
-
 
 	for x in range(size.x):
 		for y in range(size.y):
