@@ -22,9 +22,9 @@
 [ext_resource type="Texture2D" uid="uid://cdv8jkqlf57g3" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
 [ext_resource type="Texture2D" uid="uid://cuciey26eau1g" path="res://assets/batiments/blé2.png" id="16_760fv"]
 [ext_resource type="Texture2D" uid="uid://i228ktppg4x6" path="res://assets/batiments/menu-gestion.png" id="16_l3wcu"]
-[ext_resource type="Texture2D" uid="uid://cwuvnkfq2m6wj" path="res://assets/menu/menu_para.png" id="17_5p0sf"]
 [ext_resource type="Texture2D" uid="uid://bp4pstq54xmke" path="res://assets/batiments/menu-popup.png" id="18_7t7qg"]
 [ext_resource type="Script" uid="uid://b6h32hfs8um4s" path="res://scripts/goal.gd" id="18_dek3k"]
+[ext_resource type="Texture2D" uid="uid://c22hx7sk6v4vc" path="res://assets/batiments/menu_para.png" id="24_yvxia"]
 [ext_resource type="AudioStream" uid="uid://6253umu3qx27" path="res://song/background_song.wav" id="26_yvxia"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pnxe8"]
@@ -52,7 +52,7 @@ font_size = 30
 texture = ExtResource("15_7t7qg")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7t7qg"]
-texture = ExtResource("17_5p0sf")
+texture = ExtResource("24_yvxia")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_l3wcu"]
 texture = ExtResource("18_7t7qg")
@@ -292,17 +292,17 @@ offset_bottom = 69.0
 scale = Vector2(5.81371, 4.08797)
 
 [node name="btn_pause" type="Button" parent="HUD/GestionJeu/button"]
-modulate = Color(0.913434, 0.736336, 0.58943, 1)
+modulate = Color(0.913725, 0.737255, 0.588235, 0)
 layout_mode = 2
 flat = true
 
 [node name="btn_play" type="Button" parent="HUD/GestionJeu/button"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(0.913725, 0.737255, 0.588235, 0)
 layout_mode = 2
 flat = true
 
 [node name="btn_fast" type="Button" parent="HUD/GestionJeu/button"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 flat = true
 
@@ -359,64 +359,73 @@ expand_mode = 3
 
 [node name="menu_reglages" type="Panel" parent="reglages"]
 layout_mode = 0
-offset_left = -110.0
-offset_top = 29.1667
-offset_right = 40.0
-offset_bottom = 189.167
+offset_left = -103.333
+offset_top = 15.0
+offset_right = 26.667
+offset_bottom = 215.0
 scale = Vector2(1.8, 1.8)
 theme_override_styles/panel = SubResource("StyleBoxTexture_7t7qg")
 
 [node name="BtnRegles" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_left = 31.6
-offset_top = 22.4
-offset_right = 116.6
-offset_bottom = 42.4
+offset_left = 24.0739
+offset_top = 36.5741
+offset_right = 109.074
+offset_bottom = 56.5741
 flat = true
 
 [node name="BtnTouches" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_left = 34.0
-offset_top = 49.2
-offset_right = 119.0
-offset_bottom = 69.2
+offset_left = 24.9998
+offset_top = 60.1852
+offset_right = 110.0
+offset_bottom = 80.1852
 flat = true
 
 [node name="BtnSauvegarder" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_left = 33.2
-offset_top = 76.8
-offset_right = 118.2
-offset_bottom = 96.8
+offset_left = 27.3146
+offset_top = 83.3333
+offset_right = 112.315
+offset_bottom = 103.333
+flat = true
+
+[node name="BtnCharger" type="Button" parent="reglages/menu_reglages"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 27.3146
+offset_top = 109.259
+offset_right = 105.315
+offset_bottom = 126.259
 flat = true
 
 [node name="BtnRecommencer" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_left = 33.6
-offset_top = 106.0
-offset_right = 118.6
-offset_bottom = 126.0
+offset_left = 24.5369
+offset_top = 129.167
+offset_right = 109.537
+offset_bottom = 149.167
 flat = true
 
 [node name="BtnQuitter" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.913725, 0.737255, 0.588235, 1)
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_left = 32.4
-offset_top = 128.8
-offset_right = 117.4
-offset_bottom = 148.8
+offset_left = 26.3887
+offset_top = 153.241
+offset_right = 111.389
+offset_bottom = 173.241
 flat = true
 
 [node name="panneau_popup" type="Panel" parent="reglages/menu_reglages"]
 layout_mode = 0
-offset_left = -81.4815
-offset_top = 144.444
+offset_left = -81.481
+offset_top = 155.0
 offset_right = 218.519
-offset_bottom = 394.444
+offset_bottom = 405.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_l3wcu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="reglages/menu_reglages/panneau_popup"]
@@ -455,14 +464,6 @@ text = "CONFIRMER"
 modulate = Color(0.913725, 0.737255, 0.588235, 1)
 layout_mode = 2
 text = "ANNULER"
-
-[node name="BtnCharger" type="Button" parent="reglages/menu_reglages"]
-modulate = Color(0.931566, 0.723984, 0.623297, 1)
-layout_mode = 0
-offset_left = 67.6
-offset_top = 157.0
-offset_right = 145.6
-offset_bottom = 174.0
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("26_yvxia")
