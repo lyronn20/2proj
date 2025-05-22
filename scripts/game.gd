@@ -376,7 +376,6 @@ func _on_objet_selectionne(nom: String):
 		current_preview.get_node("ClickArea").set_deferred("monitoring", false)
 
 	add_child(current_preview)
-
 	# Positionne immédiatement la preview sur la grille
 	var size     = objet_sizes.get(nom, Vector2i(1,1))
 	var grid_pos = route_tilemap.local_to_map(get_global_mouse_position())

@@ -29,7 +29,7 @@ func _ready():
 	pierre.connect("gui_input", Callable(self, "_on_pierre_input"))
 	ferme.connect("gui_input", Callable(self, "_on_ferme_input"))
 	blé.connect("gui_input", Callable(self, "_on_ble_input"))
-	animaux_bat.connect("gui_input" , Callable(self, "on_animaux_bat_input"))
+	animaux_bat.connect("gui_input" , Callable(self, "_on_animaux_bat_input"))
 
 func _on_feu_camp_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

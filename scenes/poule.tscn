@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://b06pee1spg1yf"]
+[gd_scene load_steps=9 format=3 uid="uid://b06pee1spg1yf"]
 
 [ext_resource type="Texture2D" uid="uid://dy1xud08qg4ql" path="res://assets/batiments/poule.png" id="1_i6cy1"]
+[ext_resource type="Script" uid="uid://bdui27qhmn0o1" path="res://scripts/animal.gd" id="1_xmxqm"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xmxqm"]
 atlas = ExtResource("1_i6cy1")
@@ -49,6 +50,7 @@ z_index = 2
 sprite_frames = SubResource("SpriteFrames_jihwd")
 animation = &"new_animation"
 frame_progress = 0.881355
+script = ExtResource("1_xmxqm")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 z_index = 2

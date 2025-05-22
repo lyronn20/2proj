@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://cp1waee4uqhfo"]
+[gd_scene load_steps=9 format=3 uid="uid://cp1waee4uqhfo"]
 
 [ext_resource type="Texture2D" uid="uid://hews8kbwwpc8" path="res://assets/batiments/vache.png" id="1_j7jin"]
+[ext_resource type="Script" uid="uid://bdui27qhmn0o1" path="res://scripts/animal.gd" id="1_qqs4v"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qqs4v"]
 atlas = ExtResource("1_j7jin")
@@ -48,8 +49,8 @@ scale = Vector2(0.1, 0.1)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_x7qge")
 frame_progress = 0.354296
+script = ExtResource("1_qqs4v")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(2.77779, 6.62274e-06)
-scale = Vector2(1, 1)
 shape = SubResource("RectangleShape2D_j7jin")

@@ -17,7 +17,7 @@ signal objet_selectionne(nom: String)
 @onready var baies    = $route/baies
 @onready var pierre   = $route/pierre
 @onready var gomme       = $route/Gomme
-@onready var animaux_bat = $HUD/ZoneInventaire/HBoxContainer/animaux_bat
+@onready var animaux_bat = $HBoxContainer/animaux_bat
 var menu
 var time_scales = [2.0, 4.0, 8.0]
 

@@ -1,0 +1,56 @@
+[gd_scene load_steps=4 format=3 uid="uid://badj3cr4qnbf5"]
+
+[ext_resource type="Script" uid="uid://03mw0q06nrll" path="res://scripts/accueil.gd" id="1_u3a2a"]
+[ext_resource type="Texture2D" uid="uid://dmq4mcfsrvdkq" path="res://assets/menu/start_menu.png" id="2_ejcqs"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_ejcqs"]
+
+[node name="Accueil" type="Control"]
+layout_mode = 3
+anchor_right = 2.293
+anchor_bottom = 2.19
+offset_right = -2641.54
+offset_bottom = -1419.12
+script = ExtResource("1_u3a2a")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -2.0
+offset_top = -1.0
+offset_right = 2642.0
+offset_bottom = 1355.0
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("2_ejcqs")
+expand_mode = 1
+
+[node name="btnCharger" type="Button" parent="."]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+offset_left = 673.0
+offset_top = 628.0
+offset_right = 1255.0
+offset_bottom = 705.0
+icon = SubResource("ViewportTexture_ejcqs")
+flat = true
+
+[node name="btnJouer" type="Button" parent="."]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+offset_left = 820.0
+offset_top = 515.0
+offset_right = 1109.0
+offset_bottom = 589.0
+flat = true
+icon_alignment = 1
+
+[node name="btnQuitter" type="Button" parent="."]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+offset_left = 820.0
+offset_top = 740.0
+offset_right = 1112.0
+offset_bottom = 816.0
+flat = true

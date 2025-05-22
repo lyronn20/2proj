@@ -1,5 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://ju8r4j3u0ccg"]
+[gd_scene load_steps=9 format=3 uid="uid://ju8r4j3u0ccg"]
 
+[ext_resource type="Script" uid="uid://bdui27qhmn0o1" path="res://scripts/animal.gd" id="1_qmgw4"]
 [ext_resource type="Texture2D" uid="uid://bjrtaoeetylw1" path="res://assets/batiments/cochon.png" id="1_wxogi"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qmgw4"]
@@ -49,6 +50,7 @@ scale = Vector2(0.17, 0.17)
 sprite_frames = SubResource("SpriteFrames_bdt4h")
 frame = 2
 frame_progress = 0.863264
+script = ExtResource("1_qmgw4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(6.5, -14)
