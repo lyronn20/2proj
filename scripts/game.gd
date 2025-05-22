@@ -363,6 +363,7 @@ func _on_objet_selectionne(nom: String):
 	current_preview = current_scene.instantiate()
 	current_preview.modulate = Color(1, 1, 1, 0.5)
 	current_preview.z_index = 1
+	current_preview.set_meta("is_preview", true)
 
 	# (Optionnel) désactive collisions et zones de clic de la preview
 	if current_preview.has_node("CollisionShape2D"):

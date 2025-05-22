@@ -10,9 +10,7 @@ extends Control
 @onready var bar_energie := $PNJ/VBoxContainer/BarEnergie
 @onready var stock_panel := $Total_stock/HBoxContainer
 
-var current_pnj :Node= null
-
-
+var current_pnj: Node = null
 
 func _ready():
 	await get_tree().process_frame
@@ -20,8 +18,7 @@ func _ready():
 	update_dashboard()
 	await get_tree().create_timer(0.1).timeout
 	update_total_stock()
-	print("✅ total stock lancé")  # ← ce print DOIT apparaître
-
+	print("✅ total stock lancé")
 
 func update_dashboard(batiment: Node = null):
 	pnj_panel.visible = false
@@ -37,29 +34,24 @@ func update_dashboard(batiment: Node = null):
 		if batiment.has_meta("nom_affichage"):
 			nom = batiment.get_meta("nom_affichage")
 
-		var label = Label.new()
-		label.text = "🏠 " + nom
-		label.add_theme_color_override("font_color", Color("#e9bc96"))
-		vbox.add_child(label)
+		vbox.add_child(make_label("🏠 " + nom))
 
 		if "habitants" in batiment:
 			for p in batiment.habitants:
-				var p_label = Label.new()
-				p_label.text = "  → PNJ ID: " + str(p.id)
-				p_label.add_theme_color_override("font_color", Color("#e9bc96"))
-				vbox.add_child(p_label)
+				vbox.add_child(make_label("  → PNJ ID: " + str(p.id)))
 		elif "employes" in batiment:
 			for p in batiment.employes:
-				var p_label = Label.new()
-				p_label.text = "  → PNJ ID: " + str(p.id)
-				p_label.add_theme_color_override("font_color", Color("#e9bc96"))
-				vbox.add_child(p_label)
-		
+				vbox.add_child(make_label("  → PNJ ID: " + str(p.id)))
+
 		# Affiche le stock si disponible
 		if batiment.has_method("get_stock"):
 			var stock = batiment.get_stock()
-			vbox.add_child(make_label("📦 Stock : " + str(stock)))
-
+			if typeof(stock) == TYPE_DICTIONARY:
+				vbox.add_child(make_label("📦 Stock :"))
+				for res in stock.keys():
+					vbox.add_child(make_label("  → " + res.capitalize() + " : " + str(stock[res])))
+			else:
+				vbox.add_child(make_label("📦 Stock : " + str(stock)))
 
 func make_label(text: String) -> Label:
 	var lbl = Label.new()
@@ -76,7 +68,6 @@ func make_bar(value: float) -> ProgressBar:
 	bar.custom_minimum_size = Vector2(0, 16)
 	return bar
 
-
 func update_pnj_panel(pnj: Node):
 	pnj_panel.visible = true
 	batiment_panel.visible = false
@@ -85,18 +76,16 @@ func update_pnj_panel(pnj: Node):
 		child.queue_free()
 
 	pnj_content.add_child(make_label("🍗 Faim"))
-	pnj_content.add_child(make_colored_bar(pnj.faim, Color(1, 0.2, 0.2)))  # rouge
+	pnj_content.add_child(make_colored_bar(pnj.faim, Color(1, 0.2, 0.2)))
 
 	pnj_content.add_child(make_label("💧 Soif"))
-	pnj_content.add_child(make_colored_bar(pnj.soif, Color(0.2, 0.6, 1)))   # bleu
+	pnj_content.add_child(make_colored_bar(pnj.soif, Color(0.2, 0.6, 1)))
 
 	pnj_content.add_child(make_label("⚡ Énergie"))
-	pnj_content.add_child(make_colored_bar(pnj.energy, Color(0.3, 1, 0.3))) # vert
+	pnj_content.add_child(make_colored_bar(pnj.energy, Color(0.3, 1, 0.3)))
 
 	pnj_content.add_child(make_label("🧍 ID: " + str(pnj.id)))
 	pnj_content.add_child(make_label("🏷️ Métier: " + str(pnj.metier)))
-
-
 
 func make_colored_bar(value: float, color: Color) -> ProgressBar:
 	var bar = ProgressBar.new()
@@ -106,31 +95,23 @@ func make_colored_bar(value: float, color: Color) -> ProgressBar:
 	bar.value = value
 	bar.custom_minimum_size = Vector2(0, 18)
 
-	# Crée un style de fond sombre
 	var background_style = StyleBoxFlat.new()
-	background_style.bg_color = Color(0.1, 0.1, 0.1, 0.8)  # fond presque noir avec transparence
+	background_style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
 	background_style.set_border_width_all(1)
 	background_style.border_color = Color(0.3, 0.3, 0.3)
 
-	# Crée un style de remplissage coloré
 	var fill_style = StyleBoxFlat.new()
 	fill_style.bg_color = color
 	fill_style.set_corner_radius_all(3)
 
-	# Applique les styles
 	bar.add_theme_stylebox_override("background", background_style)
 	bar.add_theme_stylebox_override("fill", fill_style)
-
-	# Ajoute un texte blanc lisible
 	bar.add_theme_color_override("font_color", Color(1, 1, 1))
 	bar.add_theme_color_override("font_outline_color", Color.BLACK)
 	bar.add_theme_constant_override("outline_size", 1)
 
-
 	return bar
-	
-	
-	
+
 func update_total_stock():
 	var stock_total := {
 		"blé": 0,

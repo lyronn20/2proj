@@ -9,6 +9,8 @@ func add_habitant(pnj):
 		habitants.append(pnj)
 
 func _ready():
+	if has_meta("is_preview") and get_meta("is_preview") == true:
+		return  # Ne pas exécuter le reste si c’est une preview
 	add_to_group("batiment")
 	set_meta("nom_affichage", "Hutte : "+ str(compteur))
 	compteur += 1
@@ -23,8 +25,9 @@ func _ready():
 	shape.shape = rect
 	area.add_child(shape)
 
-	area.connect("input_event", Callable(self, "_on_click"))
+	area.connect("input_event", Callable(self, "_on_click"), CONNECT_ONE_SHOT)
+
 
 func _on_click(viewport, event, shape_idx):
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
