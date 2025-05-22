@@ -43,16 +43,17 @@ animations = [{
 size = Vector2(209, 160)
 
 [node name="Cochon" type="Node2D"]
-z_index = 2
+z_index = 3
 scale = Vector2(0.17, 0.17)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-z_index = 4
+z_index = 3
 sprite_frames = SubResource("SpriteFrames_bdt4h")
 frame = 2
 frame_progress = 0.863264
 script = ExtResource("1_qmgw4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 3
 position = Vector2(6.5, -14)
 shape = SubResource("RectangleShape2D_hslr4")

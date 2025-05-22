@@ -43,6 +43,7 @@ animations = [{
 radius = 220.227
 
 [node name="Poule" type="Node2D"]
+z_index = 3
 scale = Vector2(0.06, 0.06)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

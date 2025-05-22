@@ -3,7 +3,7 @@ extends AnimatedSprite2D
 @onready var herbe_tilemap: TileMapLayer = get_node("/root/game/herbe")
 
 var direction := Vector2.ZERO
-var speed := 20.0
+var speed := 15.0
 var wander_timer := 0.0
 var interval := 2.0
 

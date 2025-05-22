@@ -410,8 +410,6 @@ func _physics_process(delta):
     if following_route:
         follow_path(delta)
 
-    elif faim < 20 and mission == "" and current_baie == null:
-        search_nearest_animal()
 
     elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble"]:
         match mission:
@@ -425,9 +423,6 @@ func _physics_process(delta):
     elif mission == "retour_travail":
         if metier in ["cueilleur", "bucheron", "mineur", "fermier"]:
             go_to(lieu_travail.global_position, "aller_travailler")
-
-    elif mission == "manger_animal":
-        do_manger_animal(delta)
 
     elif mission == "":
         match metier:
@@ -608,57 +603,3 @@ func do_collect_ble(delta):
         current_baie = null
         await get_tree().create_timer(0.5).timeout
         search_next_ble()
-
-func do_manger_animal(delta):
-    if is_instance_valid(current_baie):
-       current_baie.queue_free()
-       if lieu_travail.animaux.has(current_baie):
-          lieu_travail.animaux.erase(current_baie)
-
-    var dist = global_position.distance_to(current_baie.global_position)
-    if dist > 8:
-        return
-
-    velocity = Vector2.ZERO
-    energy -= delta * travail_rate
-    cutting_timer += delta
-
-    if cutting_timer >= cutting_duration:
-        match current_baie.name.to_lower():
-            "poule": faim = clamp(faim + 15, 0, 100)
-            "cochon": faim = clamp(faim + 35, 0, 100)
-            "vache": faim = clamp(faim + 60, 0, 100)
-
-        current_baie.queue_free()
-        if lieu_travail.animaux.has(current_baie):
-            lieu_travail.animaux.erase(current_baie)
-        current_baie = null
-        cutting_timer = 0.0
-        mission = ""
-        print("🍗 PNJ", id, " a mangé un animal.")
-        
-func search_nearest_animal():
-    if not lieu_travail or not lieu_travail.has("animaux"):
-        return
-
-    var animaux = lieu_travail.animaux
-    if animaux.is_empty():
-        return
-
-    var closest_animal = null
-    var min_dist = INF
-
-    for a in animaux:
-        if not is_instance_valid(a):
-            continue
-        var dist = global_position.distance_to(a.global_position)
-        if dist < min_dist:
-            min_dist = dist
-            closest_animal = a
-
-    if closest_animal:
-        current_baie = closest_animal
-        go_to(closest_animal.global_position, "aller_manger_animal")
-        # ⚠️ Supprimer l'animal de la liste globale pour éviter les conflits
-        if lieu_travail.animaux.has(closest_animal):
-            lieu_travail.animaux.erase(closest_animal)

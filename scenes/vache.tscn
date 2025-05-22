@@ -43,7 +43,7 @@ animations = [{
 size = Vector2(383.333, 311.111)
 
 [node name="Vache" type="Node2D"]
-z_index = 2
+z_index = 3
 scale = Vector2(0.1, 0.1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
