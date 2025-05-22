@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=4 uid="uid://bhs3xfwenrsbx"]
+[gd_scene load_steps=25 format=4 uid="uid://bhs3xfwenrsbx"]
 
 [ext_resource type="Script" uid="uid://dkxjx8q7p23w" path="res://scripts/game.gd" id="1_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://b1r42x5lvt6c" path="res://assets/map/sol_terre.png" id="2_u5sy4"]
@@ -369,6 +369,69 @@ terrain_set_1/terrain_0/name = "eau-bord"
 terrain_set_1/terrain_0/color = Color(0.469981, 0.372313, 0, 1)
 sources/2 = SubResource("TileSetAtlasSource_lbhrr")
 
+[sub_resource type="FontFile" id="FontFile_gee14"]
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/2/0/ascent = 0.0
+cache/0/2/0/descent = 0.0
+cache/0/2/0/underline_position = 0.0
+cache/0/2/0/underline_thickness = 0.0
+cache/0/2/0/scale = 1.0
+cache/0/3/0/ascent = 0.0
+cache/0/3/0/descent = 0.0
+cache/0/3/0/underline_position = 0.0
+cache/0/3/0/underline_thickness = 0.0
+cache/0/3/0/scale = 1.0
+cache/0/4/0/ascent = 0.0
+cache/0/4/0/descent = 0.0
+cache/0/4/0/underline_position = 0.0
+cache/0/4/0/underline_thickness = 0.0
+cache/0/4/0/scale = 1.0
+cache/0/5/0/ascent = 0.0
+cache/0/5/0/descent = 0.0
+cache/0/5/0/underline_position = 0.0
+cache/0/5/0/underline_thickness = 0.0
+cache/0/5/0/scale = 1.0
+cache/0/6/0/ascent = 0.0
+cache/0/6/0/descent = 0.0
+cache/0/6/0/underline_position = 0.0
+cache/0/6/0/underline_thickness = 0.0
+cache/0/6/0/scale = 1.0
+cache/0/7/0/ascent = 0.0
+cache/0/7/0/descent = 0.0
+cache/0/7/0/underline_position = 0.0
+cache/0/7/0/underline_thickness = 0.0
+cache/0/7/0/scale = 1.0
+cache/0/50/0/ascent = 0.0
+cache/0/50/0/descent = 0.0
+cache/0/50/0/underline_position = 0.0
+cache/0/50/0/underline_thickness = 0.0
+cache/0/50/0/scale = 1.0
+cache/0/40/0/ascent = 0.0
+cache/0/40/0/descent = 0.0
+cache/0/40/0/underline_position = 0.0
+cache/0/40/0/underline_thickness = 0.0
+cache/0/40/0/scale = 1.0
+
+[sub_resource type="FontFile" id="FontFile_u5sy4"]
+cache/0/50/0/ascent = 0.0
+cache/0/50/0/descent = 0.0
+cache/0/50/0/underline_position = 0.0
+cache/0/50/0/underline_thickness = 0.0
+cache/0/50/0/scale = 1.0
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_u5sy4"]
+font = SubResource("FontFile_u5sy4")
+font_size = 50
+
 [node name="game" type="Node2D"]
 script = ExtResource("1_lnu2h")
 
@@ -418,3 +481,40 @@ script = ExtResource("4_iywne")
 visible = false
 tilemap = NodePath("../Map")
 preview_size = Vector2i(4, 4)
+
+[node name="EpilepsieLayer" type="CanvasLayer" parent="."]
+
+[node name="Background" type="ColorRect" parent="EpilepsieLayer"]
+anchors_preset = -1
+offset_left = -44.0
+offset_top = -183.0
+offset_right = 2031.0
+offset_bottom = 1264.0
+color = Color(0, 0, 0, 1)
+
+[node name="Button" type="Button" parent="EpilepsieLayer"]
+offset_left = 905.0
+offset_top = 613.0
+offset_right = 1130.0
+offset_bottom = 696.0
+theme_override_fonts/font = SubResource("FontFile_gee14")
+theme_override_font_sizes/font_size = 40
+text = "CONTINUER
+"
+
+[node name="Label" type="Label" parent="EpilepsieLayer"]
+offset_left = 418.0
+offset_top = 291.0
+offset_right = 2203.0
+offset_bottom = 864.0
+scale = Vector2(0.6489, 0.653387)
+text = "⚠ AVERTISSEMENT ÉPILEPSIE ⚠
+
+Ce jeu contient des effets visuels pouvant provoquer des crises d’épilepsie
+chez les personnes photosensibles.  
+Jouez dans une pièce bien éclairée et faites des pauses régulièrement.
+
+Appuyez sur \"Continuer\" pour lancer la partie.
+"
+label_settings = SubResource("LabelSettings_u5sy4")
+horizontal_alignment = 1

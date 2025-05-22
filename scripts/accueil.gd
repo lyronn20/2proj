@@ -5,7 +5,7 @@ func _ready():
 	$btnQuitter.pressed.connect(_on_quitter_pressed)
 
 func _on_jouer_pressed():
-	get_tree().change_scene_to_file("res://scenes/game.tscn")  # adapte ce chemin !
+	get_tree().change_scene_to_file("res://scenes/game.tscn")  
 
 func _on_charger_pressed():
 	print("Chargement de la sauvegarde...")

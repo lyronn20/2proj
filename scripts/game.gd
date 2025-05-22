@@ -11,6 +11,10 @@ extends Node2D
 @onready var menu = $CanvasLayer/Menu
 @onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
 @onready var goal_panel = $CanvasLayer/Menu/HUD/Goal
+@onready var epilepsie_layer := $EpilepsieLayer
+@onready var background := $EpilepsieLayer/Background
+@onready var bouton := $EpilepsieLayer/Button
+@onready var label := $EpilepsieLayer/Label
 
 const TERRAIN_ID = 0
 const FEU_CAMP_SCENE = preload("res://scenes/feu_camp.tscn")
@@ -67,6 +71,16 @@ var hold_place_timer := 0.0
 var hold_place_interval := 0.01   
 
 func _ready():
+	# départ tout invisible
+	background.modulate.a = 0.4
+	bouton.modulate.a = 0.4
+	label.modulate.a = 0.4
+	# fondu d’entrée
+	var fade_in = get_tree().create_tween()
+	fade_in.tween_property(background, "modulate:a", 1.0, 1.5)
+	fade_in.tween_property(bouton, "modulate:a", 1.0, 1.5)
+	fade_in.tween_property(label, "modulate:a", 1.0, 1.5)
+	bouton.pressed.connect(_on_epilepsie_continue_pressed)
 	menu = get_node("/root/game/CanvasLayer/Menu")
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -751,3 +765,8 @@ func charger_jeu():
 
 	file.close()
 	print("✅ Partie chargée manuellement")
+
+func _on_epilepsie_continue_pressed():
+	var fade_out = get_tree().create_tween()
+	fade_out.tween_property(background, "modulate:a", 0.0, 1.5)
+	fade_out.tween_callback(Callable($EpilepsieLayer, "hide"))
