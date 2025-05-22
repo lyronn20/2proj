@@ -81,8 +81,6 @@ func _ready():
 
 	build_route_astar()
 
-	
-
 
 func _cell_to_id(cell: Vector2i) -> int:
 	return cell.x + cell.y * grid_size.x
@@ -95,18 +93,27 @@ func _get_route_cells() -> Array:
 	return cells
 
 func build_route_astar():
-	# 1) Définition de la région à couvrir
-	route_astar.region    = Rect2i(0, 0, grid_size.x, grid_size.y)
+	# 1) On couvre toute la zone d'herbe (terre + eau)
+	var grass_rect = herbe_tilemap.get_used_rect()
+	route_astar.region    = grass_rect
 	route_astar.cell_size = Vector2(1, 1)
-	# 2) Mise à jour automatique du graphe à partir des cellules « route »
 	route_astar.update()
-	# 3) Toutes les cellules non-route deviennent infranchissables
-	var r = route_astar.region
-	for x in range(r.position.x, r.position.x + r.size.x):
-		for y in range(r.position.y, r.position.y + r.size.y):
+
+	# 2) On n’autorise QUE la route et la pelouse (interdit : eau + bâtiments)
+	const WATER_ATLAS = Vector2i(2, 0)  # coords atlas de ta tuile d’eau
+	for x in range(grass_rect.position.x, grass_rect.position.x + grass_rect.size.x):
+		for y in range(grass_rect.position.y, grass_rect.position.y + grass_rect.size.y):
 			var cell = Vector2i(x, y)
-			if route_tilemap.get_cell_source_id(cell) == -1:
-				route_astar.set_point_solid(cell, true)
+			# a) test eau
+			var src = herbe_tilemap.get_cell_source_id(cell)
+			var is_water = (src != -1 and herbe_tilemap.get_cell_atlas_coords(cell) == WATER_ATLAS)
+			# b) test route
+			var is_route = route_tilemap.get_cell_source_id(cell) != -1
+			# c) test bâtiment (barré par occupied_cells)
+			var is_building = occupied_cells.has(cell)
+			# => traversable si (route OU herbe) ET pas eau ET pas bâtiment
+			var traversable = (is_route or src != -1) and not is_water and not is_building
+			route_astar.set_point_solid(cell, not traversable)
 
 func _process(delta):
 	# 1) Si preview verrouillée → on la supprime et on sort

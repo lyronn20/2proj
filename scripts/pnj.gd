@@ -4,7 +4,7 @@ extends CharacterBody2D
 # === Nodes & references ===
 @onready var sprite: AnimatedSprite2D    = $AnimatedSprite2D
 @onready var herbe_tilemap: TileMapLayer = get_node("/root/game/herbe")
-@onready var route_tilemap: TileMapLayer = get_node("/root/game/Map/Route/route")
+@onready var route_tilemap: TileMapLayer = get_node("/root/game/Route/route")
 @onready var game := get_node("/root/game")
 @onready var astar: AStarGrid2D           = game.route_astar
 
@@ -331,26 +331,36 @@ func search_next_tree():
 
 
 func go_to(pos: Vector2, new_mission: String = ""):
-	var start = route_tilemap.local_to_map(global_position)
-	var goal = route_tilemap.local_to_map(pos)
+	# a) start/goal en coordonnées de tile
+	var raw_start = route_tilemap.local_to_map(global_position)
+	var raw_goal  = route_tilemap.local_to_map(pos)
 
+	# b) on projette le goal sur le réseau A*
+	var goal = raw_goal
+	if not astar.region.has_point(raw_goal) or astar.is_point_solid(raw_goal):
+		goal = game._find_nearest_route_cell(raw_goal)
+
+	# c) calcul du chemin A*
 	var path = []
-	if astar.region.has_point(start) and astar.region.has_point(goal):
-		if not astar.is_point_solid(start) and not astar.is_point_solid(goal):
-			path = astar.get_point_path(start, goal)
+	if astar.region.has_point(raw_start) and astar.region.has_point(goal):
+		if not astar.is_point_solid(raw_start) and not astar.is_point_solid(goal):
+			path = astar.get_point_path(raw_start, goal)
 
+	# d) reconstruction world‐space
 	chemin.clear()
 	var half = astar.cell_size * 0.5
 	if path.size() > 0:
 		for cell in path:
 			chemin.append(route_tilemap.map_to_local(cell) + half)
-	else:
+		# dernière étape : centre du pos, pour entrer dans le bâtiment
 		chemin.append(pos)
-
-	current_step = 0
+	else:
+		# si A* n'a rien trouvé (cas vraiment rare), on finit quand même
+		chemin.append(pos)
+	current_step    = 0
 	following_route = true
 
-	# 👇 Corrigé : si une mission est donnée, on l'utilise
+	# e) applique la mission si fournie
 	if new_mission != "":
 		mission = new_mission
 

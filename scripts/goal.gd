@@ -53,8 +53,8 @@ var goals = [
 func _ready():
 	update_goal_display()
 
-	if get_tree().get_root().has_node("game/Map/Route/route"):
-		route_tilemap = get_tree().get_root().get_node("game/Map/Route/route")
+	if get_tree().get_root().has_node("game/Route/route"):
+		route_tilemap = get_tree().get_root().get_node("game/Route/route")
 	else:
 		push_warning("❌ TileMap de route introuvable. Vérifie le chemin dans goal.gd")
 
