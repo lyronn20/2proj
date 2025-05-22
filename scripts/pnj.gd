@@ -112,14 +112,22 @@ func _process(delta):
 
 
 func _on_click(_vp, event, _si):
-	if event is InputEventMouseButton and event.pressed:
-		show_energy = !show_energy
-		print("🖱️ PNJ ID:", id)
-		var tab = get_node_or_null("/root/game/CanvasLayer/TableauBord")
-		if tab and tab.has_method("update_pnj_panel"):
-			tab.update_pnj_panel(self)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var tab = get_node("/root/game/CanvasLayer/TableauBord")
+		if not tab:
+			return
 
-# ————————————————————————————————————————————————————————————————
+		if tab.pnj_panel.visible and tab.current_pnj == self:
+			tab.pnj_panel.visible = false
+			tab.current_pnj = null
+		else:
+			tab.update_pnj_panel(self)
+			tab.current_pnj = self
+
+		print("🖱️ PNJ ID:", id)
+
+		
+	# ————————————————————————————————————————————————————————————————
 func follow_path(delta):
 	if current_step >= chemin.size():
 		following_route = false

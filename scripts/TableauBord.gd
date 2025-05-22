@@ -10,6 +10,9 @@ extends Control
 @onready var bar_energie := $PNJ/VBoxContainer/BarEnergie
 @onready var stock_panel := $Total_stock/HBoxContainer
 
+var current_pnj :Node= null
+
+
 
 func _ready():
 	await get_tree().process_frame
