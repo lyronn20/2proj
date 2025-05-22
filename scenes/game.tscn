@@ -373,6 +373,10 @@ sources/2 = SubResource("TileSetAtlasSource_lbhrr")
 script = ExtResource("1_lnu2h")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+limit_left = -1500
+limit_top = -1500
+limit_right = 1900
+limit_bottom = 1800
 
 [node name="herbe" type="TileMapLayer" parent="."]
 z_index = 1
