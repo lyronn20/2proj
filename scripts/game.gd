@@ -2,24 +2,30 @@
 extends Node2D
 
 @export var tilemap: TileMapLayer
-@onready var route_tilemap: TileMapLayer = $Map/Route/route
+@onready var route_tilemap: TileMapLayer = $Route/route
 @onready var herbe_tilemap: TileMapLayer = $herbe
-@onready var menu                        = $CanvasLayer/Menu
-@onready var stats                       = $CanvasLayer/Menu/HUD/Infos_Stats
-@onready var goal_panel 				 = $CanvasLayer/Menu/HUD/Goal
+@onready var ile2_tilemap: TileMapLayer = $ile2
+@onready var ile3_tilemap: TileMapLayer = $ile3
+@onready var ile4_tilemap: TileMapLayer = $ile4
+@onready var ile5_tilemap: TileMapLayer = $ile5
+@onready var menu = $CanvasLayer/Menu
+@onready var stats = $CanvasLayer/Menu/HUD/Infos_Stats
+@onready var goal_panel = $CanvasLayer/Menu/HUD/Goal
 
-const TERRAIN_ID        = 0
-const FEU_CAMP_SCENE	=preload("res://scenes/feu_camp.tscn")
-const HUTTE_SCENE		=preload("res://scenes/hutte.tscn")
-const SAPIN_SCENE       = preload("res://scenes/sapin.tscn")
-const BAIES       = preload("res://scenes/baies.tscn")
-const COLLECT_BAIES       = preload("res://scenes/collect_baies.tscn")
-const SCIERIE_SCENE     = preload("res://scenes/scierie.tscn")
-const PUIT_SCENE        = preload("res://scenes/puit.tscn")
-const CARRIERE_SCENE    = preload("res://scenes/carriere.tscn")
-const PIERRE    = preload("res://scenes/pierre.tscn")
-const FERME		=preload("res://scenes/ferme.tscn")
-const BLE		=preload("res://scenes/blé.tscn")
+const TERRAIN_ID = 0
+const FEU_CAMP_SCENE = preload("res://scenes/feu_camp.tscn")
+const HUTTE_SCENE = preload("res://scenes/hutte.tscn")
+const SAPIN_SCENE = preload("res://scenes/sapin.tscn")
+const BAIES = preload("res://scenes/baies.tscn")
+const COLLECT_BAIES = preload("res://scenes/collect_baies.tscn")
+const SCIERIE_SCENE = preload("res://scenes/scierie.tscn")
+const PUIT_SCENE = preload("res://scenes/puit.tscn")
+const CARRIERE_SCENE = preload("res://scenes/carriere.tscn")
+const PIERRE = preload("res://scenes/pierre.tscn")
+const FERME = preload("res://scenes/ferme.tscn")
+const BLE = preload("res://scenes/blé.tscn")
+
+var island_tilemaps := []
 
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
@@ -64,21 +70,18 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
-
-	# Verrouille tout sauf feu_camp
 	menu.set_locked_buttons(goal_accompli)
-
-	# Création PNJ & monde
+	island_tilemaps = [herbe_tilemap, ile2_tilemap, ile3_tilemap, ile4_tilemap, ile5_tilemap]
 	spawn_pnjs(20)
-	generate_sapins(100)
+	generate_sapins(120)
 
-	# Grille de placement
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
 
-	# Chemins de navigation
 	build_route_astar()
+
+	
 
 
 func _cell_to_id(cell: Vector2i) -> int:
@@ -430,24 +433,30 @@ func spawn_pnjs(count: int):
 			count -= 1
 
 func generate_sapins(count: int = 50):
-	var rect = herbe_tilemap.get_used_rect()
 	var tries = 0
 	var spawned = 0
-	while spawned < count and tries < count*10:
+	while spawned < count and tries < count * 20:
 		tries += 1
+		var tilemap = island_tilemaps[randi() % island_tilemaps.size()]
+		if not tilemap.visible:
+			continue
+		var rect = tilemap.get_used_rect()
+		if rect.size == Vector2i(0, 0):
+			continue
 		var cell = Vector2i(
-			randi_range(rect.position.x, rect.position.x+rect.size.x-1),
-			randi_range(rect.position.y, rect.position.y+rect.size.y-1)
+			randi_range(rect.position.x, rect.position.x + rect.size.x - 1),
+			randi_range(rect.position.y, rect.position.y + rect.size.y - 1)
 		)
-		if herbe_tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
+		if tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
 			var sp = SAPIN_SCENE.instantiate()
 			sp.name = "sapin_" + str(randi() % 100000)
-			sp.global_position = herbe_tilemap.map_to_local(cell)
+			sp.global_position = tilemap.map_to_local(cell) + tilemap.global_position
 			sp.add_to_group("sapin")
 			sp.add_to_group("placeable")
 			add_child(sp)
 			occupied_cells[cell] = true
 			spawned += 1
+
 
 func assign_pnjs_to_hut(hut: Node2D):
 	var free_pnjs := []
