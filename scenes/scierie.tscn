@@ -7,7 +7,7 @@
 size = Vector2(91.1111, 72.2222)
 
 [node name="scierie" type="Node2D"]
-z_index = 1
+z_index = 3
 scale = Vector2(0.9, 0.9)
 script = ExtResource("1_iofx4")
 

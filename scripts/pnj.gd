@@ -384,8 +384,10 @@ func do_collect_baie(delta):
 		cutting_timer += delta
 
 		if cutting_timer >= cutting_duration:
-			# On « cueille » la baie : on lance son respawn interne
-			current_baie.respawn()
+	# On supprime la baie et on demande au bâtiment de la respawn
+			if lieu_travail and lieu_travail.has_method("respawn_baie"):
+				lieu_travail.respawn_baie(current_baie.global_position)
+			current_baie.queue_free()
 			cutting_timer = 0.0
 
 			# On stocke les fruits dans la scierie (ou ferme)
@@ -395,6 +397,7 @@ func do_collect_baie(delta):
 			# Petite pause avant de chercher la suivante
 			await get_tree().create_timer(0.5).timeout
 			search_next_baie()
+
 	else:
 		# Pas de cible ou baie détruite : on réessaie après un court délai
 		current_baie = null

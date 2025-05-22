@@ -7,16 +7,17 @@
 size = Vector2(121.429, 107.143)
 
 [node name="collect_baies" type="Node2D"]
-z_index = 1
+z_index = 3
 scale = Vector2(0.5, 0.5)
 script = ExtResource("1_fbc6a")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(36, 38)
 scale = Vector2(0.3, 0.3)
 texture = ExtResource("2_fbc6a")
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(-0.714277, 2.14286)
+position = Vector2(34, 42)
 shape = SubResource("RectangleShape2D_exhpw")

@@ -81,7 +81,7 @@ size = Vector2(20, 45)
 size = Vector2(20, 38)
 
 [node name="Pnj" type="CharacterBody2D"]
-z_index = 2
+z_index = 5
 script = ExtResource("1_xg58l")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

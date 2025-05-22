@@ -47,6 +47,7 @@ z_index = 2
 scale = Vector2(0.17, 0.17)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 4
 sprite_frames = SubResource("SpriteFrames_bdt4h")
 frame = 2
 frame_progress = 0.863264
