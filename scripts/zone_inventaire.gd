@@ -14,6 +14,7 @@ signal objet_selectionne(nom: String)
 @onready var gomme       = $route/Gomme
 @onready var ferme   = $HBoxContainer/ferme
 @onready var blé 	 = $route/blé
+@onready var animaux_bat = $HBoxContainer/animaux_bat
 
 func _ready():
 	feu_camp.connect("gui_input", Callable(self, "_on_feu_camp_input"))
@@ -28,6 +29,7 @@ func _ready():
 	pierre.connect("gui_input", Callable(self, "_on_pierre_input"))
 	ferme.connect("gui_input", Callable(self, "_on_ferme_input"))
 	blé.connect("gui_input", Callable(self, "_on_ble_input"))
+	animaux_bat.connect("gui_input" , Callable(self, "on_animaux_bat_input"))
 
 func _on_feu_camp_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -77,3 +79,7 @@ func _on_ferme_input(event):
 func _on_ble_input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		emit_signal("objet_selectionne","blé")
+
+func _on_animaux_bat_input(event):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		emit_signal("objet_selectionne","animaux_bat")

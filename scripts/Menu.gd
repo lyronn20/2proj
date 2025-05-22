@@ -17,6 +17,7 @@ signal objet_selectionne(nom: String)
 @onready var baies    = $route/baies
 @onready var pierre   = $route/pierre
 @onready var gomme       = $route/Gomme
+@onready var animaux_bat = $HUD/ZoneInventaire/HBoxContainer/animaux_bat
 var menu
 var time_scales = [2.0, 4.0, 8.0]
 
@@ -85,22 +86,26 @@ func set_locked_buttons(goal_accompli: int):
 	var all_buttons = {
 		"feu_camp": 0,
 		"hutte": 1,
-		"carriere": 2,
+		"animaux_bat": 2,
 		"puit": 3,
 		"ferme": 4,
 		"collect_baies": 5,
-		"scierie": 6
+		"scierie": 6,
+		"carriere": 7
 	}
 
 	for btn_name in all_buttons.keys():
 		var required_goal = all_buttons[btn_name]
-		var btn = inventaire.get_node("HBoxContainer/" + btn_name)
-		var croix = btn.get_node_or_null("verrou")
-		if croix:
-			croix.visible = goal_accompli < required_goal
-		# Et tu peux désactiver les boutons aussi si tu veux :
-		if btn is BaseButton:
-			btn.disabled = goal_accompli < required_goal
+		if inventaire:
+			var btn = inventaire.get_node_or_null("HBoxContainer/" + btn_name)
+			if btn:
+				var croix = btn.get_node_or_null("verrou")
+				
+				if croix:
+					croix.visible = goal_accompli < required_goal
+				# Et tu peux désactiver les boutons aussi si tu veux :
+				if btn is BaseButton:
+					btn.disabled = goal_accompli < required_goal
 			
 func set_bloque(nom: String, bloque: bool):
 	var noeud = get_node_or_null("HBoxContainer/" + nom)

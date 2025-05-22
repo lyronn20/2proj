@@ -97,14 +97,18 @@ func _process(delta):
 	faim = clamp(faim, 0, 100)
 	soif = clamp(soif, 0, 100)
 
+	# 1.5) Aller manger si faim trop basse
+	if faim < 20 and mission == "" and lieu_travail and lieu_travail.has_method("get_animaux_disponibles"):
+		var cible = lieu_travail.get_animal_disponible()
+		if cible:
+			current_baie = cible
+			go_to(cible.global_position, "aller_manger_animal")
+
 	# 2) Devrait-on afficher la barre ?
-	#    - Si on a cliqué (show_energy)
-	#    - OU si on est en train de TRAVAILLER
-	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur","bucheron","fermier"]
+	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur", "bucheron", "fermier"]
 	energy_bar_container.visible = should_show
 	if should_show:
 		energy_bar_container.position = Vector2(0, -40)
-		# 3) Mise à jour de la taille & couleur
 		energy_bar.size.x = clamp(energy / 100.0 * 40.0, 0, 40)
 		energy_bar.modulate = Color(1, 0, 0) if energy < 30 else Color(0, 1, 0)
 		
@@ -132,32 +136,26 @@ func follow_path(delta):
 	if current_step >= chemin.size():
 		following_route = false
 
-		# 🔁 Gestion spéciale après recharge
 		if mission == "retour_travail":
-			if metier == "cueilleur":
-				search_next_baie()
-			elif metier == "bucheron":
-				search_next_tree()
-			elif metier == "mineur":
-				search_next_rock()
-			elif metier == "fermier":
-				search_next_ble()
+			if metier == "cueilleur": search_next_baie()
+			elif metier == "bucheron": search_next_tree()
+			elif metier == "mineur": search_next_rock()
+			elif metier == "fermier": search_next_ble()
 			return
 
-		# 🎯 Gestion classique à l’arrivée
 		match mission:
 			"aller_travailler":
-				# on démarre le travail adapté à notre métier
-				if metier == "cueilleur":
-					mission = "cueillir"
-				elif metier == "bucheron":
-					mission = "bucheron"
-				elif metier == "mineur":
-					mission = "mineur"
-				elif metier == "fermier":
-					mission = "recolter_ble"
-				else:
-					mission = "travailler"
+				match metier:
+					"cueilleur":
+						mission = "cueillir"
+					"bucheron":
+						mission = "bucheron"
+					"mineur":
+						mission = "mineur"
+					"fermier":
+						mission = "recolter_ble"
+					_:
+						mission = "travailler"
 			"aller_abattre":
 				mission = "bucheron"
 			"aller_cueillir":
@@ -165,12 +163,14 @@ func follow_path(delta):
 			"aller_mineur":
 				mission = "mineur"
 			"aller_recolter_ble":
-				mission = "recolter_ble"	
+				mission = "recolter_ble"
 			"retour_maison":
 				mission = "recharger"
+			"aller_manger_animal":
+				mission = "manger_animal"
+
 		return
 
-	# déplacement vers la prochaine étape du chemin
 	var target_pos = chemin[current_step]
 	var dir = (target_pos - global_position).normalized()
 	velocity = dir * speed
@@ -178,7 +178,6 @@ func follow_path(delta):
 
 	if global_position.distance_to(target_pos) < 2:
 		current_step += 1
-
 
 
 func do_work(delta):
@@ -409,27 +408,20 @@ func _physics_process(delta):
 
 	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble"]:
 		match mission:
-			"travailler":
-				do_work(delta)
-			"bucheron":
-				do_chop_tree(delta)
-			"cueillir":          # ← on passe de "cueilleur" à "cueillir"
-				do_collect_baie(delta)
-			"mineur":
-				do_mine(delta)
-			"recharger":
-				do_recharge(delta)
-			"recolter_ble":
-				do_collect_ble(delta)
+			"travailler": do_work(delta)
+			"bucheron": do_chop_tree(delta)
+			"cueillir": do_collect_baie(delta)
+			"mineur": do_mine(delta)
+			"recharger": do_recharge(delta)
+			"recolter_ble": do_collect_ble(delta)
 
-				
 	elif mission == "retour_travail":
-		if metier == "cueilleur":
+		if metier in ["cueilleur", "bucheron", "mineur"]:
 			go_to(lieu_travail.global_position, "aller_travailler")
-		elif metier == "bucheron":
-			go_to(lieu_travail.global_position, "aller_travailler")
-		elif metier == "mineur":
-			go_to(lieu_travail.global_position, "aller_travailler")
+
+	elif mission == "manger_animal":
+		do_manger_animal(delta)
+
 	else:
 		move_randomly(delta)
 
@@ -595,3 +587,31 @@ func do_collect_ble(delta):
 		current_baie = null
 		await get_tree().create_timer(0.5).timeout
 		search_next_ble()
+
+func do_manger_animal(delta):
+	if not current_baie or not is_instance_valid(current_baie):
+		current_baie = null
+		mission = ""
+		return
+
+	var dist = global_position.distance_to(current_baie.global_position)
+	if dist > 8:
+		return
+
+	velocity = Vector2.ZERO
+	energy -= delta * travail_rate
+	cutting_timer += delta
+
+	if cutting_timer >= cutting_duration:
+		match current_baie.name.to_lower():
+			"poule": faim = clamp(faim + 15, 0, 100)
+			"cochon": faim = clamp(faim + 35, 0, 100)
+			"vache": faim = clamp(faim + 60, 0, 100)
+
+		current_baie.queue_free()
+		if lieu_travail.animaux.has(current_baie):
+			lieu_travail.animaux.erase(current_baie)
+		current_baie = null
+		cutting_timer = 0.0
+		mission = ""
+		print("🍗 PNJ", id, " a mangé un animal.")

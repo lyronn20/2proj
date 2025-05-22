@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://6hf7amn2ycd6"]
+[gd_scene load_steps=36 format=3 uid="uid://6hf7amn2ycd6"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://drxkfbu1n3d7k" path="res://assets/batiments/clique.png" id="10_2af52"]
 [ext_resource type="Texture2D" uid="uid://djp0vpaspobyk" path="res://assets/batiments/sapin.png" id="10_thu7x"]
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
+[ext_resource type="Texture2D" uid="uid://ddvv21viv6ndr" path="res://assets/batiments/animaux_bat.png" id="11_nxcfj"]
 [ext_resource type="Texture2D" uid="uid://c7qn5fkrfr83s" path="res://assets/batiments/baies2.png" id="13_rtd1e"]
 [ext_resource type="Texture2D" uid="uid://dsggi1onvob0" path="res://assets/batiments/roche.png" id="14_i7htd"]
 [ext_resource type="Texture2D" uid="uid://bfvvhx5sxnaxy" path="res://assets/batiments/menu-icon.png" id="15_7t7qg"]
@@ -114,6 +115,19 @@ offset_right = 360.0
 offset_bottom = 360.0
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("4_rehui")
+
+[node name="animaux_bat" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("11_nxcfj")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer/animaux_bat"]
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 360.0
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("4_rehui")
+expand_mode = 2
 
 [node name="carriere" type="TextureRect" parent="HUD/ZoneInventaire/HBoxContainer"]
 layout_mode = 2

@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://ju8r4j3u0ccg"]
+
+[ext_resource type="Texture2D" uid="uid://bjrtaoeetylw1" path="res://assets/batiments/cochon.png" id="1_wxogi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qmgw4"]
+atlas = ExtResource("1_wxogi")
+region = Rect2(0, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e46gi"]
+atlas = ExtResource("1_wxogi")
+region = Rect2(250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v3dmf"]
+atlas = ExtResource("1_wxogi")
+region = Rect2(0, 250, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wvjj2"]
+atlas = ExtResource("1_wxogi")
+region = Rect2(250, 250, 250, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bdt4h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qmgw4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e46gi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v3dmf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wvjj2")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hslr4"]
+size = Vector2(209, 160)
+
+[node name="Cochon" type="Node2D"]
+z_index = 2
+scale = Vector2(0.17, 0.17)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_bdt4h")
+frame = 2
+frame_progress = 0.863264
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(6.5, -14)
+shape = SubResource("RectangleShape2D_hslr4")

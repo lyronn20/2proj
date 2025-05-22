@@ -5,7 +5,7 @@ extends Node
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
-var goal_accompli = 0
+var goal_accompli = 7
 var menu 
 var goals = [
 	{

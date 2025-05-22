@@ -24,6 +24,7 @@ const CARRIERE_SCENE = preload("res://scenes/carriere.tscn")
 const PIERRE = preload("res://scenes/pierre.tscn")
 const FERME = preload("res://scenes/ferme.tscn")
 const BLE = preload("res://scenes/blé.tscn")
+const ANIMAUX_BAT = preload("res://scenes/animaux_bat.tscn")
 
 var island_tilemaps := []
 
@@ -50,7 +51,8 @@ var objet_sizes = {
 	"collect_baies":     Vector2i(4, 4),
 	"carriere": Vector2i(4, 4),
 	"ferme": Vector2i(4,4),
-	"blé": Vector2i(2,2)
+	"blé": Vector2i(2,2),
+	"animaux_bat":Vector2i(4,4)
 }
 
 # A* grid
@@ -356,6 +358,8 @@ func _on_objet_selectionne(nom: String):
 			current_scene = FERME
 		"blé":
 			current_scene = BLE
+		"animaux_bat":
+			current_scene = ANIMAUX_BAT
 		_:
 			return
 
@@ -681,6 +685,8 @@ func charger_jeu():
 			scene = preload("res://scenes/ferme.tscn")
 		elif name.begins_with("blé"):
 			scene = preload("res://scenes/blé.tscn")
+		elif name.begins_with("animaux_bat"):
+			scene = preload("res://scenes/animaux_bat.tscn")
 
 
 

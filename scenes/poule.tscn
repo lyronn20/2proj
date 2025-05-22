@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://b06pee1spg1yf"]
+
+[ext_resource type="Texture2D" uid="uid://dy1xud08qg4ql" path="res://assets/batiments/poule.png" id="1_i6cy1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xmxqm"]
+atlas = ExtResource("1_i6cy1")
+region = Rect2(0, 104, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j41yl"]
+atlas = ExtResource("1_i6cy1")
+region = Rect2(486, 104, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jw5od"]
+atlas = ExtResource("1_i6cy1")
+region = Rect2(0, 544, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6buq2"]
+atlas = ExtResource("1_i6cy1")
+region = Rect2(486, 544, 486, 440)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jihwd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xmxqm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j41yl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jw5od")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6buq2")
+}],
+"loop": true,
+"name": &"new_animation",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_i6cy1"]
+radius = 220.227
+
+[node name="Poule" type="Node2D"]
+scale = Vector2(0.06, 0.06)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
+sprite_frames = SubResource("SpriteFrames_jihwd")
+animation = &"new_animation"
+frame_progress = 0.881355
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
+shape = SubResource("CircleShape2D_i6cy1")

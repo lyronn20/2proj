@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://cp1waee4uqhfo"]
+
+[ext_resource type="Texture2D" uid="uid://hews8kbwwpc8" path="res://assets/batiments/vache.png" id="1_j7jin"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qqs4v"]
+atlas = ExtResource("1_j7jin")
+region = Rect2(0, 104, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5mh71"]
+atlas = ExtResource("1_j7jin")
+region = Rect2(486, 104, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e1fen"]
+atlas = ExtResource("1_j7jin")
+region = Rect2(0, 544, 486, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1j7t4"]
+atlas = ExtResource("1_j7jin")
+region = Rect2(486, 544, 486, 440)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_x7qge"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qqs4v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5mh71")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e1fen")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1j7t4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j7jin"]
+size = Vector2(383.333, 311.111)
+
+[node name="Vache" type="Node2D"]
+z_index = 2
+scale = Vector2(0.1, 0.1)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_x7qge")
+frame_progress = 0.354296
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2.77779, 6.62274e-06)
+scale = Vector2(1, 1)
+shape = SubResource("RectangleShape2D_j7jin")
