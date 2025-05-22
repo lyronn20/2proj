@@ -8,7 +8,7 @@ var animaux := []
 const MAX_ANIMAUX = 15
 
 func _ready():
-	$Timer.wait_time = 30
+	$Timer.wait_time = 10
 	$Timer.start()
 	$Timer.timeout.connect(spawn_animaux)
 

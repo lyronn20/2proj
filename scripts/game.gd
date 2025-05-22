@@ -95,27 +95,32 @@ func _get_route_cells() -> Array:
 	return cells
 
 func build_route_astar():
-	# 1) On couvre toute la zone d'herbe (terre + eau)
-	var grass_rect = herbe_tilemap.get_used_rect()
-	route_astar.region    = grass_rect
+	route_astar.clear()
+
+	# Calculer dynamiquement la zone utilisée par toutes les tilemaps
+	var total_rect := herbe_tilemap.get_used_rect()
+	for t in island_tilemaps:
+		total_rect = total_rect.merge(t.get_used_rect())
+
+	route_astar.region = total_rect
 	route_astar.cell_size = Vector2(1, 1)
 	route_astar.update()
 
-	# 2) On n’autorise QUE la route et la pelouse (interdit : eau + bâtiments)
-	const WATER_ATLAS = Vector2i(2, 0)  # coords atlas de ta tuile d’eau
-	for x in range(grass_rect.position.x, grass_rect.position.x + grass_rect.size.x):
-		for y in range(grass_rect.position.y, grass_rect.position.y + grass_rect.size.y):
+	const WATER_ATLAS = Vector2i(2, 0)
+	for x in range(total_rect.position.x, total_rect.position.x + total_rect.size.x):
+		for y in range(total_rect.position.y, total_rect.position.y + total_rect.size.y):
 			var cell = Vector2i(x, y)
-			# a) test eau
 			var src = herbe_tilemap.get_cell_source_id(cell)
 			var is_water = (src != -1 and herbe_tilemap.get_cell_atlas_coords(cell) == WATER_ATLAS)
-			# b) test route
 			var is_route = route_tilemap.get_cell_source_id(cell) != -1
-			# c) test bâtiment (barré par occupied_cells)
 			var is_building = occupied_cells.has(cell)
-			# => traversable si (route OU herbe) ET pas eau ET pas bâtiment
-			var traversable = (is_route or src != -1) and not is_water and not is_building
+
+			# ✅ Priorité stricte : si c'est de l'eau => toujours bloqué
+			var traversable = (not is_water) and not is_building and (src != -1 or is_route)
+
 			route_astar.set_point_solid(cell, not traversable)
+
+
 
 func _process(delta):
 	# 1) Si preview verrouillée → on la supprime et on sort
@@ -525,8 +530,8 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 		var raw_start = route_tilemap.local_to_map(p.global_position)
 		var raw_goal = route_tilemap.local_to_map(building.global_position)
 
-		var start = raw_start if raw_start in route_cells else _find_nearest_route_cell(raw_start)
-		var goal  = raw_goal  if raw_goal  in route_cells else _find_nearest_route_cell(raw_goal)
+		var start = raw_start if raw_start in route_cells else _find_nearest_walkable_cell(raw_start)
+		var goal  = raw_goal  if raw_goal  in route_cells else _find_nearest_walkable_cell(raw_goal)
 
 		var cell_path = route_astar.get_point_path(start, goal)
 
@@ -547,15 +552,20 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 		if assigned >= 2:
 			break
 
-func _find_nearest_route_cell(cell: Vector2i) -> Vector2i:
+func _find_nearest_walkable_cell(cell: Vector2i) -> Vector2i:
 	var best = cell
 	var best_dist = INF
-	for rc in _get_route_cells():
-		var d = rc.distance_to(cell)
-		if d < best_dist:
-			best_dist = d
-			best = rc
+	for dx in range(-5, 6):
+		for dy in range(-5, 6):
+			var c = cell + Vector2i(dx, dy)
+			if route_astar.region.has_point(c) and not route_astar.is_point_solid(c):
+				var d = c.distance_to(cell)
+				if d < best_dist:
+					best = c
+					best_dist = d
 	return best
+
+
 
 
 func debloquer_objet(nom: String):
@@ -724,9 +734,9 @@ func charger_jeu():
 			var goal = route_tilemap.local_to_map(cible.global_position)
 
 			if route_tilemap.get_cell_source_id(start) == -1:
-				start = _find_nearest_route_cell(start)
+				start = _find_nearest_walkable_cell(start)
 			if route_tilemap.get_cell_source_id(goal) == -1:
-				goal = _find_nearest_route_cell(goal)
+				goal = _find_nearest_walkable_cell(goal)
 
 			var path = route_astar.get_point_path(start, goal)
 			p.chemin.clear()
