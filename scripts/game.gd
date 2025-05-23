@@ -126,12 +126,22 @@ func build_route_astar():
 			var cell = Vector2i(x, y)
 			var src = herbe_tilemap.get_cell_source_id(cell)
 			var is_water = (src != -1 and herbe_tilemap.get_cell_atlas_coords(cell) == WATER_ATLAS)
+
+			# Si eau, on teste si une herbe est à côté
+			if is_water:
+				var voisins = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]
+				var accessible := false
+				for v in voisins:
+					var voisin = cell + v
+					if herbe_tilemap.get_cell_source_id(voisin) == 0:
+						accessible = true
+						break
+				is_water = not accessible  # on garde bloqué si aucun voisin herbe
+
 			var is_route = route_tilemap.get_cell_source_id(cell) != -1
 			var is_building = occupied_cells.has(cell)
 
-			# ✅ Priorité stricte : si c'est de l'eau => toujours bloqué
 			var traversable = (not is_water) and not is_building and (src != -1 or is_route)
-
 			route_astar.set_point_solid(cell, not traversable)
 
 
@@ -225,7 +235,6 @@ func _place_object_at_mouse():
 		"ferme":
 			assign_pnjs_to_work(inst, "fermier")
 		"collect_baies":
-			reset_all_pnjs()
 			assign_pnjs_to_work(inst, "cueilleur")
 		"hutte":
 			assign_pnjs_to_hut(inst)
@@ -234,7 +243,7 @@ func _place_object_at_mouse():
 		_:
 			pass
 
-
+	
 	# 7) Marquage des cellules
 	for x in range(size.x):
 		for y in range(size.y):

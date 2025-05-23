@@ -7,6 +7,11 @@ var stock_eau := 0
 var touche_eau := false
 var last_water_point := Vector2.ZERO  # stocke le dernier point d'eau trouvé
 
+
+func _process(delta):
+	if not touche_eau:
+		detecte_eau()
+
 func add_employe(pnj):
 	if not employes.has(pnj):
 		employes.append(pnj)
@@ -30,16 +35,39 @@ func detecte_eau():
 	for tilemap in game.island_tilemaps:
 		for dx in range(-rayon, rayon + 1):
 			for dy in range(-rayon, rayon + 1):
-				var cell = tilemap.local_to_map(global_position + Vector2(dx * 16, dy * 16))
+				var pos = global_position + Vector2(dx * 16, dy * 16)
+				var cell = tilemap.local_to_map(pos)
 				var atlas = tilemap.get_cell_atlas_coords(cell)
-				if atlas == Vector2i(2, 0):  # eau
-					touche_eau = true
-					last_water_point = tilemap.map_to_local(cell) + tilemap.global_position
-					return
+				if atlas == Vector2i(2, 0):  # tuile d’eau
+					var world_pos = tilemap.map_to_local(cell) + tilemap.global_position
+					var goal_cell = game.route_tilemap.local_to_map(world_pos)
+					if game.route_astar.region.has_point(goal_cell) and not game.route_astar.is_point_solid(goal_cell):
+						touche_eau = true
+						last_water_point = world_pos
+						return
+					else:
+						print("❌ Eau détectée mais inaccessible A* :", goal_cell)
+
 	touche_eau = false
+	print("❌ Aucun point d’eau accessible trouvé")
 
 func get_point_eau() -> Vector2:
-	return last_water_point if touche_eau else global_position
+	if not touche_eau:
+		return global_position
+
+	var game = get_node("/root/game")
+	var cell = game.route_tilemap.local_to_map(last_water_point)
+
+	# Cherche une case adjacente herbe qui soit walkable
+	var voisins = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]
+	for v in voisins:
+		var voisin = cell + v
+		if game.route_astar.region.has_point(voisin) and not game.route_astar.is_point_solid(voisin):
+			return game.route_tilemap.map_to_local(voisin) + game.route_tilemap.global_position
+
+	print("❌ Aucun point d’eau accessible trouvé")
+	return global_position
+
 
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:

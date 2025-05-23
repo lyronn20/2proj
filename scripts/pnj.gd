@@ -99,8 +99,8 @@ func _process(delta):
 	soif = clamp(soif, 0, 100)
 
 	# 1.5) Aller manger un animal si la faim est critique
-	if faim < 95 and mission == "" and current_baie == null:
-		if lieu_travail and lieu_travail.has("animaux") and not lieu_travail.animaux.is_empty():
+	if faim < 20 and mission == "" and current_baie == null:
+		if lieu_travail and "animaux" in lieu_travail and not lieu_travail.animaux.is_empty():
 			var closest_animal = null
 			var min_dist = INF
 			for a in lieu_travail.animaux:
@@ -185,8 +185,13 @@ func do_work(delta):
 			search_next_rock()
 		"fermier":
 			search_next_ble()
+		"pompier":
+			if lieu_travail and lieu_travail.touche_eau:
+				mission = "aller_bord_eau"
+				go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
 		_:
 			mission = ""
+
 
 func do_recharge(delta):
 	show_energy = true
@@ -415,7 +420,7 @@ func _physics_process(delta):
 	if following_route:
 		follow_path(delta)
 
-	elif faim < 95 and mission == "" and current_baie == null:
+	elif faim < 20 and mission == "" and current_baie == null:
 		animal_retry_timer += delta
 		if animal_retry_timer >= 1.5:
 			animal_retry_timer = 0.0
@@ -436,8 +441,13 @@ func _physics_process(delta):
 			"deposer_eau":    do_deposer_eau(delta)
 
 	elif mission == "retour_travail":
-		if metier in ["cueilleur", "bucheron", "mineur", "fermier"]:
-			go_to(lieu_travail.global_position, "aller_travailler")
+		match metier:
+			"cueilleur", "bucheron", "mineur", "fermier":
+				go_to(lieu_travail.global_position, "aller_travailler")
+			"pompier":
+				if lieu_travail and lieu_travail.touche_eau:
+					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+
 
 	elif mission == "":
 		animal_retry_timer = 0.0
@@ -655,11 +665,23 @@ func do_pomper(delta):
 func do_deposer_eau(delta):
 	if global_position.distance_to(lieu_travail.global_position) > 8:
 		return
+
 	velocity = Vector2.ZERO
+
 	if lieu_travail and lieu_travail.has_method("add_water"):
 		lieu_travail.add_water(1)
 		await get_tree().create_timer(0.5).timeout
-		go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+
+		var next_pos = lieu_travail.get_point_eau()
+
+		# ✅ Si next_pos est le même que le puits, on arrête la boucle
+		if next_pos == lieu_travail.global_position:
+			print("⛔ Aucun point d'eau atteignable pour PNJ", id)
+			mission = ""
+			return
+
+		go_to(next_pos, "aller_bord_eau")
+
 		
 func do_manger_animal(delta):
 	if not is_instance_valid(current_baie):
