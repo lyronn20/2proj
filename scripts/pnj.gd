@@ -58,6 +58,7 @@ var mining_timer := 0.0
 var mining_duration := 1.0   # en secondes
 var eau_timer := 0.0
 var temps_pompage := 1.5
+var animal_retry_timer := 0.0
 
 func _ready():
 	sprite.play("walk")
@@ -68,40 +69,58 @@ func _ready():
 	collision_mask = 0
 
 	match metier:
-		"bucheron": mission = "aller_travailler"; search_next_tree()
-		"cueilleur": mission = "aller_travailler"; search_next_baie()
-		"mineur": mission = "aller_travailler"; search_next_rock()
-		"fermier": mission = "aller_travailler"; search_next_ble()
+		"bucheron":
+			mission = "aller_travailler"
+			search_next_tree()
+		"cueilleur":
+			mission = "aller_travailler"
+			search_next_baie()
+		"mineur":
+			mission = "aller_travailler"
+			search_next_rock()
+		"fermier":
+			mission = "aller_travailler"
+			search_next_ble()
 		"pompier":
 			if lieu_travail and lieu_travail.touche_eau:
 				mission = "aller_bord_eau"
 				go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+		_:
+			# PNJ sans métier : se déplace aléatoirement dès le départ
+			mission = ""
+			print("PNJ", id, "sans métier → marche libre.")
 
 
 func _process(delta):
-	# 1) Statistiques
+	# 1) Statistiques vitales
 	faim -= delta * 0.3
 	soif -= delta * 0.5
 	faim = clamp(faim, 0, 100)
 	soif = clamp(soif, 0, 100)
 
-	# 1.5) Aller manger si faim trop basse
-	if faim < 20 and mission == "" and lieu_travail and lieu_travail.has_method("get_animaux_disponibles"):
-		var cible = lieu_travail.get_animal_disponible()
-		if cible:
-			current_baie = cible
-			go_to(cible.global_position, "aller_manger_animal")
+	# 1.5) Aller manger un animal si la faim est critique
+	if faim < 95 and mission == "" and current_baie == null:
+		if lieu_travail and lieu_travail.has("animaux") and not lieu_travail.animaux.is_empty():
+			var closest_animal = null
+			var min_dist = INF
+			for a in lieu_travail.animaux:
+				if is_instance_valid(a):
+					var dist = global_position.distance_to(a.global_position)
+					if dist < min_dist:
+						min_dist = dist
+						closest_animal = a
+			if closest_animal:
+				current_baie = closest_animal
+				go_to(closest_animal.global_position, "aller_manger_animal")
+				lieu_travail.animaux.erase(closest_animal)
 
-	# 2) Devrait-on afficher la barre ?
+	# 2) Affichage barre d’énergie
 	var should_show = show_energy or mission in ["travailler", "cueillir", "mineur", "bucheron", "fermier"]
 	energy_bar_container.visible = should_show
 	if should_show:
 		energy_bar_container.position = Vector2(0, -40)
 		energy_bar.size.x = clamp(energy / 100.0 * 40.0, 0, 40)
 		energy_bar.modulate = Color(1, 0, 0) if energy < 30 else Color(0, 1, 0)
-		
-
-
 
 func _on_click(_vp, event, _si):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -168,9 +187,6 @@ func do_work(delta):
 			search_next_ble()
 		_:
 			mission = ""
-
-
-
 
 func do_recharge(delta):
 	show_energy = true
@@ -398,33 +414,68 @@ func do_collect_baie(delta):
 func _physics_process(delta):
 	if following_route:
 		follow_path(delta)
+
+	elif faim < 95 and mission == "" and current_baie == null:
+		animal_retry_timer += delta
+		if animal_retry_timer >= 1.5:
+			animal_retry_timer = 0.0
+			search_nearest_animal()
+
+	elif mission == "manger_animal":
+		do_manger_animal(delta)
+
 	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble", "pomper", "deposer_eau"]:
 		match mission:
-			"travailler": do_work(delta)
-			"bucheron": do_chop_tree(delta)
-			"cueillir": do_collect_baie(delta)
-			"mineur": do_mine(delta)
-			"recharger": do_recharge(delta)
-			"recolter_ble": do_collect_ble(delta)
-			"pomper": do_pomper(delta)
-			"deposer_eau": do_deposer_eau(delta)
+			"travailler":     do_work(delta)
+			"bucheron":       do_chop_tree(delta)
+			"cueillir":       do_collect_baie(delta)
+			"mineur":         do_mine(delta)
+			"recharger":      do_recharge(delta)
+			"recolter_ble":   do_collect_ble(delta)
+			"pomper":         do_pomper(delta)
+			"deposer_eau":    do_deposer_eau(delta)
+
 	elif mission == "retour_travail":
+		if metier in ["cueilleur", "bucheron", "mineur", "fermier"]:
+			go_to(lieu_travail.global_position, "aller_travailler")
+
+	elif mission == "":
+		animal_retry_timer = 0.0
 		match metier:
-			"cueilleur": search_next_baie()
-			"bucheron": search_next_tree()
-			"mineur": search_next_rock()
-			"fermier": search_next_ble()
-	else:
-		match metier:
-			"bucheron": mission = "aller_travailler"; search_next_tree()
-			"cueilleur": mission = "aller_travailler"; search_next_baie()
-			"mineur": mission = "aller_travailler"; search_next_rock()
-			"fermier": mission = "aller_travailler"; search_next_ble()
+			"cueilleur":
+				search_next_baie()
+			"bucheron":
+				search_next_tree()
+			"mineur":
+				search_next_rock()
+			"fermier":
+				search_next_ble()
 			"pompier":
 				if lieu_travail and lieu_travail.touche_eau:
 					mission = "aller_bord_eau"
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
-			_: move_randomly(delta)
+			_:
+				move_randomly(delta)  # ← AJOUT ICI
+	else:
+		match metier:
+			"bucheron":
+				mission = "aller_travailler"
+				search_next_tree()
+			"cueilleur":
+				mission = "aller_travailler"
+				search_next_baie()
+			"mineur":
+				mission = "aller_travailler"
+				search_next_rock()
+			"fermier":
+				mission = "aller_travailler"
+				search_next_ble()
+			"pompier":
+				if lieu_travail and lieu_travail.touche_eau:
+					mission = "aller_bord_eau"
+					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+			_:
+				move_randomly(delta)
 
 
 
@@ -609,3 +660,60 @@ func do_deposer_eau(delta):
 		lieu_travail.add_water(1)
 		await get_tree().create_timer(0.5).timeout
 		go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+		
+func do_manger_animal(delta):
+	if not is_instance_valid(current_baie):
+		current_baie = null
+		mission = ""
+		return
+
+	var dist = global_position.distance_to(current_baie.global_position)
+	if dist > 8:
+		return
+
+	velocity = Vector2.ZERO
+	cutting_timer += delta
+
+	if cutting_timer >= cutting_duration:
+		match current_baie.name.to_lower():
+			"poule":  faim = clamp(faim + 15, 0, 100)
+			"cochon": faim = clamp(faim + 35, 0, 100)
+			"vache":  faim = clamp(faim + 60, 0, 100)
+			_:        faim = clamp(faim + 25, 0, 100)
+
+		current_baie.queue_free()
+
+		# Supprimer de la liste centrale
+		for bat in get_tree().get_nodes_in_group("batiment"):
+			if "animaux" in bat and current_baie in bat.animaux:
+				bat.animaux.erase(current_baie)
+				break
+
+		current_baie = null
+		cutting_timer = 0.0
+		mission = ""
+
+		print("🍗 PNJ", id, " a mangé un animal.")
+
+func search_nearest_animal():
+	var animaux = game.get_all_animaux_disponibles()
+	if animaux.is_empty():
+		return
+
+	var closest_animal = null
+	var min_dist = INF
+
+	for a in animaux:
+		if not is_instance_valid(a):
+			continue
+		var dist = global_position.distance_to(a.global_position)
+		if dist < min_dist:
+			min_dist = dist
+			closest_animal = a
+
+	if closest_animal:
+		current_baie = closest_animal
+		print("🍗 PNJ", id, "va manger", closest_animal.name)
+		go_to(closest_animal.global_position, "aller_manger_animal")
+	else:
+		print("❌ Aucun animal atteignable")

@@ -581,8 +581,13 @@ func _find_nearest_walkable_cell(cell: Vector2i) -> Vector2i:
 					best = c
 					best_dist = d
 	return best
-
-
+	
+func get_all_animaux_disponibles() -> Array:
+	var all = []
+	for bat in get_tree().get_nodes_in_group("batiment"):
+		if bat.has_method("get_animaux_disponibles"):
+			all += bat.get_animaux_disponibles()
+	return all
 
 
 func debloquer_objet(nom: String):
