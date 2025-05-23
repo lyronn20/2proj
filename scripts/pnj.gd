@@ -30,6 +30,8 @@ var mission_apres_recharge := ""
 var energy := 100.0
 var faim   := 100.0
 var soif   := 100.0
+var faim_tick := 0.0
+var soif_tick := 0.0
 
 # === Random movement ===
 var direction      := Vector2.ZERO
@@ -59,6 +61,7 @@ var mining_duration := 1.0   # en secondes
 var eau_timer := 0.0
 var temps_pompage := 1.5
 var animal_retry_timer := 0.0
+var lieu_boisson = null
 
 func _ready():
 	sprite.play("walk")
@@ -155,6 +158,7 @@ func follow_path(delta):
 			"aller_recolter_ble": mission = "recolter_ble"
 			"retour_maison": mission = "recharger"
 			"aller_manger_animal": mission = "manger_animal"
+			"aller_boire": mission = "boire"
 			"retour_travail":
 				match metier:
 					"cueilleur": search_next_baie()
@@ -240,6 +244,7 @@ func prepare_return_path():
 
 func pick_new_direction():
 	direction = Vector2(cos(randf() * TAU), sin(randf() * TAU)).normalized()
+	
 func move_randomly(delta):
 	wander_timer += delta
 	if wander_timer >= change_interval:
@@ -416,18 +421,40 @@ func do_collect_baie(delta):
 		search_next_baie()
 
 
+
 func _physics_process(delta):
+	# 💧 Descente aléatoire de faim et soif
+	faim_tick += delta
+	soif_tick += delta
+
+	if faim_tick >= randf_range(0.3, 0.76):
+		faim = clamp(faim - 1, 0, 100)
+		faim_tick = 0.0
+
+	if soif_tick >= randf_range(0.3, 0.76):
+		soif = clamp(soif - 1, 0, 100)
+		soif_tick = 0.0
+
+	# 🚶 Déplacement
 	if following_route:
 		follow_path(delta)
 
+	# 🍗 Aller manger un animal
 	elif faim < 20 and mission == "" and current_baie == null:
 		animal_retry_timer += delta
 		if animal_retry_timer >= 1.5:
 			animal_retry_timer = 0.0
 			search_nearest_animal()
 
+	# 💧 Aller boire à un puits
+	elif soif < 20 and mission == "" and current_baie == null:
+		search_nearest_well()
+
+	# 🧭 Missions spéciales
 	elif mission == "manger_animal":
 		do_manger_animal(delta)
+	elif mission == "boire":
+		do_boire(delta)
 
 	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble", "pomper", "deposer_eau"]:
 		match mission:
@@ -440,6 +467,7 @@ func _physics_process(delta):
 			"pomper":         do_pomper(delta)
 			"deposer_eau":    do_deposer_eau(delta)
 
+	# ↩️ Retour au travail après une mission
 	elif mission == "retour_travail":
 		match metier:
 			"cueilleur", "bucheron", "mineur", "fermier":
@@ -448,24 +476,20 @@ func _physics_process(delta):
 				if lieu_travail and lieu_travail.touche_eau:
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
 
-
+	# 🔍 Si aucune mission en cours
 	elif mission == "":
 		animal_retry_timer = 0.0
 		match metier:
-			"cueilleur":
-				search_next_baie()
-			"bucheron":
-				search_next_tree()
-			"mineur":
-				search_next_rock()
-			"fermier":
-				search_next_ble()
+			"cueilleur": search_next_baie()
+			"bucheron":  search_next_tree()
+			"mineur":    search_next_rock()
+			"fermier":   search_next_ble()
 			"pompier":
 				if lieu_travail and lieu_travail.touche_eau:
 					mission = "aller_bord_eau"
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
-			_:
-				move_randomly(delta)  # ← AJOUT ICI
+			_: move_randomly(delta)
+
 	else:
 		match metier:
 			"bucheron":
@@ -486,8 +510,6 @@ func _physics_process(delta):
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
 			_:
 				move_randomly(delta)
-
-
 
 		
 func search_next_baie():
@@ -739,3 +761,43 @@ func search_nearest_animal():
 		go_to(closest_animal.global_position, "aller_manger_animal")
 	else:
 		print("❌ Aucun animal atteignable")
+		
+
+
+func search_nearest_well():
+	var puits_dispo = []
+	for bat in get_tree().get_nodes_in_group("batiment"):
+		if bat.name.to_lower().begins_with("puit") and bat.has_method("boire") and bat.stock_eau > 0:
+			puits_dispo.append(bat)
+
+	if puits_dispo.is_empty():
+		print("❌ Aucun puits disponible pour boire.")
+		return
+
+	var closest = null
+	var min_dist = INF
+	for puit in puits_dispo:
+		var dist = global_position.distance_to(puit.global_position)
+		if dist < min_dist:
+			min_dist = dist
+			closest = puit
+
+	if closest:
+		lieu_boisson = closest
+		go_to(closest.global_position, "aller_boire")
+		print("💧 PNJ", id, "va boire au", closest.name)
+
+func do_boire(delta):
+	if not is_instance_valid(lieu_boisson) or global_position.distance_to(lieu_boisson.global_position) > 8:
+		return
+
+	velocity = Vector2.ZERO
+
+	if lieu_boisson.boire():
+		soif = 100
+		print("💧 PNJ", id, "a bu au", lieu_boisson.name)
+	else:
+		print("❌", lieu_boisson.name, "n’a plus d’eau !")
+
+	lieu_boisson = null
+	mission = ""
