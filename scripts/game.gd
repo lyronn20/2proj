@@ -229,8 +229,11 @@ func _place_object_at_mouse():
 			assign_pnjs_to_work(inst, "cueilleur")
 		"hutte":
 			assign_pnjs_to_hut(inst)
+		"puit":
+			assign_pnjs_to_work(inst, "pompier")
 		_:
 			pass
+
 
 	# 7) Marquage des cellules
 	for x in range(size.x):

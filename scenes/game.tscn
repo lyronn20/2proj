@@ -477,15 +477,12 @@ script = ExtResource("4_iywne")
 
 [node name="TableauBord" parent="CanvasLayer" instance=ExtResource("5_u5sy4")]
 
-[node name="GridPreview" parent="." node_paths=PackedStringArray("tilemap") instance=ExtResource("7_u5sy4")]
+[node name="GridPreview" parent="." instance=ExtResource("7_u5sy4")]
 visible = false
-tilemap = NodePath("../Map")
-preview_size = Vector2i(4, 4)
 
 [node name="EpilepsieLayer" type="CanvasLayer" parent="."]
 
 [node name="Background" type="ColorRect" parent="EpilepsieLayer"]
-anchors_preset = -1
 offset_left = -44.0
 offset_top = -183.0
 offset_right = 2031.0
