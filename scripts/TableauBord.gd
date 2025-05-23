@@ -20,6 +20,14 @@ func _ready():
 	update_total_stock()
 	print("✅ total stock lancé")
 
+	# 🕒 Rafraîchir le stock régulièrement
+	var timer = Timer.new()
+	timer.wait_time = 1.0
+	timer.one_shot = false
+	timer.timeout.connect(update_total_stock)
+	add_child(timer)
+	timer.start()
+
 func update_dashboard(batiment: Node = null):
 	pnj_panel.visible = false
 	batiment_panel.visible = false
@@ -117,7 +125,8 @@ func update_total_stock():
 		"blé": 0,
 		"bois": 0,
 		"pierre": 0,
-		"baies": 0
+		"baies": 0,
+		"eau": 0
 	}
 
 	for node in get_tree().get_nodes_in_group("batiment"):
@@ -127,18 +136,22 @@ func update_total_stock():
 				for key in stock:
 					if stock_total.has(key):
 						stock_total[key] += stock[key]
+			elif typeof(stock) == TYPE_INT:
+				# Si le bâtiment retourne un entier → on suppose que c'est de l'eau (cas du puit)
+				stock_total["eau"] += stock
 
 	for child in stock_panel.get_children():
 		child.queue_free()
 
 	var icons = {
-		"blé": "🌾",
-		"bois": "🪵",
-		"pierre": "🪨",
-		"baies": "🍓"
+		"blé": "🌾 ",
+		"bois": "🪵 ",
+		"pierre": "🪨 ",
+		"baies": "🍓 ",
+		"eau": "💧 "
 	}
 
-	for res in ["blé", "bois", "pierre", "baies"]:
+	for res in ["blé", "bois", "pierre", "baies", "eau"]:
 		var label = Label.new()
 		label.text = icons[res] + " " + res + " : " + str(stock_total[res])
 		label.add_theme_color_override("font_color", Color("#e9bc96"))

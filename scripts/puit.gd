@@ -7,6 +7,26 @@ var stock_eau := 0
 var touche_eau := false
 var last_water_point := Vector2.ZERO  # stocke le dernier point d'eau trouvé
 
+func _ready():
+	if has_meta("is_preview") and get_meta("is_preview") == true:
+		return
+	add_to_group("batiment")
+	set_meta("nom_affichage", "Puit : " + str(compteur))
+	compteur += 1
+
+	var area = Area2D.new()
+	area.name = "ClickArea"
+	area.input_pickable = true
+	add_child(area)
+
+	var shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(64, 64)
+	shape.shape = rect
+	area.add_child(shape)
+
+	area.connect("input_event", Callable(self, "_on_click"))
+	detecte_eau()
 
 func _process(delta):
 	if not touche_eau:
@@ -17,10 +37,17 @@ func add_employe(pnj):
 		employes.append(pnj)
 
 func add_water(amount: int):
+	var game = get_node("/root/game")
+	if game.get_tree().paused:
+		return
 	stock_eau += amount
-
+	var tb = get_node("/root/game/CanvasLayer/TableauBord")
+	if tb.has_method("update_total_stock"):
+		tb.update_total_stock()
+		
 func get_stock():
-	return stock_eau
+	var stock = {"eau": stock_eau}
+	return stock
 
 func boire() -> bool:
 	if stock_eau > 0:
@@ -58,37 +85,24 @@ func get_point_eau() -> Vector2:
 	var game = get_node("/root/game")
 	var cell = game.route_tilemap.local_to_map(last_water_point)
 
-	# Cherche une case adjacente herbe qui soit walkable
+	# Trouver un point walkable le plus proche autour de l'eau
 	var voisins = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]
+	var closest: Vector2i = Vector2i(-9999, -9999)
+	var found := false
 	for v in voisins:
 		var voisin = cell + v
 		if game.route_astar.region.has_point(voisin) and not game.route_astar.is_point_solid(voisin):
-			return game.route_tilemap.map_to_local(voisin) + game.route_tilemap.global_position
+			closest = voisin
+			found = true
+			break
 
-	print("❌ Aucun point d’eau accessible trouvé")
-	return global_position
 
+	if found:
+		return game.route_tilemap.map_to_local(closest) + game.route_tilemap.global_position
+	else:
+		print("❌ Aucun accès walkable autour de l’eau")
+		return global_position
 
-func _ready():
-	if has_meta("is_preview") and get_meta("is_preview") == true:
-		return
-	add_to_group("batiment")
-	set_meta("nom_affichage", "Puit : " + str(compteur))
-	compteur += 1
-
-	var area = Area2D.new()
-	area.name = "ClickArea"
-	area.input_pickable = true
-	add_child(area)
-
-	var shape = CollisionShape2D.new()
-	var rect = RectangleShape2D.new()
-	rect.size = Vector2(64, 64)
-	shape.shape = rect
-	area.add_child(shape)
-
-	area.connect("input_event", Callable(self, "_on_click"))
-	detecte_eau()
 
 func _on_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.pressed:

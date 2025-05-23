@@ -58,15 +58,15 @@ layout_mode = 2
 
 [node name="Total_stock" type="Panel" parent="."]
 layout_mode = 0
-offset_left = 290.0
-offset_top = -45.0
-offset_right = 760.0
-offset_bottom = 105.0
+offset_left = 282.0
+offset_top = -56.0
+offset_right = 932.0
+offset_bottom = 124.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_ii2ve")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Total_stock"]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 58.0
-offset_right = 80.0
-offset_bottom = 88.0
+offset_left = 60.0
+offset_top = 77.0
+offset_right = 100.0
+offset_bottom = 107.0

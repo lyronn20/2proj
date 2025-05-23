@@ -639,9 +639,17 @@ func print_total_wood_stock() -> int:
 	print("🪵 Total bois stocké                                 : %d" % total)
 	return total
 
+# Total du bois de toutes les scieries
+func print_total_eau_stock() -> int:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("puit"):
+		if node.has_method("get_stock"):
+			total += node.get_stock()
+	print("🪵 Total eau stocké                            : %d" % total)
+	return total
+
 func sauvegarder_jeu():
 	var save = FileAccess.open("user://sauvegarde.save", FileAccess.WRITE)
-
 	# 🔹 Sauver les PNJ
 	var pnj_data = []
 	for pnj in get_tree().get_nodes_in_group("pnj"):

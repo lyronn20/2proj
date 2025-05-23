@@ -481,6 +481,7 @@ script = ExtResource("4_iywne")
 visible = false
 
 [node name="EpilepsieLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Background" type="ColorRect" parent="EpilepsieLayer"]
 offset_left = -44.0
