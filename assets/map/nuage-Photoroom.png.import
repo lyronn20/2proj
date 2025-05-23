@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dv3po50nnfsxq"
-path="res://.godot/imported/Bridge_Wood.png-5f78cb9836553fe67e36b9d913c98503.ctex"
+uid="uid://2ej6u65wx20"
+path="res://.godot/imported/nuage-Photoroom.png-0c00d18015e3b73e27590eab5a7fc732.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/Bridge_Wood.png"
-dest_files=["res://.godot/imported/Bridge_Wood.png-5f78cb9836553fe67e36b9d913c98503.ctex"]
+source_file="res://assets/map/nuage-Photoroom.png"
+dest_files=["res://.godot/imported/nuage-Photoroom.png-0c00d18015e3b73e27590eab5a7fc732.ctex"]
 
 [params]
 

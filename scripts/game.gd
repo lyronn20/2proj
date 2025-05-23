@@ -3,7 +3,9 @@ extends Node2D
 
 @export var tilemap: TileMapLayer
 @onready var route_tilemap: TileMapLayer = $Route/route
+@onready var pont_tilemap : TileMapLayer = $Pont/pont
 @onready var herbe_tilemap: TileMapLayer = $herbe
+@onready var map_tilemap: TileMapLayer = $Map
 @onready var ile2_tilemap: TileMapLayer = $ile2
 @onready var ile3_tilemap: TileMapLayer = $ile3
 @onready var ile4_tilemap: TileMapLayer = $ile4
@@ -316,9 +318,13 @@ func _unhandled_input(event):
 			if not clicked_batiment:
 				get_node("CanvasLayer/TableauBord").update_dashboard()
 
-	# ► Touche R pour tracer la route
-	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
-		placer_route()
+	else:
+		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
+			placer_route()
+		elif event.is_action_pressed("pont"):
+			placer_pont()
+
+
 
 
 func _erase_object_at_mouse():
@@ -413,6 +419,23 @@ func _on_objet_selectionne(nom: String):
 	grid_pos.x = int(grid_pos.x / size.x) * size.x
 	grid_pos.y = int(grid_pos.y / size.y) * size.y
 	current_preview.global_position = route_tilemap.map_to_local(grid_pos)
+
+func placer_pont():
+	var c = pont_tilemap.local_to_map(get_global_mouse_position())
+	print("📍 Tentative de placement de pont en cellule :", c)
+
+	if map_tilemap.get_cell_source_id(c) != 2 or map_tilemap.get_cell_atlas_coords(c) != Vector2i(1, 2):
+		print("❌ La cellule n'est pas de l’eau.")
+		return
+
+	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1 or pont_tilemap.get_cell_source_id(c) != -1:
+		print("❌ Cellule occupée ou déjà utilisée.")
+		return
+
+	pont_tilemap.set_cell(c, 1, Vector2i(0, 0))  # ✅ source_id = 1, coord = (0,0) → à adapter à ton tileset
+	print("✅ Pont placé à", c)
+	build_route_astar()
+
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
