@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2ej6u65wx20"
-path="res://.godot/imported/nuage-Photoroom.png-0c00d18015e3b73e27590eab5a7fc732.ctex"
+uid="uid://doeq5gsx228a0"
+path="res://.godot/imported/nuage.png-c38a2fa073b2348a7bc3501db01a5189.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/map/nuage-Photoroom.png"
-dest_files=["res://.godot/imported/nuage-Photoroom.png-0c00d18015e3b73e27590eab5a7fc732.ctex"]
+source_file="res://assets/map/nuage.png"
+dest_files=["res://.godot/imported/nuage.png-c38a2fa073b2348a7bc3501db01a5189.ctex"]
 
 [params]
 

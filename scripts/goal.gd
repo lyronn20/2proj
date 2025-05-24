@@ -2,6 +2,7 @@ extends Node
 
 @onready var lbl_title = $Label
 @onready var lbl_description = $RichTextLabel
+@onready var tilemap_nuages: TileMapLayer = get_node("/root/game/tilemap_nuages")
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
@@ -11,12 +12,17 @@ var goals = [
 	{
 		"title": "Poser un feu de camp",
 		"description": "Place ton premier feu de camp pour établir ton campement.",
-		"id": "feu_camp"
+		"id": "feu_camp",
+		"zone_rect": {
+			"coin_haut_gauche": Vector2i(-122,-4),
+			"coin_bas_droit": Vector2i(-23, 112)
+		}
 	},
 	{
 		"title": "Construire une hutte",
 		"description": "Construis une hutte pour héberger tes citoyens.",
-		"id": "hutte"
+		"id": "hutte",
+		"zone": Vector2i(55, 30)
 	},
 	{
 		"title": "Poser des routes en terre",
@@ -82,6 +88,13 @@ func valider_goal(goal_id: String):
 		print("🎯 Goal validé :", goal_id)
 		current_goal_index += 1
 		goal_accompli += 1  # ✅ on incrémente ici
+		var goal = goals[current_goal_index - 1]
+		if "zone_rect" in goal:
+			var rect = goal["zone_rect"]
+			debloquer_zone_nuage_rect(rect["coin_haut_gauche"], rect["coin_bas_droit"])
+		elif "zone" in goal:
+			debloquer_zone_nuage(goal["zone"], 20)
+		
 		update_goal_display()
 
 		# 🔓 débloquer les objets dans le menu en fonction du progrès
@@ -102,3 +115,42 @@ func _process(_delta):
 
 		if count >= 5:
 			valider_goal("route_terre")
+			
+			
+func debloquer_zone_nuage(position: Vector2i, rayon: int = 5):
+
+	if not tilemap_nuages:
+
+		push_error("❌ tilemap_nuages est nul.")
+
+		return
+
+
+
+	for x in range(-rayon, rayon + 1):
+
+		for y in range(-rayon, rayon + 1):
+
+			var cell: Vector2i = position + Vector2i(x, y)
+
+			tilemap_nuages.set_cell( cell, -1)
+
+
+
+func debloquer_zone_nuage_rect(coin_haut_gauche: Vector2i, coin_bas_droit: Vector2i):
+
+	if not tilemap_nuages:
+
+		push_error("❌ tilemap_nuages est nul.")
+
+		return
+
+
+
+	for x in range(coin_haut_gauche.x, coin_bas_droit.x + 1):
+
+		for y in range(coin_haut_gauche.y, coin_bas_droit.y + 1):
+
+			var cell = Vector2i(x, y)
+
+			tilemap_nuages.set_cell( cell, -1)
