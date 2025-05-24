@@ -43,6 +43,8 @@ var current_scene:   PackedScene = null
 var selected_mode:   String      = ""
 var grid_preview:    Node2D      = null
 var pnj_counter := 1
+var reproduction_timer := 0.0
+var reproduction_interval := 210 
 
 var inventory := { "feu_camp": 1 }
 var occupied_cells := {}
@@ -149,6 +151,12 @@ func build_route_astar():
 
 
 func _process(delta):
+	
+	# Système de reproduction
+	reproduction_timer += delta
+	if reproduction_timer >= reproduction_interval:
+		reproduction_timer = 0.0
+		verifier_reproduction()
 	# 1) Si preview verrouillée → on la supprime et on sort
 	if current_preview and menu.is_locked(selected_mode):
 		current_preview.queue_free()
@@ -324,9 +332,6 @@ func _unhandled_input(event):
 		elif event.is_action_pressed("pont"):
 			placer_pont()
 
-
-
-
 func _erase_object_at_mouse():
 	var pos = get_global_mouse_position()
 	for obj in get_tree().get_nodes_in_group("placeable"):
@@ -480,7 +485,43 @@ func update_ui_stats():
 		Vector2i(0,0),
 		100
 	)
+func verifier_reproduction():
+	var couples = []
+	var pnjs_libres = []
+	
+	# Trouve les couples (PNJ dans la même maison)
+	for pnj in get_tree().get_nodes_in_group("pnj"):
+		if pnj.has_house and pnj.age > 5.0:  
+			var maison = pnj.maison
+			var cohabitants = []
+			for autre in get_tree().get_nodes_in_group("pnj"):
+				if autre != pnj and autre.maison == maison:
+					cohabitants.append(autre)
+			
+			if cohabitants.size() > 0:
+				couples.append([pnj, cohabitants[0]])
+	
+	# Chance de reproduction pour chaque couple
+	for couple in couples:
+		if randf() < 0.15:  
+			faire_bebe(couple[0].maison)
 
+func faire_bebe(maison_parents: Node2D):
+	var bebe = pnj_scene.instantiate()
+	bebe.name = "PNJ_" + str(next_id)
+	bebe.id = next_id
+	next_id += 1
+	bebe.global_position = maison_parents.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
+	bebe.has_house = true
+	bebe.maison = maison_parents
+	bebe.add_to_group("pnj")
+	bebe.add_to_group("placeable")
+	add_child(bebe)
+	
+	if maison_parents.has_method("add_habitant"):
+		maison_parents.add_habitant(bebe)
+	
+	print("👶 Nouveau PNJ né ! Population:", get_tree().get_nodes_in_group("pnj").size())
 func spawn_pnjs(count: int):
 	var tries = 0
 	while count > 0 and tries < count*10:

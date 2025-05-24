@@ -32,6 +32,9 @@ var faim   := 100.0
 var soif   := 100.0
 var faim_tick := 0.0
 var soif_tick := 0.0
+var age := 0.0  # en minutes de jeu
+var esperance_vie := randf_range(15.0, 25.0)  # entre 15-25 minutes	
+var facteur_sante := 1.0  # multiplicateur selon les conditions de vie
 
 # === Random movement ===
 var direction      := Vector2.ZERO
@@ -95,9 +98,6 @@ func _ready():
 
 
 func _process(delta):
-	# 1) Statistiques vitales
-	faim -= delta * 0.3
-	soif -= delta * 0.5
 	faim = clamp(faim, 0, 100)
 	soif = clamp(soif, 0, 100)
 
@@ -423,30 +423,49 @@ func do_collect_baie(delta):
 
 
 func _physics_process(delta):
-	# 💧 Descente aléatoire de faim et soif
+	# Vieillissement
+	age += delta / 60.0
+	calculer_facteur_sante()
+	
+	# Vérification de mort naturelle
+	if age >= (esperance_vie * facteur_sante):
+		mourir_naturellement()
+		return
+	
+	# Mort prématurée si conditions extrêmes
+	if faim <= 0 and soif <= 0:
+		mourir_de_privation()
+		return
+	
+	# Consommation faim/soif
 	faim_tick += delta
 	soif_tick += delta
 
-	if faim_tick >= randf_range(0.3, 0.76):
+	if faim_tick >= randf_range(2.0, 5.0):
 		faim = clamp(faim - 1, 0, 100)
 		faim_tick = 0.0
 
-	if soif_tick >= randf_range(0.3, 0.76):
+	if soif_tick >= randf_range(1.5, 4.0):
 		soif = clamp(soif - 1, 0, 100)
 		soif_tick = 0.0
+
+	# 🚨 PRIORITÉ ABSOLUE : Interruption pour survie (AVANT tout le reste)
+	if (faim <= 10 or soif <= 10) and mission not in ["aller_manger_animal", "manger_animal", "aller_boire", "boire"]:
+		interrompre_pour_survie()
+		return
 
 	# 🚶 Déplacement
 	if following_route:
 		follow_path(delta)
 
-	# 🍗 Aller manger un animal
+	# 🍗 Aller manger un animal (seulement si pas de mission)
 	elif faim < 20 and mission == "" and current_baie == null:
 		animal_retry_timer += delta
 		if animal_retry_timer >= 1.5:
 			animal_retry_timer = 0.0
 			search_nearest_animal()
 
-	# 💧 Aller boire à un puits
+	# 💧 Aller boire à un puits (seulement si pas de mission)
 	elif soif < 20 and mission == "" and current_baie == null:
 		search_nearest_well()
 
@@ -456,6 +475,7 @@ func _physics_process(delta):
 	elif mission == "boire":
 		do_boire(delta)
 
+	# 💼 Missions de travail
 	elif mission in ["travailler", "bucheron", "cueillir", "mineur", "recharger", "recolter_ble", "pomper", "deposer_eau"]:
 		match mission:
 			"travailler":     do_work(delta)
@@ -490,6 +510,7 @@ func _physics_process(delta):
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
 			_: move_randomly(delta)
 
+	# 🔄 Fallback pour relancer le travail
 	else:
 		match metier:
 			"bucheron":
@@ -720,10 +741,10 @@ func do_manger_animal(delta):
 
 	if cutting_timer >= cutting_duration:
 		match current_baie.name.to_lower():
-			"poule":  faim = clamp(faim + 15, 0, 100)
-			"cochon": faim = clamp(faim + 35, 0, 100)
-			"vache":  faim = clamp(faim + 60, 0, 100)
-			_:        faim = clamp(faim + 25, 0, 100)
+			"poule":  faim = clamp(faim + 100, 0, 100)
+			"cochon": faim = clamp(faim + 100, 0, 100)
+			"vache":  faim = clamp(faim + 100, 0, 100)
+			_:        faim = clamp(faim + 50, 0, 100)
 
 		current_baie.queue_free()
 
@@ -735,7 +756,9 @@ func do_manger_animal(delta):
 
 		current_baie = null
 		cutting_timer = 0.0
-		mission = ""
+		
+		# Reprendre la mission précédente après avoir mangé
+		reprendre_mission_apres_survie()
 
 		print("🍗 PNJ", id, " a mangé un animal.")
 
@@ -796,8 +819,98 @@ func do_boire(delta):
 	if lieu_boisson.boire():
 		soif = 100
 		print("💧 PNJ", id, "a bu au", lieu_boisson.name)
+		
+		# Reprendre la mission précédente après avoir bu
+		reprendre_mission_apres_survie()
 	else:
-		print("❌", lieu_boisson.name, "n’a plus d’eau !")
+		print("❌", lieu_boisson.name, "n'a plus d'eau !")
+		mission = ""
 
 	lieu_boisson = null
-	mission = ""
+	
+func calculer_facteur_sante():
+	facteur_sante = 1.0
+	
+	# 🏠 Avoir une maison = +20% espérance de vie
+	if has_house:
+		facteur_sante += 0.2
+	
+	# 💼 Avoir un travail = +10% espérance de vie  
+	if metier != "":
+		facteur_sante += 0.1
+	
+	# 🍖 Bonne alimentation = +15% espérance de vie
+	if faim > 70:
+		facteur_sante += 0.15
+	elif faim < 30:
+		facteur_sante -= 0.1  # Malnutrition réduit l'espérance
+	
+	# 💧 Bonne hydratation = +10% espérance de vie
+	if soif > 70:
+		facteur_sante += 0.1
+	elif soif < 30:
+		facteur_sante -= 0.05
+	
+	# 😴 Bon repos = +5% espérance de vie
+	if energy > 80:
+		facteur_sante += 0.05
+	
+	# Limite les valeurs extrêmes
+	facteur_sante = clamp(facteur_sante, 0.5, 2.0)
+
+func mourir_naturellement():
+	print("👴 PNJ", id, "est mort de vieillesse à", age, "minutes (espérance:", esperance_vie, ")")
+	liberer_ressources()
+	
+	# Effet visuel de mort naturelle (particules, animation...)
+	queue_free()
+
+func mourir_de_privation():
+	print("💀 PNJ", id, "est mort de privation extrême")
+	liberer_ressources()
+	queue_free()
+
+func liberer_ressources():
+	# Libérer le travail
+	if lieu_travail and lieu_travail.has_method("remove_employe"):
+		lieu_travail.remove_employe(self)
+	
+	# Libérer la maison
+	if maison and maison.has_method("remove_habitant"):
+		maison.remove_habitant(self)
+		
+
+func interrompre_pour_survie():
+	# Sauvegarder la mission actuelle
+	if mission != "":
+		mission_apres_recharge = mission
+	
+	# Arrêter le pathfinding en cours
+	following_route = false
+	chemin.clear()
+	current_step = 0
+	
+	# Priorité à la soif (plus critique)
+	if soif <= 10:
+		search_nearest_well()
+	elif faim <= 10:
+		search_nearest_animal()
+
+func reprendre_mission_apres_survie():
+	if mission_apres_recharge != "":
+		mission = mission_apres_recharge
+		mission_apres_recharge = ""
+		
+		# Relancer le pathfinding vers le lieu de travail
+		match metier:
+			"bucheron": search_next_tree()
+			"cueilleur": search_next_baie()
+			"mineur": search_next_rock()
+			"fermier": search_next_ble()
+			"pompier":
+				if lieu_travail and lieu_travail.touche_eau:
+					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
+		
+		print("🔄 PNJ", id, "reprend son travail après s'être nourri")
+	else:
+		mission = ""

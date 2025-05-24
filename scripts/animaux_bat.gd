@@ -8,7 +8,7 @@ var animaux := []
 const MAX_ANIMAUX = 15
 
 func _ready():
-	$Timer.wait_time = 10
+	$Timer.wait_time = 25
 	$Timer.start()
 	$Timer.timeout.connect(spawn_animaux)
 
@@ -26,9 +26,9 @@ func spawn_animaux():
 
 func consommer_animal(pnj):
 	var priorites = [
-		{ "gain": 60, "name": "vache", "scene": vache_scene },
-		{ "gain": 35, "name": "cochon", "scene": cochon_scene },
-		{ "gain": 15, "name": "poule", "scene": poule_scene }
+		{ "gain": 100, "name": "vache", "scene": vache_scene },
+		{ "gain": 100, "name": "cochon", "scene": cochon_scene },
+		{ "gain": 100, "name": "poule", "scene": poule_scene }
 	]
 
 	for t in priorites:
