@@ -17,6 +17,7 @@ extends Node2D
 @onready var background := $EpilepsieLayer/Background
 @onready var bouton := $EpilepsieLayer/Button
 @onready var label := $EpilepsieLayer/Label
+@onready var audio := AudioStreamPlayer.new()
 
 const TERRAIN_ID = 0
 const FEU_CAMP_SCENE = preload("res://scenes/feu_camp.tscn")
@@ -31,7 +32,8 @@ const PIERRE = preload("res://scenes/pierre.tscn")
 const FERME = preload("res://scenes/ferme.tscn")
 const BLE = preload("res://scenes/blé.tscn")
 const ANIMAUX_BAT = preload("res://scenes/animaux_bat.tscn")
-
+const FEU_CAMP_SOUND = preload("res://song/feu_camp.mp3")
+const SCIERIE_SOUND = preload("res://song/scierie.mp3")
 var island_tilemaps := []
 
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
@@ -98,7 +100,8 @@ func _ready():
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
 	grid_preview.z_index = 100
-
+	add_child(audio)
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("music"), -20)
 	build_route_astar()
 
 
@@ -229,6 +232,21 @@ func _place_object_at_mouse():
 		inst.add_to_group("carriere")
 	add_child(inst)
 	get_node("CanvasLayer/TableauBord").update_dashboard(inst)
+	
+		# 🔊 Bruitages
+	match selected_mode:
+		"feu_camp":
+			audio.stream = FEU_CAMP_SOUND
+			audio.play()
+			inventory["feu_camp"] -= 1
+			menu.update_inventory("feu_camp", inventory["feu_camp"])
+			menu.set_bloque("feu_camp", true)
+		"scierie":
+			audio.stream = SCIERIE_SOUND
+			audio.play()
+		_:
+			pass
+
 
 	# 5) Gestion spéciale feu de camp
 	if selected_mode == "feu_camp":

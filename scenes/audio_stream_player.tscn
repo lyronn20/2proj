@@ -4,4 +4,5 @@
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer"]
 stream = ExtResource("1_nbeep")
+volume_db = -20.775
 autoplay = true

@@ -14,7 +14,7 @@ var goals = [
 		"description": "Place ton premier feu de camp pour établir ton campement.",
 		"id": "feu_camp",
 		"zone_rect": {
-			"coin_haut_gauche": Vector2i(-122,-4),
+			"coin_haut_gauche": Vector2i(-109,-3),
 			"coin_bas_droit": Vector2i(-23, 112)
 		}
 	},
@@ -22,7 +22,6 @@ var goals = [
 		"title": "Construire une hutte",
 		"description": "Construis une hutte pour héberger tes citoyens.",
 		"id": "hutte",
-		"zone": Vector2i(55, 30)
 	},
 	{
 		"title": "Poser des routes en terre",
