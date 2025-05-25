@@ -251,16 +251,19 @@ func move_randomly(delta):
 		wander_timer = 0
 		pick_new_direction()
 
-	var next_pos = global_position + direction * speed * delta
-	var cell     = herbe_tilemap.local_to_map(next_pos)
+	# Calculer la vitesse en fonction du terrain
+	var current_cell = route_tilemap.local_to_map(global_position)
+	var is_on_route = route_tilemap.get_cell_source_id(current_cell) != -1
+	var current_speed = speed * (2.0 if is_on_route else 1.0)
+
+	var next_pos = global_position + direction * current_speed * delta
+	var cell = herbe_tilemap.local_to_map(next_pos)
 	if herbe_tilemap.get_cell_source_id(cell) == 0:
 		global_position = next_pos
 		sprite.flip_h = direction.x < 0
 	else:
 		pick_new_direction()
-
-# ————————————————————————————————————————————————————————————————
-# Dessiner la trajectoire A* en mode debug
+		
 func _draw():
 	for i in range(chemin.size() - 1):
 		draw_line(chemin[i], chemin[i + 1], Color(1, 0, 0), 2)
