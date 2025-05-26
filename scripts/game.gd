@@ -97,7 +97,7 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	menu.set_locked_buttons(goal_accompli)
 	island_tilemaps = [herbe_tilemap, ile2_tilemap, ile3_tilemap, ile4_tilemap, ile5_tilemap]
-	spawn_pnjs(20)
+	spawn_pnjs(200)
 	generate_sapins(120)
 	detecter_types_eau()
 

@@ -12,7 +12,7 @@ func add_employe(pnj: Node2D):
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
 		return  # Ne pas exécuter le reste si c’est une preview
-	add_to_group("batiment")
+	add_to_group("collect_baies")
 	set_meta("nom_affichage", "Collecteur : "+ str(compteur))
 	compteur += 1
 	var area = Area2D.new()

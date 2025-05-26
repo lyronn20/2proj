@@ -1662,7 +1662,6 @@ tilemap = NodePath("../Map")
 preview_size = Vector2i(4, 4)
 
 [node name="EpilepsieLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Background" type="ColorRect" parent="EpilepsieLayer"]
 offset_left = -44.0

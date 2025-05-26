@@ -12,7 +12,7 @@ func add_employe(pnj: Node2D):
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
 		return  # Ne pas exécuter le reste si c’est une preview
-	add_to_group("batiment")
+	add_to_group("ferme")
 	add_to_group("ble")   
 	set_meta("nom_affichage", "Ferme : "+ str(compteur))
 	compteur += 1
