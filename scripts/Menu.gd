@@ -84,11 +84,14 @@ func update_inventory(item_name: String, count: int) -> void:
 		
 func set_locked_buttons(goal_accompli: int):
 	var objets_associes = {
-		"scierie": ["sapin"],
-		"ferme": ["blé"],
-		"collect_baies": ["baies"],
-		"carriere": ["pierre", "roches"]
+	"scierie": ["sapin"],
+	"ferme": ["blé"],
+	"collect_baies": ["baies"],
+	"carriere": ["pierre", "roches"],
+	"Pont": ["Pont"],              # ← bouton pont dans `route`
+	"route": ["sol_terre"]         # ← bouton route dans `route`
 	}
+
 
 	var all_buttons = {
 		"feu_camp": 0,
@@ -103,7 +106,9 @@ func set_locked_buttons(goal_accompli: int):
 		"baies": 6,
 		"carriere": 7,
 		"roches": 7,
-		"pierre": 7
+		"pierre": 7,
+		"Pont": 12,           
+		"sol_terre": 4  
 	}
 
 	for btn_name in all_buttons.keys():

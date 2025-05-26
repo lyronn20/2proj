@@ -158,6 +158,13 @@ func build_route_astar():
 
 
 func _process(delta):
+	reproduction_timer += delta
+	if reproduction_timer >= reproduction_interval:
+		reproduction_timer = 0.0
+		verifier_reproduction()
+
+	# Et tout ce qui est preview, UI, stats...
+
 	
 	# Système de reproduction
 	reproduction_timer += delta
@@ -303,77 +310,74 @@ func _place_object_at_mouse():
 
 
 func _unhandled_input(event):
-	# ► Clic droit : désélection automatique
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		# On vide la preview et on remet en mode normal
-		selected_mode = ""
-		if current_preview:
-			current_preview.queue_free()
-			current_preview = null
-			current_scene = null
-		# On remet à jour le dashboard sans cible
-		get_node("CanvasLayer/TableauBord").update_dashboard()
-		return
-
-	# ► Clic gauche : inspection / placement / gomme
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton:
 		var mouse_pos = get_global_mouse_position()
 
-		if event.pressed:
-			# 1) Inspection au simple clic : bâtiments
-			for bat in get_tree().get_nodes_in_group("batiment"):
-				if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
-					get_node("CanvasLayer/TableauBord").update_dashboard(bat)
-					return
-			#    puis PNJ
-			for pnj in get_tree().get_nodes_in_group("pnj"):
-				if pnj.global_position.distance_to(mouse_pos) < 16:
-					get_node("CanvasLayer/TableauBord").update_dashboard(pnj)
-					return
+		# ► Clic droit : désélection
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			selected_mode = ""
+			if current_preview:
+				current_preview.queue_free()
+				current_preview = null
+				current_scene = null
+			get_node("CanvasLayer/TableauBord").update_dashboard()
+			return
 
-			# 2) Si pas d’inspection, on démarre click-and-hold ou action unique
-			if selected_mode in repeatable_modes or selected_mode == "gomme":
-				is_holding_place = true
-				hold_place_timer  = 0.0
-				if selected_mode == "gomme":
-					_erase_object_at_mouse()
-				else:
-					_place_object_at_mouse()
-			else:
-				match selected_mode:
-					"gomme":
+		# ► Clic gauche : interactions
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				for bat in get_tree().get_nodes_in_group("batiment"):
+					if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
+						get_node("CanvasLayer/TableauBord").update_dashboard(bat)
+						return
+				for pnj in get_tree().get_nodes_in_group("pnj"):
+					if pnj.global_position.distance_to(mouse_pos) < 16:
+						get_node("CanvasLayer/TableauBord").update_dashboard(pnj)
+						return
+
+				# Répétables ou gomme
+				if selected_mode in repeatable_modes or selected_mode == "gomme":
+					is_holding_place = true
+					hold_place_timer = 0.0
+					if selected_mode == "gomme":
 						_erase_object_at_mouse()
-					"route":
-						placer_route()
-					_:
-						if current_scene:
-							_place_object_at_mouse()
+					else:
+						_place_object_at_mouse()
 
-		else:
-			# 3) Relâchement → stoppe le hold
-			is_holding_place = false
+				# Mode route
+				elif selected_mode == "route":
+					placer_route()
 
-			# 4) Clic hors bâtiment → vide le dashboard
-			var clicked_batiment := false
-			for bat in get_tree().get_nodes_in_group("batiment"):
-				if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
-					clicked_batiment = true
-					break
-			if not clicked_batiment:
-				get_node("CanvasLayer/TableauBord").update_dashboard()
+				# Mode pont
+				elif selected_mode == "Pont":
+					placer_pont()
 
-	else:
-		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
-			placer_route()
-		elif event is InputEventKey and event.keycode == KEY_P:
-			if event.pressed and not is_holding_pont:
-				# Début du maintien
+				elif current_scene:
+					_place_object_at_mouse()
+
+			else:
+				is_holding_place = false
+				var clicked := false
+				for bat in get_tree().get_nodes_in_group("batiment"):
+					if bat.has_node("ClickArea") and bat.get_node("ClickArea").global_position.distance_to(mouse_pos) < 32:
+						clicked = true
+						break
+				if not clicked:
+					get_node("CanvasLayer/TableauBord").update_dashboard()
+
+	elif event is InputEventKey:
+		if event.keycode == KEY_R:
+			if event.pressed and not event.echo and not menu.is_locked("sol_terre"):
+				selected_mode = "route"
+				placer_route()
+		elif event.keycode == KEY_P:
+			if event.pressed and not event.echo and not menu.is_locked("Pont"):
 				is_holding_pont = true
 				pont_hold_timer = 0.0
-				placer_pont()  # Premier placement immédiat
+				placer_pont()
 			elif not event.pressed:
-				# Fin du maintien
 				is_holding_pont = false
+
 
 func _erase_object_at_mouse():
 	var pos = get_global_mouse_position()
@@ -470,15 +474,11 @@ func _on_objet_selectionne(nom: String):
 
 func placer_pont():
 	var c = pont_tilemap.local_to_map(get_global_mouse_position())
-	print("📍 Tentative de placement de pont en cellule :", c)
 
-	var map_source = map_tilemap.get_cell_source_id(c)
-	if map_source != 2:
-		print("❌ La cellule n'est pas une tuile d'eau.")
+	if map_tilemap.get_cell_source_id(c) != 2:
 		return
 
 	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1:
-		print("❌ Cellule occupée par un bâtiment ou une route.")
 		return
 
 	var voisins = {
@@ -491,32 +491,32 @@ func placer_pont():
 	var atlas_coords: Vector2i
 
 	if voisins["gauche"] == 0 or voisins["droite"] == 0:
-		atlas_coords = Vector2i(11, 31)  # ← tuile horizontale
+		atlas_coords = Vector2i(11, 31)
 	elif voisins["haut"] == 0 or voisins["bas"] == 0:
-		atlas_coords = Vector2i(12, 32)  # ← tuile verticale
+		atlas_coords = Vector2i(12, 32)
 	else:
-		atlas_coords = Vector2i(11, 31)  # fallback
+		atlas_coords = Vector2i(11, 31)
 
 	pont_tilemap.set_cell(c, 0, atlas_coords)
 	pont_tilemap.z_index = 10
-	print("✅ Pont placé à", c, "avec tuile", atlas_coords)
 	build_route_astar()
 
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
 
-	# —– Si ce n’est pas de l’herbe, on refuse (donc on empêche l’eau)
 	if herbe_tilemap.get_cell_source_id(c) == -1:
 		return
 
-	# —– Si déjà occupé ou déjà une route
 	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1:
 		return
 
-	# —– Sinon on place et on rebuild l’ASTAR
 	route_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
 	build_route_astar()
+
+	if goal_panel and goal_panel.has_method("valider_goal"):
+		goal_panel.valider_goal("check_routes")
+
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 

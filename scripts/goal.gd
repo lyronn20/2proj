@@ -6,7 +6,7 @@ extends Node
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
-var goal_accompli = 0
+var goal_accompli = 12
 var menu 
 var goals = [
 	{ "title": "Construire un feu de camp", "description": "Place ton premier feu de camp pour établir ton campement.", "check": "check_feu_camp" },
@@ -88,6 +88,13 @@ func valider_goal(goal_id: String):
 			debloquer_liens_objets("collect_baies")
 		elif goal_id == "check_carriere":
 			debloquer_liens_objets("carriere")
+		if goal_id == "check_pont":
+			menu.set_bloque("Pont", false)
+		elif goal_id == "check_scierie":
+			menu.set_bloque("sapin", false)
+			menu.set_bloque("sol_terre", false)
+
+
 
 
 

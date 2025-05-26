@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://6hf7amn2ycd6"]
+[gd_scene load_steps=38 format=3 uid="uid://6hf7amn2ycd6"]
 
 [ext_resource type="Script" uid="uid://du3hx8atlspg5" path="res://scripts/Menu.gd" id="1_11y2r"]
 [ext_resource type="Script" uid="uid://cb8bddsmmhndm" path="res://scripts/zone_inventaire.gd" id="2_jmdev"]
@@ -18,6 +18,7 @@
 [ext_resource type="Script" uid="uid://bjfblba0n3yrb" path="res://scripts/reglages.gd" id="11_el213"]
 [ext_resource type="Texture2D" uid="uid://ddvv21viv6ndr" path="res://assets/batiments/animaux_bat.png" id="11_nxcfj"]
 [ext_resource type="Texture2D" uid="uid://c7qn5fkrfr83s" path="res://assets/batiments/baies2.png" id="13_rtd1e"]
+[ext_resource type="Texture2D" uid="uid://de5747qwvrvid" path="res://assets/batiments/logo_pont.png" id="13_uwbky"]
 [ext_resource type="Texture2D" uid="uid://dsggi1onvob0" path="res://assets/batiments/roche.png" id="14_i7htd"]
 [ext_resource type="Texture2D" uid="uid://bfvvhx5sxnaxy" path="res://assets/batiments/menu-icon.png" id="15_7t7qg"]
 [ext_resource type="Texture2D" uid="uid://cdv8jkqlf57g3" path="res://assets/batiments/ui_clean_2__1_-removebg-preview.png" id="15_7ycwl"]
@@ -39,6 +40,9 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="LabelSettings" id="LabelSettings_uwbky"]
+font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dek3k"]
 texture = ExtResource("18_7t7qg")
@@ -206,6 +210,13 @@ layout_mode = 2
 texture = ExtResource("5_b6cxs")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/sol_terre"]
+layout_mode = 2
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
 [node name="Label" type="Label" parent="HUD/ZoneInventaire/route/sol_terre"]
 modulate = Color(0, 0, 0, 1)
 layout_mode = 0
@@ -214,6 +225,27 @@ offset_top = 44.0
 offset_right = 92.0
 offset_bottom = 67.0
 text = "R"
+
+[node name="Pont" type="TextureRect" parent="HUD/ZoneInventaire/route"]
+layout_mode = 2
+texture = ExtResource("13_uwbky")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/Pont"]
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="HUD/ZoneInventaire/route/Pont"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 45.0
+offset_right = 95.0
+offset_bottom = 68.0
+text = "P"
+label_settings = SubResource("LabelSettings_uwbky")
 
 [node name="Gomme" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
