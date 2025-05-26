@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=4 uid="uid://bhs3xfwenrsbx"]
+[gd_scene load_steps=31 format=4 uid="uid://bhs3xfwenrsbx"]
 
 [ext_resource type="Script" uid="uid://dkxjx8q7p23w" path="res://scripts/game.gd" id="1_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://b1r42x5lvt6c" path="res://assets/map/sol_terre.png" id="2_u5sy4"]
@@ -1605,6 +1605,9 @@ texture = ExtResource("9_0tnpc")
 [sub_resource type="TileSet" id="TileSet_dinhu"]
 sources/0 = SubResource("TileSetAtlasSource_kvpfn")
 
+[sub_resource type="LabelSettings" id="LabelSettings_vtaks"]
+font_size = 100
+
 [node name="game" type="Node2D"]
 script = ExtResource("1_lnu2h")
 
@@ -1659,10 +1662,8 @@ tilemap = NodePath("../Map")
 preview_size = Vector2i(4, 4)
 
 [node name="EpilepsieLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Background" type="ColorRect" parent="EpilepsieLayer"]
-visible = false
 offset_left = -44.0
 offset_top = -183.0
 offset_right = 2031.0
@@ -1670,7 +1671,6 @@ offset_bottom = 1264.0
 color = Color(0, 0, 0, 0.811765)
 
 [node name="Button" type="Button" parent="EpilepsieLayer"]
-visible = false
 offset_left = 905.0
 offset_top = 613.0
 offset_right = 1130.0
@@ -1681,7 +1681,6 @@ text = "CONTINUER
 "
 
 [node name="Label" type="Label" parent="EpilepsieLayer"]
-visible = false
 offset_left = 418.0
 offset_top = 291.0
 offset_right = 2203.0
@@ -1704,3 +1703,39 @@ tile_map_data = PackedByteArray("AADJ/2cAAAAnAC8AAADJ/2gAAAAJAC0AADDJ/2kAAAAJACw
 tile_set = SubResource("TileSet_dinhu")
 
 [node name="musiqueFond" parent="." instance=ExtResource("10_vtaks")]
+
+[node name="ile 2" type="Label" parent="."]
+z_index = 11
+offset_left = -1649.0
+offset_top = 606.0
+offset_right = -1424.0
+offset_bottom = 743.0
+text = "Île 2 "
+label_settings = SubResource("LabelSettings_vtaks")
+
+[node name="ile 3" type="Label" parent="."]
+z_index = 11
+offset_left = -1571.0
+offset_top = -984.0
+offset_right = -1346.0
+offset_bottom = -847.0
+text = "Île 3"
+label_settings = SubResource("LabelSettings_vtaks")
+
+[node name="ile 4" type="Label" parent="."]
+z_index = 11
+offset_left = 1298.0
+offset_top = 940.0
+offset_right = 1523.0
+offset_bottom = 1077.0
+text = "Île 4"
+label_settings = SubResource("LabelSettings_vtaks")
+
+[node name="ile 5" type="Label" parent="."]
+z_index = 11
+offset_left = 1259.0
+offset_top = -901.0
+offset_right = 1484.0
+offset_bottom = -764.0
+text = "Île 5"
+label_settings = SubResource("LabelSettings_vtaks")
