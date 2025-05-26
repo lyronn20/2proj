@@ -75,6 +75,9 @@ var repeatable_modes = ["baies", "sapin", "blé", "pierre"]
 var is_holding_place := false
 var hold_place_timer := 0.0
 var hold_place_interval := 0.01   
+var is_holding_pont := false
+var pont_hold_timer := 0.0
+var pont_hold_interval := 0.01
 
 func _ready():
 	# départ tout invisible
@@ -96,6 +99,7 @@ func _ready():
 	island_tilemaps = [herbe_tilemap, ile2_tilemap, ile3_tilemap, ile4_tilemap, ile5_tilemap]
 	spawn_pnjs(20)
 	generate_sapins(120)
+	detecter_types_eau()
 
 	grid_preview = preload("res://scenes/GridPreview.tscn").instantiate()
 	add_child(grid_preview)
@@ -203,6 +207,12 @@ func _process(delta):
 				_erase_object_at_mouse()
 			else:
 				_place_object_at_mouse()
+				
+	if is_holding_pont:
+		pont_hold_timer += delta
+		if pont_hold_timer >= pont_hold_interval:
+			pont_hold_timer = 0.0
+			placer_pont()
 	# 6) Mise à jour du HUD stat
 	update_ui_stats()
 
@@ -347,8 +357,15 @@ func _unhandled_input(event):
 	else:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
 			placer_route()
-		elif event.is_action_pressed("pont"):
-			placer_pont()
+		elif event is InputEventKey and event.keycode == KEY_P:
+			if event.pressed and not is_holding_pont:
+				# Début du maintien
+				is_holding_pont = true
+				pont_hold_timer = 0.0
+				placer_pont()  # Premier placement immédiat
+			elif not event.pressed:
+				# Fin du maintien
+				is_holding_pont = false
 
 func _erase_object_at_mouse():
 	var pos = get_global_mouse_position()
@@ -447,18 +464,25 @@ func placer_pont():
 	var c = pont_tilemap.local_to_map(get_global_mouse_position())
 	print("📍 Tentative de placement de pont en cellule :", c)
 
-	if map_tilemap.get_cell_source_id(c) != 2 or map_tilemap.get_cell_atlas_coords(c) != Vector2i(1, 2):
-		print("❌ La cellule n'est pas de l’eau.")
+	var map_source = map_tilemap.get_cell_source_id(c)
+	
+	if map_source != 2:
+		print("❌ La cellule n'est pas une tuile d'eau.")
 		return
 
-	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1 or pont_tilemap.get_cell_source_id(c) != -1:
-		print("❌ Cellule occupée ou déjà utilisée.")
+	if occupied_cells.has(c) or route_tilemap.get_cell_source_id(c) != -1:
+		print("❌ Cellule occupée par un bâtiment ou une route.")
 		return
 
-	pont_tilemap.set_cell(c, 1, Vector2i(0, 0))  # ✅ source_id = 1, coord = (0,0) → à adapter à ton tileset
+	# 🔧 ENLEVEZ cette ligne qui copie le mauvais tileset :
+	# pont_tilemap.tile_set = herbe_tilemap.tile_set
+	
+	# ✅ Gardez votre TileSet de pont original
+	pont_tilemap.set_cell(c, 0, Vector2i(0, 0))  # Essayez (0,0) pour la première tuile de pont
+	pont_tilemap.z_index = 10
+	
 	print("✅ Pont placé à", c)
 	build_route_astar()
-
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
@@ -692,7 +716,6 @@ func print_total_carriere_stock() -> int:
 		# On utilise la méthode get_stock() plutôt que carre.has()
 		if carre.has_method("get_stock"):
 			total_pierre += carre.get_stock()
-	print("📦 Total pierre stockée par toutes les carrières : %d" % total_pierre)
 	return total_pierre
 # Total des baies de tous les collecteurs de baies
 func print_total_baies_stock() -> int:
@@ -700,7 +723,6 @@ func print_total_baies_stock() -> int:
 	for node in get_tree().get_nodes_in_group("baies"):
 		if node.has_method("get_stock"):
 			total += node.get_stock()
-	print("🍓 Total baies stockées                             : %d" % total)
 	return total
 
 # Total du blé de toutes les fermes
@@ -709,7 +731,6 @@ func print_total_ble_stock() -> int:
 	for node in get_tree().get_nodes_in_group("ble"):
 		if node.has_method("get_stock"):
 			total += node.get_stock()
-	print("🌾 Total blé stocké                                  : %d" % total)
 	return total
 
 # Total du bois de toutes les scieries
@@ -718,7 +739,6 @@ func print_total_wood_stock() -> int:
 	for node in get_tree().get_nodes_in_group("scierie"):
 		if node.has_method("get_stock"):
 			total += node.get_stock()
-	print("🪵 Total bois stocké                                 : %d" % total)
 	return total
 
 # Total du bois de toutes les scieries
@@ -727,7 +747,6 @@ func print_total_eau_stock() -> int:
 	for node in get_tree().get_nodes_in_group("puit"):
 		if node.has_method("get_stock"):
 			total += node.get_stock()
-	print("🪵 Total eau stocké                            : %d" % total)
 	return total
 
 func sauvegarder_jeu():
@@ -877,3 +896,30 @@ func _on_epilepsie_continue_pressed():
 	var fade_out = get_tree().create_tween()
 	fade_out.tween_property(background, "modulate:a", 0.0, 1.5)
 	fade_out.tween_callback(Callable($EpilepsieLayer, "hide"))
+	
+
+func detecter_types_eau():
+	var eau_types = {}
+	var used_rect = map_tilemap.get_used_rect()
+	
+	for x in range(used_rect.position.x, used_rect.position.x + used_rect.size.x):
+		for y in range(used_rect.position.y, used_rect.position.y + used_rect.size.y):
+			var cell = Vector2i(x, y)
+			var source = map_tilemap.get_cell_source_id(cell)
+			var atlas = map_tilemap.get_cell_atlas_coords(cell)
+			
+			# Si c'est une tuile avec source_id = 2 (vos tuiles d'eau)
+			if source == 2:
+				var key = str(atlas)
+				if not eau_types.has(key):
+					eau_types[key] = {
+						"atlas": atlas,
+						"count": 0,
+						"example_pos": cell
+					}
+				eau_types[key]["count"] += 1
+	for key in eau_types.keys():
+		var info = eau_types[key]
+		print("  📍 Atlas:", info["atlas"], "- Quantité:", info["count"], "- Exemple en:", info["example_pos"])
+	
+	return eau_types

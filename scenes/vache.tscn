@@ -47,6 +47,7 @@ z_index = 3
 scale = Vector2(0.1, 0.1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 3
 sprite_frames = SubResource("SpriteFrames_x7qge")
 frame_progress = 0.354296
 script = ExtResource("1_qqs4v")

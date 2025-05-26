@@ -18,7 +18,6 @@ func _ready():
 	update_dashboard()
 	await get_tree().create_timer(0.1).timeout
 	update_total_stock()
-	print("✅ total stock lancé")
 
 	# 🕒 Rafraîchir le stock régulièrement
 	var timer = Timer.new()

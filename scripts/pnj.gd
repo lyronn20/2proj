@@ -94,7 +94,6 @@ func _ready():
 		_:
 			# PNJ sans métier : se déplace aléatoirement dès le départ
 			mission = ""
-			print("PNJ", id, "sans métier → marche libre.")
 
 
 func _process(delta):
@@ -137,8 +136,6 @@ func _on_click(_vp, event, _si):
 		else:
 			tab.update_pnj_panel(self)
 			tab.current_pnj = self
-
-		print("🖱️ PNJ ID:", id)
 
 		
 func follow_path(delta):
@@ -219,13 +216,11 @@ func prepare_return_path():
 		var goal = game._find_nearest_walkable_cell(raw_goal)
 
 		if not astar.region.has_point(start) or not astar.region.has_point(goal):
-			print("❌ Retour maison impossible : hors région", start, goal)
 			following_route = false
 			mission = ""
 			return
 
 		if astar.is_point_solid(start) or astar.is_point_solid(goal):
-			print("❌ Retour maison impossible : bloqué", start, goal)
 			following_route = false
 			mission = ""
 			return
@@ -353,13 +348,11 @@ func go_to(pos: Vector2, new_mission: String = ""):
 	var goal  = game._find_nearest_walkable_cell(raw_goal)
 
 	if not astar.region.has_point(start) or not astar.region.has_point(goal):
-		print("❌ START ou GOAL hors région :", start, "->", goal)
 		following_route = false
 		mission = ""
 		return
 
 	if astar.is_point_solid(start) or astar.is_point_solid(goal):
-		print("❌ START ou GOAL bloqués :", start, "->", goal)
 		following_route = false
 		mission = ""
 		return
@@ -378,7 +371,6 @@ func go_to(pos: Vector2, new_mission: String = ""):
 		if new_mission != "":
 			mission = new_mission
 	else:
-		print("❌ Aucun chemin trouvé pour mission :", new_mission)
 		following_route = false
 		mission = ""
 
@@ -722,7 +714,6 @@ func do_deposer_eau(delta):
 
 		# ✅ Si next_pos est le même que le puits, on arrête la boucle
 		if next_pos == lieu_travail.global_position:
-			print("⛔ Aucun point d'eau atteignable pour PNJ", id)
 			mission = ""
 			return
 
@@ -763,8 +754,6 @@ func do_manger_animal(delta):
 		# Reprendre la mission précédente après avoir mangé
 		reprendre_mission_apres_survie()
 
-		print("🍗 PNJ", id, " a mangé un animal.")
-
 func search_nearest_animal():
 	var animaux = game.get_all_animaux_disponibles()
 	if animaux.is_empty():
@@ -783,13 +772,8 @@ func search_nearest_animal():
 
 	if closest_animal:
 		current_baie = closest_animal
-		print("🍗 PNJ", id, "va manger", closest_animal.name)
 		go_to(closest_animal.global_position, "aller_manger_animal")
-	else:
-		print("❌ Aucun animal atteignable")
 		
-
-
 func search_nearest_well():
 	var puits_dispo = []
 	for bat in get_tree().get_nodes_in_group("batiment"):
@@ -797,7 +781,6 @@ func search_nearest_well():
 			puits_dispo.append(bat)
 
 	if puits_dispo.is_empty():
-		print("❌ Aucun puits disponible pour boire.")
 		return
 
 	var closest = null
@@ -811,7 +794,6 @@ func search_nearest_well():
 	if closest:
 		lieu_boisson = closest
 		go_to(closest.global_position, "aller_boire")
-		print("💧 PNJ", id, "va boire au", closest.name)
 
 func do_boire(delta):
 	if not is_instance_valid(lieu_boisson) or global_position.distance_to(lieu_boisson.global_position) > 8:
@@ -821,12 +803,10 @@ func do_boire(delta):
 
 	if lieu_boisson.boire():
 		soif = 100
-		print("💧 PNJ", id, "a bu au", lieu_boisson.name)
 		
 		# Reprendre la mission précédente après avoir bu
 		reprendre_mission_apres_survie()
 	else:
-		print("❌", lieu_boisson.name, "n'a plus d'eau !")
 		mission = ""
 
 	lieu_boisson = null
@@ -862,14 +842,11 @@ func calculer_facteur_sante():
 	facteur_sante = clamp(facteur_sante, 0.5, 2.0)
 
 func mourir_naturellement():
-	print("👴 PNJ", id, "est mort de vieillesse à", age, "minutes (espérance:", esperance_vie, ")")
 	liberer_ressources()
-	
 	# Effet visuel de mort naturelle (particules, animation...)
 	queue_free()
 
 func mourir_de_privation():
-	print("💀 PNJ", id, "est mort de privation extrême")
 	liberer_ressources()
 	queue_free()
 
@@ -913,7 +890,5 @@ func reprendre_mission_apres_survie():
 			"pompier":
 				if lieu_travail and lieu_travail.touche_eau:
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
-		
-		print("🔄 PNJ", id, "reprend son travail après s'être nourri")
 	else:
 		mission = ""
