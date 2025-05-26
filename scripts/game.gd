@@ -465,7 +465,6 @@ func placer_pont():
 	print("📍 Tentative de placement de pont en cellule :", c)
 
 	var map_source = map_tilemap.get_cell_source_id(c)
-	
 	if map_source != 2:
 		print("❌ La cellule n'est pas une tuile d'eau.")
 		return
@@ -474,15 +473,27 @@ func placer_pont():
 		print("❌ Cellule occupée par un bâtiment ou une route.")
 		return
 
-	# 🔧 ENLEVEZ cette ligne qui copie le mauvais tileset :
-	# pont_tilemap.tile_set = herbe_tilemap.tile_set
-	
-	# ✅ Gardez votre TileSet de pont original
-	pont_tilemap.set_cell(c, 0, Vector2i(0, 0))  # Essayez (0,0) pour la première tuile de pont
+	var voisins = {
+		"haut": map_tilemap.get_cell_source_id(c + Vector2i(0, -1)),
+		"bas": map_tilemap.get_cell_source_id(c + Vector2i(0, 1)),
+		"gauche": map_tilemap.get_cell_source_id(c + Vector2i(-1, 0)),
+		"droite": map_tilemap.get_cell_source_id(c + Vector2i(1, 0))
+	}
+
+	var atlas_coords: Vector2i
+
+	if voisins["gauche"] == 0 or voisins["droite"] == 0:
+		atlas_coords = Vector2i(11, 31)  # ← tuile horizontale
+	elif voisins["haut"] == 0 or voisins["bas"] == 0:
+		atlas_coords = Vector2i(12, 32)  # ← tuile verticale
+	else:
+		atlas_coords = Vector2i(11, 31)  # fallback
+
+	pont_tilemap.set_cell(c, 0, atlas_coords)
 	pont_tilemap.z_index = 10
-	
-	print("✅ Pont placé à", c)
+	print("✅ Pont placé à", c, "avec tuile", atlas_coords)
 	build_route_astar()
+
 
 func placer_route():
 	var c = route_tilemap.local_to_map(get_global_mouse_position())
