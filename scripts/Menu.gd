@@ -107,7 +107,7 @@ func set_locked_buttons(goal_accompli: int):
 		"carriere": 7,
 		"roches": 7,
 		"pierre": 7,
-		"Pont": 12,           
+		"Pont": 11,           
 		"sol_terre": 4  
 	}
 

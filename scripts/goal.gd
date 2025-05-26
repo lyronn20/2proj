@@ -6,7 +6,7 @@ extends Node
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
-var goal_accompli = 12
+var goal_accompli = 0
 var menu 
 var goals = [
 	{ "title": "Construire un feu de camp", "description": "Place ton premier feu de camp pour établir ton campement.", "check": "check_feu_camp" },
