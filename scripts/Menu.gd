@@ -86,11 +86,11 @@ func set_locked_buttons(goal_accompli: int):
 	var all_buttons = {
 		"feu_camp": 0,
 		"hutte": 1,
-		"animaux_bat": 2,
-		"puit": 3,
-		"ferme": 4,
-		"collect_baies": 5,
-		"scierie": 6,
+		"puit": 2,
+		"animaux_bat": 3,
+		"scierie": 4,
+		"ferme": 5,
+		"collect_baies": 6,
 		"carriere": 7
 	}
 

@@ -30,25 +30,37 @@ func _ready():
 func update_dashboard(batiment: Node = null):
 	pnj_panel.visible = false
 	batiment_panel.visible = false
+
+	# Vide l'ancien contenu
 	for child in vbox.get_children():
 		child.queue_free()
 
-	if batiment:
-		batiment_panel.visible = true
+	# Si rien n'est sélectionné, on sort
+	if batiment == null:
+		return
 
-		# ➕ Utilise `nom_affichage` s'il existe, sinon fallback sur le name brut
-		var nom := batiment.name
-		if batiment.has_meta("nom_affichage"):
-			nom = batiment.get_meta("nom_affichage")
+	batiment_panel.visible = true
 
-		vbox.add_child(make_label("🏠 " + nom))
+	# Titre du bâtiment
+	var nom := batiment.name
+	if batiment.has_meta("nom_affichage"):
+		nom = batiment.get_meta("nom_affichage")
+	vbox.add_child(make_label("🏠 " + nom))
 
-		if "habitants" in batiment:
-			for p in batiment.habitants:
-				vbox.add_child(make_label("  → PNJ ID: " + str(p.id)))
-		elif "employes" in batiment:
-			for p in batiment.employes:
-				vbox.add_child(make_label("  → PNJ ID: " + str(p.id)))
+	# Liste des PNJ
+	if "habitants" in batiment:
+		# On purge d'abord les références mortes
+		batiment.habitants = batiment.habitants.filter(is_instance_valid)
+		for p in batiment.habitants:
+			# Garde seulement les PNJ encore valides
+			if is_instance_valid(p):
+				vbox.add_child(make_label("→ PNJ ID: " + str(p.id)))
+	elif "employes" in batiment:
+		batiment.employes = batiment.employes.filter(is_instance_valid)
+		for p in batiment.employes:
+			if is_instance_valid(p):
+				vbox.add_child(make_label("→ PNJ ID: " + str(p.id)))
+
 
 		# Affiche le stock si disponible
 		if batiment.has_method("get_stock"):

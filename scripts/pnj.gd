@@ -65,6 +65,8 @@ var eau_timer := 0.0
 var temps_pompage := 1.5
 var animal_retry_timer := 0.0
 var lieu_boisson = null
+signal died(metier: String, batiment: Node)
+
 
 func _ready():
 	sprite.play("walk")
@@ -892,3 +894,8 @@ func reprendre_mission_apres_survie():
 					go_to(lieu_travail.get_point_eau(), "aller_bord_eau")
 	else:
 		mission = ""
+		
+func die():
+	# avant de queue_free, on prévient
+	emit_signal("died", metier, lieu_travail if lieu_travail else maison)
+	queue_free()

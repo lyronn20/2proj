@@ -6,7 +6,7 @@ extends Node
 
 var route_tilemap: TileMapLayer 
 var current_goal_index := 0
-var goal_accompli = 7
+var goal_accompli = 0
 var menu 
 var goals = [
 	{ "title": "Construire un feu de camp", "description": "Place ton premier feu de camp pour établir ton campement.", "check": "check_feu_camp" },
@@ -17,14 +17,15 @@ var goals = [
 	{ "title": "Construire une scierie", "description": "Transforme le bois en planches.", "check": "check_scierie" },
 	{ "title": "Avoir 150 bois", "description": "Stocke au moins 150 bois.", "check": "check_150_bois" },
 	{ "title": "Construire une carrière", "description": "Place une carrière pour extraire de la pierre.", "check": "check_carriere" },
-	{ "title": "Collecteur de baies + 50 baies", "description": "Place un collecteur de baies et récolte 50 baies.", "check": "check_berry" },
+	{ "title": "Collecteur de baies + 75 baies", "description": "Place un collecteur de baies et récolte 75 baies.", "check": "check_berry" },
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_ferme" },
-	{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
+	#{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
 	{ "title": "2 puits + 2 enclos à animaux", "description": "Aie 2 puits et 2 bâtiments à animaux.", "check": "check_double_eau_animaux" },
-	{ "title": "50 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
-	{ "title": "500 blés stockés", "description": "Stocke au moins 500 blés.", "check": "check_500_ble" },
+	#debloquage des ponts
+	{ "title": "100 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
+	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_250_ble" },
 	{ "title": "30 métiers assignés", "description": "Affecte 30 PNJ à un métier.", "check": "check_30_metiers" },
-	{ "title": "100 citoyens + débloquer pont", "description": "Atteins 100 citoyens pour débloquer le pont.", "check": "check_100_citoyens" }
+	{ "title": "150 citoyens + débloquer pont", "description": "Atteins 100 citoyens pour débloquer le pont.", "check": "check_100_citoyens" }
 ]
 
 

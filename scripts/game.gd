@@ -35,7 +35,6 @@ const ANIMAUX_BAT = preload("res://scenes/animaux_bat.tscn")
 const FEU_CAMP_SOUND = preload("res://song/feu_camp.mp3")
 const SCIERIE_SOUND = preload("res://song/scierie.mp3")
 var island_tilemaps := []
-
 var pnj_scene: PackedScene = preload("res://scenes/pnj.tscn")
 var next_id := 1
 var goal_accompli : = 0
@@ -46,7 +45,8 @@ var selected_mode:   String      = ""
 var grid_preview:    Node2D      = null
 var pnj_counter := 1
 var reproduction_timer := 0.0
-var reproduction_interval := 210 
+var reproduction_interval := 130
+var death_queue := []
 
 var inventory := { "feu_camp": 1 }
 var occupied_cells := {}
@@ -97,7 +97,7 @@ func _ready():
 	menu.update_inventory("feu_camp", inventory["feu_camp"])
 	menu.set_locked_buttons(goal_accompli)
 	island_tilemaps = [herbe_tilemap, ile2_tilemap, ile3_tilemap, ile4_tilemap, ile5_tilemap]
-	spawn_pnjs(200)
+	spawn_pnjs(21)
 	generate_sapins(120)
 	detecter_types_eau()
 
@@ -556,40 +556,82 @@ func verifier_reproduction():
 	
 	# Chance de reproduction pour chaque couple
 	for couple in couples:
-		if randf() < 0.15:  
+		if randf() < 0.22:  
 			faire_bebe(couple[0].maison)
 
-func faire_bebe(maison_parents: Node2D):
+func faire_bebe(_unused):
+	# 1) instanciation du bébé
 	var bebe = pnj_scene.instantiate()
-	bebe.name = "PNJ_" + str(next_id)
+	bebe.name = "PNJ_%d" % next_id
 	bebe.id = next_id
 	next_id += 1
-	bebe.global_position = maison_parents.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
-	bebe.has_house = true
-	bebe.maison = maison_parents
 	bebe.add_to_group("pnj")
 	bebe.add_to_group("placeable")
 	add_child(bebe)
+
+	# 2) on cherche une hutte libre (jamais celle des parents)
+	var cible_hutte = _find_hutte_libre()
+	# si aucune n'est libre, on retombe sur la hutte des parents
+	if cible_hutte == null and bebe.maison:
+		cible_hutte = bebe.maison
+	# si toujours null, on fait sans maison
+	if cible_hutte:
+		# 3) positionnement autour de la hutte choisie
+		var pos = cible_hutte.global_position
+		bebe.global_position = pos + Vector2(randf_range(-10,10), randf_range(-10,10))
+		# 4) inscription comme habitant
+		bebe.has_house = true
+		bebe.maison = cible_hutte
+		if cible_hutte.has_method("add_habitant"):
+			cible_hutte.call("add_habitant", bebe)
+	else:
+		# fallback : pile au centre de la carte
+		bebe.global_position = Vector2.ZERO
+
+	# 5) connexion du signal de mort
+	_register_pnj(bebe)
+
+func _find_hutte_libre() -> Node2D:
+	for hut in get_tree().get_nodes_in_group("housing"):
+		if hut.habitants.size() < 2:
+			return hut
+	return null
 	
-	if maison_parents.has_method("add_habitant"):
-		maison_parents.add_habitant(bebe)
-	
-	print("👶 Nouveau PNJ né ! Population:", get_tree().get_nodes_in_group("pnj").size())
+# 1) Fonction purement “register” : connecte seulement le signal
+func _register_pnj(pnj):
+	pnj.died.connect(Callable(self, "_on_pnj_died"))
+
+	# 2) Fonction “spawn” : instancie, ajoute au tree, puis enregistre
 func spawn_pnjs(count: int):
-	var tries = 0
-	while count > 0 and tries < count*10:
+	var tries := 0
+	while count > 0 and tries < count * 10:
 		tries += 1
+		# → Ta logique pour trouver `cell` valide (ex. random sur herbe_tilemap) :
 		var cell = Vector2i(randi_range(0,20), randi_range(0,20))
-		if herbe_tilemap.get_cell_source_id(cell) == 0:
-			var pn = pnj_scene.instantiate()
-			pn.name = "pnj"
-			pn.id = next_id
-			next_id += 1
-			pn.global_position = herbe_tilemap.map_to_local(cell)
-			pn.add_to_group("pnj")
-			pn.add_to_group("placeable")
-			add_child(pn)
-			count -= 1
+		if herbe_tilemap.get_cell_source_id(cell) != 0:
+			continue
+
+		# Instanciation
+		var pn = pnj_scene.instantiate()
+		pn.name = "PNJ_%d" % next_id
+		pn.id = next_id
+		next_id += 1
+		pn.global_position = herbe_tilemap.map_to_local(cell)
+		pn.add_to_group("pnj")
+		pn.add_to_group("placeable")
+		add_child(pn)
+
+		# Connexion du signal de mort
+		_register_pnj(pn)
+
+		count -= 1
+	
+
+func _on_pnj_died(metier: String, batiment: Node) -> void:
+	if is_instance_valid(batiment):
+		death_queue.append({ "metier": metier, "bat": batiment })
+		
+
 
 func generate_sapins(count: int = 50):
 	var tries = 0
