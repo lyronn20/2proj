@@ -21,7 +21,7 @@ var goals = [
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_ferme" },
 	#{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
 	{ "title": "2 puits + 2 enclos à animaux", "description": "Aie 2 puits et 2 bâtiments à animaux.", "check": "check_double_eau_animaux" },
-	#debloquage des ponts
+	{ "title": "Construire un pont", "description": "Permet d'étendre ton territoire.", "check": "check_pont" },
 	{ "title": "100 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
 	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_250_ble" },
 	{ "title": "30 métiers assignés", "description": "Affecte 30 PNJ à un métier.", "check": "check_30_metiers" },
@@ -214,14 +214,14 @@ func check_50_citoyens() -> bool:
 	var total := get_tree().get_nodes_in_group("pnj").size()
 	return total >= 50
 
-func check_500_ble() -> bool:
+func check_250_ble() -> bool:
 	var total := 0
 	for node in get_tree().get_nodes_in_group("ferme"):
 		if node.has_method("get_stock"):
 			var stock = node.get_stock()
 			if typeof(stock) == TYPE_DICTIONARY and stock.has("blé"):
 				total += int(stock["blé"])
-	return total >= 500
+	return total >= 250
 
 func check_30_metiers() -> bool:
 	var count := 0
@@ -233,3 +233,13 @@ func check_30_metiers() -> bool:
 func check_100_citoyens() -> bool:
 	var total := get_tree().get_nodes_in_group("pnj").size()
 	return total >= 100
+
+func check_pont() -> bool:
+	if not get_tree().get_root().has_node("game/Pont/pont"):
+		return false
+
+	var pont_tilemap = get_tree().get_root().get_node("game/Pont/pont")
+	for cell in pont_tilemap.get_used_cells():
+		if pont_tilemap.get_cell_source_id(cell) != -1:
+			return true
+	return false

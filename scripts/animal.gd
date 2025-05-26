@@ -9,7 +9,8 @@ var interval := 2.0
 
 func _ready():
 	pick_new_direction()
-	play("walk")
+	if sprite_frames and sprite_frames.has_animation("walk"):
+		play("walk")
 
 func _process(delta):
 	wander_timer += delta

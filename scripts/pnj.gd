@@ -97,6 +97,8 @@ func _ready():
 			# PNJ sans métier : se déplace aléatoirement dès le départ
 			mission = ""
 
+func update():
+	pass  # ← temporaire pour éviter l'erreur console
 
 func _process(delta):
 	faim = clamp(faim, 0, 100)

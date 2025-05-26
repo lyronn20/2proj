@@ -69,7 +69,7 @@ var objet_sizes = {
 var route_astar := AStarGrid2D.new()
 var grid_size := Vector2i(128, 128)
 
-var repeatable_modes = ["baies", "sapin", "blé", "pierre"]
+var repeatable_modes = ["baies", "sapin", "blé", "pierre", "hutte"]
 
 # flag & timer pour le click-and-hold
 var is_holding_place := false
@@ -238,10 +238,18 @@ func _place_object_at_mouse():
 	inst.global_position = route_tilemap.map_to_local(base_cell)
 	inst.add_to_group("placeable")
 	inst.add_to_group("batiment")
+
 	if selected_mode == "carriere":
 		inst.add_to_group("carriere")
+	if selected_mode == "hutte":
+		inst.add_to_group("housing")
+
 	add_child(inst)
 	get_node("CanvasLayer/TableauBord").update_dashboard(inst)
+
+	if selected_mode == "hutte":
+		assign_pnjs_to_hut(inst)
+
 	
 		# 🔊 Bruitages
 	match selected_mode:
@@ -630,8 +638,30 @@ func spawn_pnjs(count: int):
 func _on_pnj_died(metier: String, batiment: Node) -> void:
 	if is_instance_valid(batiment):
 		death_queue.append({ "metier": metier, "bat": batiment })
-		
 
+	# Relancer une tentative d’assignation dans tout le groupe
+	match metier:
+		"bucheron":
+			_try_fill_all_jobs("scierie", "bucheron")
+		"mineur":
+			_try_fill_all_jobs("carriere", "mineur")
+		"fermier":
+			_try_fill_all_jobs("ferme", "fermier")
+		"cueilleur":
+			_try_fill_all_jobs("collect_baies", "cueilleur")
+		"pompier":
+			_try_fill_all_jobs("puit", "pompier")
+
+			
+func _try_fill_all_jobs(group_name: String, metier: String):
+	for building in get_tree().get_nodes_in_group("batiment"):
+		if not building.name.begins_with(group_name):
+			continue
+		if not building.has_method("add_employe"):
+			continue
+		if building.employes.size() >= 2:
+			continue
+		assign_pnjs_to_work(building, metier)
 
 func generate_sapins(count: int = 50):
 	var tries = 0
@@ -659,20 +689,22 @@ func generate_sapins(count: int = 50):
 			spawned += 1
 
 
-func assign_pnjs_to_hut(hut: Node2D):
+func assign_pnjs_to_hut(_ignore: Variant = null):
 	var free_pnjs := []
 	for p in get_tree().get_nodes_in_group("pnj"):
 		if not p.has_house:
 			free_pnjs.append(p)
-			if free_pnjs.size() >= 2:
-				break
 
-	for p in free_pnjs:
-		p.name = "PNJ_" + str(pnj_counter)
-		pnj_counter += 1
-		p.has_house = true
-		p.maison = hut
-		hut.call("add_habitant", p)
+	for hut in get_tree().get_nodes_in_group("housing"):
+		while hut.habitants.size() < 2 and free_pnjs.size() > 0:
+			var pnj = free_pnjs.pop_front()
+			pnj.name = "PNJ_" + str(pnj_counter)
+			pnj_counter += 1
+			pnj.has_house = true
+			pnj.maison = hut
+			hut.call("add_habitant", pnj)
+
+
 
 func reset_all_pnjs():
 	for p in get_tree().get_nodes_in_group("pnj"):
@@ -728,7 +760,8 @@ func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
 		p.chemin.append(building.global_position)
 		p.current_step = 0
 		p.following_route = true
-		p.call_deferred("update")
+		if p.has_method("update"):
+			p.call_deferred("update")
 
 		if building.has_method("add_employe") and not building.employes.has(p):
 			building.call("add_employe", p)
@@ -972,7 +1005,5 @@ func detecter_types_eau():
 					}
 				eau_types[key]["count"] += 1
 	for key in eau_types.keys():
-		var info = eau_types[key]
-		print("  📍 Atlas:", info["atlas"], "- Quantité:", info["count"], "- Exemple en:", info["example_pos"])
-	
+		var info = eau_types[key]	
 	return eau_types
