@@ -231,9 +231,23 @@ layout_mode = 2
 texture = ExtResource("10_thu7x")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/sapin"]
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
 [node name="baies" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("13_rtd1e")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/baies"]
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
 expand_mode = 2
 
 [node name="pierre" type="TextureRect" parent="HUD/ZoneInventaire/route"]
@@ -241,9 +255,23 @@ layout_mode = 2
 texture = ExtResource("14_i7htd")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/pierre"]
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
 [node name="blé" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("16_760fv")
+expand_mode = 2
+
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/blé"]
+layout_mode = 0
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
 expand_mode = 2
 
 [node name="Infos_Stats" type="Panel" parent="HUD"]

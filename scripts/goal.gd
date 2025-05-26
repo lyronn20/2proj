@@ -79,6 +79,16 @@ func valider_goal(goal_id: String):
 
 		if menu:
 			menu.set_locked_buttons(goal_accompli)
+			
+		if goal_id == "check_scierie":
+			debloquer_liens_objets("scierie")
+		elif goal_id == "check_ferme":
+			debloquer_liens_objets("ferme")
+		elif goal_id == "check_berry":
+			debloquer_liens_objets("collect_baies")
+		elif goal_id == "check_carriere":
+			debloquer_liens_objets("carriere")
+
 
 
 func _process(_delta):
@@ -243,3 +253,20 @@ func check_pont() -> bool:
 		if pont_tilemap.get_cell_source_id(cell) != -1:
 			return true
 	return false
+
+
+func debloquer_liens_objets(nom: String):
+	if menu == null:
+		return
+
+	match nom:
+		"scierie":
+			menu.set_bloque("sapin", false)
+		"ferme":
+			menu.set_bloque("blé", false)
+		"collect_baies":
+			menu.set_bloque("baies", false)
+		"carriere":
+			menu.set_bloque("pierre", false)
+		_:
+			pass

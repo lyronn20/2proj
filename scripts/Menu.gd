@@ -83,43 +83,73 @@ func update_inventory(item_name: String, count: int) -> void:
 		btn.disabled = (count <= 0)
 		
 func set_locked_buttons(goal_accompli: int):
+	var objets_associes = {
+		"scierie": ["sapin"],
+		"ferme": ["blé"],
+		"collect_baies": ["baies"],
+		"carriere": ["pierre", "roches"]
+	}
+
 	var all_buttons = {
 		"feu_camp": 0,
 		"hutte": 1,
 		"puit": 2,
 		"animaux_bat": 3,
 		"scierie": 4,
+		"sapin": 4,
 		"ferme": 5,
+		"blé": 5,
 		"collect_baies": 6,
-		"carriere": 7
+		"baies": 6,
+		"carriere": 7,
+		"roches": 7,
+		"pierre": 7
 	}
 
 	for btn_name in all_buttons.keys():
 		var required_goal = all_buttons[btn_name]
 		if inventaire:
-			var btn = inventaire.get_node_or_null("HBoxContainer/" + btn_name)
+			var btn = _get_bouton_par_nom(btn_name)
 			if btn:
 				var croix = btn.get_node_or_null("verrou")
-				
+				var est_verrouille = goal_accompli < required_goal
+
 				if croix:
-					croix.visible = goal_accompli < required_goal
-				# Et tu peux désactiver les boutons aussi si tu veux :
+					croix.visible = est_verrouille
 				if btn is BaseButton:
-					btn.disabled = goal_accompli < required_goal
+					btn.disabled = est_verrouille
+
+				if not est_verrouille and objets_associes.has(btn_name):
+					for alias in objets_associes[btn_name]:
+						var btn_lie = inventaire.get_node_or_null("HBoxContainer/" + alias)
+						if btn_lie:
+							var verrou_lie = btn_lie.get_node_or_null("verrou")
+							if verrou_lie:
+								verrou_lie.visible = false
+							if btn_lie is BaseButton:
+								btn_lie.disabled = false
+
 			
 func set_bloque(nom: String, bloque: bool):
-	var noeud = get_node_or_null("HBoxContainer/" + nom)
+	var noeud = _get_bouton_par_nom(nom)
 	if noeud:
-		var verrou = noeud.get_node_or_null("Verrou")
+		var verrou = noeud.get_node_or_null("verrou")
 		if verrou and verrou is TextureRect:
 			verrou.visible = bloque
-			
+
+
 func is_locked(nom: String) -> bool:
-	if not inventaire:
-		return false
-	var noeud = inventaire.get_node_or_null("HBoxContainer/" + nom)
+	var noeud = _get_bouton_par_nom(nom)
 	if noeud:
 		var verrou = noeud.get_node_or_null("verrou")
 		if verrou and verrou is TextureRect:
 			return verrou.visible
 	return false
+
+
+func _get_bouton_par_nom(nom: String) -> Node:
+	if inventaire.has_node("HBoxContainer/" + nom):
+		return inventaire.get_node("HBoxContainer/" + nom)
+	elif inventaire.has_node("route/" + nom):
+		return inventaire.get_node("route/" + nom)
+	return null
