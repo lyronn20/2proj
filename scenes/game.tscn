@@ -1707,36 +1707,36 @@ tile_set = SubResource("TileSet_dinhu")
 
 [node name="ile 2" type="Label" parent="."]
 z_index = 11
-offset_left = -1649.0
+offset_left = -1268.0
 offset_top = 606.0
-offset_right = -1424.0
+offset_right = -1043.0
 offset_bottom = 743.0
 text = "Île 2 "
 label_settings = SubResource("LabelSettings_vtaks")
 
 [node name="ile 3" type="Label" parent="."]
 z_index = 11
-offset_left = -1571.0
-offset_top = -984.0
-offset_right = -1346.0
-offset_bottom = -847.0
+offset_left = -1295.0
+offset_top = -865.0
+offset_right = -1070.0
+offset_bottom = -728.0
 text = "Île 3"
 label_settings = SubResource("LabelSettings_vtaks")
 
 [node name="ile 4" type="Label" parent="."]
 z_index = 11
-offset_left = 1298.0
-offset_top = 940.0
-offset_right = 1523.0
-offset_bottom = 1077.0
+offset_left = 1156.0
+offset_top = 1179.0
+offset_right = 1381.0
+offset_bottom = 1316.0
 text = "Île 4"
 label_settings = SubResource("LabelSettings_vtaks")
 
 [node name="ile 5" type="Label" parent="."]
 z_index = 11
-offset_left = 1259.0
-offset_top = -901.0
-offset_right = 1484.0
-offset_bottom = -764.0
+offset_left = 1374.0
+offset_top = -529.0
+offset_right = 1599.0
+offset_bottom = -392.0
 text = "Île 5"
 label_settings = SubResource("LabelSettings_vtaks")
