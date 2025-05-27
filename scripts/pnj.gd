@@ -65,7 +65,7 @@ var eau_timer := 0.0
 var temps_pompage := 1.5
 var animal_retry_timer := 0.0
 var lieu_boisson = null
-signal died(metier: String, batiment: Node)
+signal died(metier: String, bâtiment: Node, pnj: Node)
 
 
 func _ready():
@@ -898,6 +898,5 @@ func reprendre_mission_apres_survie():
 		mission = ""
 		
 func die():
-	# avant de queue_free, on prévient
-	emit_signal("died", metier, lieu_travail if lieu_travail else maison)
+	emit_signal("died", metier, lieu_travail, self)
 	queue_free()

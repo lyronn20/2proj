@@ -5,9 +5,11 @@ var wood_stock := 0
 static var compteur := 1
 
 func _ready():
+	if has_meta("is_preview") and get_meta("is_preview") == true:
+		return
+	add_to_group("scierie")
 	add_to_group("batiment")
-	add_to_group("scierie") 
-	set_meta("nom_affichage", "Scierie : "+ str(compteur))
+	set_meta("nom_affichage", "Scierie : " + str(compteur))
 	compteur += 1
 	_setup_click_area()
 

@@ -598,6 +598,13 @@ func faire_bebe(_unused):
 
 	# 5) connexion du signal de mort
 	_register_pnj(bebe)
+	
+	# 6) on tente immédiatement de remplir tous les postes vacants
+	_try_fill_all_jobs_for_metier("bucheron")
+	_try_fill_all_jobs_for_metier("mineur")
+	_try_fill_all_jobs_for_metier("fermier")
+	_try_fill_all_jobs_for_metier("cueilleur")
+	_try_fill_all_jobs_for_metier("pompier")
 
 func _find_hutte_libre() -> Node2D:
 	for hut in get_tree().get_nodes_in_group("housing"):
@@ -605,7 +612,6 @@ func _find_hutte_libre() -> Node2D:
 			return hut
 	return null
 	
-# 1) Fonction purement “register” : connecte seulement le signal
 func _register_pnj(pnj):
 	pnj.died.connect(Callable(self, "_on_pnj_died"))
 
@@ -635,33 +641,56 @@ func spawn_pnjs(count: int):
 		count -= 1
 	
 
-func _on_pnj_died(metier: String, batiment: Node) -> void:
-	if is_instance_valid(batiment):
-		death_queue.append({ "metier": metier, "bat": batiment })
+func _on_pnj_died(metier: String, batiment: Node, pnj: Node) -> void:
+	if not is_instance_valid(batiment):
+		return
 
-	# Relancer une tentative d’assignation dans tout le groupe
+	# ➤ Retirer le PNJ de son boulot ou de sa hutte
+	if batiment.has_method("remove_habitant"):
+		batiment.remove_habitant(pnj)
+	if batiment.has_method("remove_employe"):
+		batiment.remove_employe(pnj)
+
+	# ➤ Réassigner immédiatement un remplaçant pour CE bâtiment
+	assign_pnjs_to_work(batiment, metier)
+
+	# On peut stocker dans death_queue si besoin, mais l’important est la ré-affectation.
 	match metier:
 		"bucheron":
-			_try_fill_all_jobs("scierie", "bucheron")
+			_try_fill_all_jobs_for_metier("bucheron")
 		"mineur":
-			_try_fill_all_jobs("carriere", "mineur")
+			_try_fill_all_jobs_for_metier("mineur")
 		"fermier":
-			_try_fill_all_jobs("ferme", "fermier")
+			_try_fill_all_jobs_for_metier("fermier")
 		"cueilleur":
-			_try_fill_all_jobs("collect_baies", "cueilleur")
+			_try_fill_all_jobs_for_metier("cueilleur")
 		"pompier":
-			_try_fill_all_jobs("puit", "pompier")
+			_try_fill_all_jobs_for_metier("pompier")
+		_:
+			pass
 
-			
-func _try_fill_all_jobs(group_name: String, metier: String):
+
+# 2) Pour chaque bâtiment du métier donné, on complète jusqu’à 2 employés.
+func _try_fill_all_jobs_for_metier(metier: String) -> void:
+	var group_name := ""
+	match metier:
+		"bucheron":  group_name = "scierie"
+		"mineur":    group_name = "carriere"
+		"fermier":   group_name = "ferme"
+		"cueilleur": group_name = "collect_baies"
+		"pompier":   group_name = "puit"
+		_:
+			return
+
 	for building in get_tree().get_nodes_in_group("batiment"):
-		if not building.name.begins_with(group_name):
-			continue
 		if not building.has_method("add_employe"):
 			continue
-		if building.employes.size() >= 2:
+		if not building.name.begins_with(group_name):
 			continue
-		assign_pnjs_to_work(building, metier)
+
+		# tant qu’il reste de la place, on tente d’y envoyer un PNJ libre
+		while building.employes.size() < 2:
+			assign_pnjs_to_work(building, metier)
 
 func generate_sapins(count: int = 50):
 	var tries = 0
@@ -715,60 +744,53 @@ func reset_all_pnjs():
 		p.following_route = false
 		
 func assign_pnjs_to_work(building: Node2D, metier: String) -> void:
-	var assigned := 0
-	var route_cells := _get_route_cells()
+	# Combien de postes il reste à pourvoir (max 2)
+	var needed: int = 2 - building.employes.size()
+	if needed <= 0:
+		return
 
-	# 🧼 Libération des PNJ déjà assignés à CE bâtiment
-	for p in get_tree().get_nodes_in_group("pnj"):
-		if p.lieu_travail == building:
-			p.metier = ""
-			p.lieu_travail = null
-			p.mission = ""
-			p.chemin.clear()
-			p.following_route = false
+	var route_cells = _get_route_cells()
 
+	# On parcourt les PNJ libres (sans lieu_travail)
 	for p in get_tree().get_nodes_in_group("pnj"):
-		# Si déjà employé dans un autre bâtiment → on skippe
-		var est_deja_employe = false
-		for b in get_tree().get_nodes_in_group("batiment"):
-			if b.has_method("add_employe") and b.employes.has(p):
-				est_deja_employe = true
-				break
-		if est_deja_employe:
+		if p.lieu_travail != null:
 			continue
 
-
-		p.metier = metier
+		# 1) On assigne le PNJ
+		p.metier       = metier
 		p.lieu_travail = building
-		p.mission = "aller_travailler"
-		p.name = "PNJ_" + str(pnj_counter)
-		pnj_counter += 1
+		p.mission      = "aller_travailler"
+		p.name         = "PNJ_%d" % pnj_counter
+		pnj_counter   += 1
 
+		# 2) Calcul du chemin A*
 		var raw_start = route_tilemap.local_to_map(p.global_position)
-		var raw_goal = route_tilemap.local_to_map(building.global_position)
-
-		var start = raw_start if raw_start in route_cells else _find_nearest_walkable_cell(raw_start)
-		var goal  = raw_goal  if raw_goal  in route_cells else _find_nearest_walkable_cell(raw_goal)
-
-		var cell_path = route_astar.get_point_path(start, goal)
+		var raw_goal  = route_tilemap.local_to_map(building.global_position)
+		var start_pos = raw_start if raw_start in route_cells else _find_nearest_walkable_cell(raw_start)
+		var goal_pos  = raw_goal  if raw_goal  in route_cells else _find_nearest_walkable_cell(raw_goal)
+		var cell_path = route_astar.get_point_path(start_pos, goal_pos)
 
 		p.chemin.clear()
 		var half = route_astar.cell_size * 0.5
 		for cell in cell_path:
 			p.chemin.append(route_tilemap.map_to_local(cell) + half)
-
 		p.chemin.append(building.global_position)
-		p.current_step = 0
+
+		p.current_step    = 0
 		p.following_route = true
 		if p.has_method("update"):
 			p.call_deferred("update")
 
+		# 3) On notifie le bâtiment
 		if building.has_method("add_employe") and not building.employes.has(p):
 			building.call("add_employe", p)
 
-		assigned += 1
-		if assigned >= 2:
+		# 4) Décrément et sortie dès que complet
+		needed -= 1
+		if needed <= 0:
 			break
+
+
 
 func _find_nearest_walkable_cell(cell: Vector2i) -> Vector2i:
 	var best = cell
