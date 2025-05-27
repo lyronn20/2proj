@@ -22,14 +22,14 @@ var goals = [
 	{ "title": "Collecteur de baies + 75 baies", "description": "Place un collecteur de baies et récolte 75 baies.", "check": "check_berry" },
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_ferme" },
 	{ "title": "2 puits + 2 enclos à animaux", "description": "Aie 2 puits et 2 bâtiments à animaux.", "check": "check_double_eau_animaux" },
-	{ "title": "100 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
-	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_250_ble" },
-	{ "title": "30 métiers assignés", "description": "Affecte 30 PNJ à un métier.", "check": "check_30_metiers" },
-	{ "title": "150 citoyens + débloquer pont", "description": "Atteins 100 citoyens pour débloquer le pont.", "check": "check_100_citoyens"},
+	{ "title": "50 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
 	{ "title": "Construire un pont vers l'île 2", "description": "Permet d'étendre ton territoire vers l'île 2.", "check": "check_pont_ile2", "zone_rect": { "coin_haut_gauche": Vector2i(-110, -5), "coin_bas_droit": Vector2i(8, 112) } },
-	{ "title": "Construire un pont vers l'île 3", "description": "Étends ton territoire vers l'île 3.", "check": "check_pont_ile3", "zone_rect": { "coin_haut_gauche": Vector2i(-110, -94), "coin_bas_droit": Vector2i(8, -2) } },  # ← HAUT GAUCHE
-	{ "title": "Construire un pont vers l'île 4", "description": "Étends ton territoire vers l'île 4.", "check": "check_pont_ile4", "zone_rect": { "coin_haut_gauche": Vector2i(6, 28), "coin_bas_droit": Vector2i(118, 112) } },  # ← BAS DROITE
-	{ "title": "Construire un pont vers l'île 5", "description": "Étends ton territoire vers l'île 5.", "check": "check_pont_ile5", "zone_rect": { "coin_haut_gauche": Vector2i(8, -94), "coin_bas_droit": Vector2i(130, 31) } }  # ← HAUT DROITE
+	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_250_ble" },
+	{"title": "Construire un pont vers l'île 3", "description": "Étends ton territoire vers l'île 3.", "check": "check_pont_ile3", "zone_rect": { "coin_haut_gauche": Vector2i(-110, -94), "coin_bas_droit": Vector2i(8, -2) } }, 
+	{ "title": "30 métiers assignés", "description": "Affecte 30 PNJ à un métier.", "check": "check_30_metiers" },
+	{ "title": "100 citoyens ", "description": "Atteins 100 citoyens pour débloquer le pont.", "check": "check_100_citoyens"},
+	{ "title": "Construire un pont vers l'île 4", "description": "Étends ton territoire vers l'île 4.", "check": "check_pont_ile4", "zone_rect": { "coin_haut_gauche": Vector2i(6, 28), "coin_bas_droit": Vector2i(118, 112) } },
+	{ "title": "Construire un pont vers l'île 5", "description": "Étends ton territoire vers l'île 5.", "check": "check_pont_ile5", "zone_rect": { "coin_haut_gauche": Vector2i(8, -94), "coin_bas_droit": Vector2i(130, 31) } } 
 ]
 
 
