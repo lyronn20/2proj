@@ -76,7 +76,6 @@ func detecte_eau():
 						print("❌ Eau détectée mais inaccessible A* :", goal_cell)
 
 	touche_eau = false
-	print("❌ Aucun point d’eau accessible trouvé")
 
 func get_point_eau() -> Vector2:
 	if not touche_eau:

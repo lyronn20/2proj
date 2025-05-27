@@ -540,12 +540,32 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 
 
 func update_ui_stats():
+	var population = get_tree().get_nodes_in_group("pnj").size()
+	var housing_total = get_tree().get_nodes_in_group("housing").size()
+	var max_housing = 50
+
+	var jobs_occupees = 0
+	for p in get_tree().get_nodes_in_group("pnj"):
+		if p.metier != "" and p.is_inside_tree():
+			jobs_occupees += 1
+
+	# 📊 Calcul progression par objectifs accomplis
+	var progress := 0
+	var goal_panel = get_node_or_null("CanvasLayer/Menu/HUD/Goal")
+	if goal_panel:
+		var total = goal_panel.goals.size()
+		var done = goal_panel.goal_accompli
+		progress = int(float(done) / max(total, 1) * 100)
+
 	stats.update_stats(
-		get_tree().get_nodes_in_group("pnj").size(),
-		Vector2i(get_tree().get_nodes_in_group("housing").size(), 50),
-		Vector2i(0,0),
-		100
+		population,
+		Vector2i(housing_total, max_housing),
+		jobs_occupees,
+		progress
 	)
+
+
+	
 func verifier_reproduction():
 	var couples = []
 	var pnjs_libres = []

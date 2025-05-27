@@ -23,9 +23,9 @@ func _process(delta):
 	var secs = int(time_elapsed) % 60
 	lbl_timer.text = "⏱ %02d:%02d" % [mins, secs]
 
-func update_stats(pop: int, housing: Vector2i, jobs: Vector2i, progress: int):
+func update_stats(pop: int, housing: Vector2i, jobs: int, progress: int):
 	lbl_population.text = "👥 Population : %d" % pop
-	lbl_housing.text = "🏠 Housing : %d / %d" % [housing.x, housing.y]
-	lbl_jobs.text = "🛠 Jobs : %d / %d" % [jobs.x, jobs.y]
+	lbl_housing.text = "🏠 Habitations : %d / %d" % [housing.x, housing.y]
+	lbl_jobs.text = "🛠 Métiers : %d" % jobs
 	lbl_progress.text = "Progress : %d%%" % progress
 	bar_progress.value = progress

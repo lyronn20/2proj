@@ -17,6 +17,7 @@ var goals = [
 	{ "title": "Construire une scierie", "description": "Transforme le bois en planches.", "check": "check_scierie" },
 	{ "title": "Avoir 150 bois", "description": "Stocke au moins 150 bois.", "check": "check_150_bois" },
 	{ "title": "Construire une carrière", "description": "Place une carrière pour extraire de la pierre.", "check": "check_carriere" },
+	{"title": "Avoir 100 pierres ", "description": "Stocker au moins 100 pierres", "check": "check_pierres" },
 	{ "title": "Collecteur de baies + 75 baies", "description": "Place un collecteur de baies et récolte 75 baies.", "check": "check_berry" },
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_ferme" },
 	#{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
@@ -194,6 +195,13 @@ func check_carriere() -> bool:
 		if node.name.begins_with("carriere"):
 			return true
 	return false
+	
+func check_pierres() ->bool:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("carriere"):
+		if node.has_method("get_stock"):
+			total += node.get_stock()["pierre"]
+	return total >= 100
 
 func check_berry() -> bool:
 	var total := 0

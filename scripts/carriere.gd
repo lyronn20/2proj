@@ -14,6 +14,7 @@ func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
 		return  # Ne pas exécuter le reste si c’est une preview
 	add_to_group("batiment")
+	add_to_group("carriere")
 	set_meta("nom_affichage", "Carriere : "+ str(compteur))
 	compteur += 1
 	_setup_click_area()
