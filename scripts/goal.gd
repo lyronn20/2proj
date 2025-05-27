@@ -16,13 +16,14 @@ var goals = [
 	{ "title": "Construire 10 routes", "description": "Place 10 routes pour connecter tes bâtiments.", "check": "check_routes" },
 	{ "title": "Construire une scierie", "description": "Transforme le bois en planches.", "check": "check_scierie" },
 	{ "title": "Avoir 150 bois", "description": "Stocke au moins 150 bois.", "check": "check_150_bois" },
+	{ "title": "Construire 3 bâtiments à animaux", "description": "Pose au moins 3 bâtiments à animaux pour accueillir du bétail.", "check": "check_3_animaux" },
 	{ "title": "Construire une carrière", "description": "Place une carrière pour extraire de la pierre.", "check": "check_carriere" },
 	{"title": "Avoir 100 pierres ", "description": "Stocker au moins 100 pierres", "check": "check_pierres" },
 	{ "title": "Collecteur de baies + 75 baies", "description": "Place un collecteur de baies et récolte 75 baies.", "check": "check_berry" },
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_ferme" },
 	#{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
 	{ "title": "2 puits + 2 enclos à animaux", "description": "Aie 2 puits et 2 bâtiments à animaux.", "check": "check_double_eau_animaux" },
-	{ "title": "Construire un pont", "description": "Permet d'étendre ton territoire.", "check": "check_pont" },
+	{ "title": "Construire un pont vers l'île 2", "description": "Permet d'étendre ton territoire vers l'île 2.", "check": "check_pont_ile2", "zone_rect": { "coin_haut_gauche": Vector2i(-110, -5), "coin_bas_droit": Vector2i(-23, 112) } },
 	{ "title": "100 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_50_citoyens" },
 	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_250_ble" },
 	{ "title": "30 métiers assignés", "description": "Affecte 30 PNJ à un métier.", "check": "check_30_metiers" },
@@ -73,6 +74,10 @@ func valider_goal(goal_id: String):
 		if "zone_rect" in goal:
 			var rect = goal["zone_rect"]
 			debloquer_zone_nuage_rect(rect["coin_haut_gauche"], rect["coin_bas_droit"])
+			if goal_id == "check_pont_ile2":
+				var ile2_label = get_node_or_null("/root/game/ile 2")
+				if ile2_label:
+					ile2_label.visible = false
 		elif "zone" in goal:
 			debloquer_zone_nuage(goal["zone"], 20)
 
@@ -189,6 +194,14 @@ func check_150_bois() -> bool:
 		if node.has_method("get_stock"):
 			total += node.get_stock()["bois"]
 	return total >= 150
+	
+func check_3_animaux() -> bool:
+	var total := 0
+	for node in get_tree().get_nodes_in_group("animaux_bat"):
+		if node.name.begins_with("animaux_bat"):
+			total += 1
+	return total >= 3
+
 
 func check_carriere() -> bool:
 	for node in get_tree().get_nodes_in_group("batiment"):
@@ -267,6 +280,18 @@ func check_pont() -> bool:
 	for cell in pont_tilemap.get_used_cells():
 		if pont_tilemap.get_cell_source_id(cell) != -1:
 			return true
+	return false
+	
+func check_pont_ile2() -> bool:
+	if not get_tree().get_root().has_node("game/Pont/pont"):
+		return false
+
+	var pont_tilemap = get_tree().get_root().get_node("game/Pont/pont")
+
+	for cell in pont_tilemap.get_used_cells():
+		if pont_tilemap.get_cell_source_id(cell) != -1:
+			if cell.x >= -122 and cell.x <= -23 and cell.y >= -4 and cell.y <= 112:
+				return true
 	return false
 
 

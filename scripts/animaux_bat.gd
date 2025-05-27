@@ -8,6 +8,8 @@ var animaux := []
 const MAX_ANIMAUX = 15
 
 func _ready():
+	add_to_group("batiment")
+	add_to_group("animaux_bat")
 	$Timer.wait_time = 25
 	$Timer.start()
 	$Timer.timeout.connect(spawn_animaux)
