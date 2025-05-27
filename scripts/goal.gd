@@ -21,7 +21,6 @@ var goals = [
 	{"title": "Avoir 100 pierres ", "description": "Stocker au moins 100 pierres", "check": "check_feu_camp" },
 	{ "title": "Collecteur de baies + 75 baies", "description": "Place un collecteur de baies et récolte 75 baies.", "check": "check_feu_camp" },
 	{ "title": "Construire une ferme", "description": "Commence l'agriculture.", "check": "check_feu_camp" },
-	#{ "title": "Sélection multiple + déplacement", "description": "Sélectionne et déplace plusieurs objets.", "check": "check_multi_select" },
 	{ "title": "2 puits + 2 enclos à animaux", "description": "Aie 2 puits et 2 bâtiments à animaux.", "check": "check_feu_camp" },
 	{ "title": "100 citoyens", "description": "Atteins 50 PNJ sur l’île principale.", "check": "check_feu_camp" },
 	{ "title": "250 blés stockés", "description": "Stocke au moins 250 blés.", "check": "check_feu_camp" },
@@ -247,13 +246,6 @@ func check_ferme() -> bool:
 	for node in get_tree().get_nodes_in_group("batiment"):
 		if node.name.begins_with("ferme") and not node.has_meta("is_preview"):
 			return true
-	return false
-
-func check_multi_select() -> bool:
-	# À adapter à ton système de sélection/déplacement
-	# Ici on vérifie s'il y a un groupe d'objets sélectionnés en cours
-	if get_parent().has_method("has_moved_multiple"):
-		return get_parent().has_moved_multiple()
 	return false
 
 func check_double_eau_animaux() -> bool:

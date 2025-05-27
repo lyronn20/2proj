@@ -126,36 +126,37 @@ func build_route_astar():
 	var total_rect := herbe_tilemap.get_used_rect()
 	for t in island_tilemaps:
 		total_rect = total_rect.merge(t.get_used_rect())
+	
+	# 🔍 AJOUTER AUSSI map_tilemap dans le calcul
+	total_rect = total_rect.merge(map_tilemap.get_used_rect())
 
 	route_astar.region = total_rect
 	route_astar.cell_size = Vector2(1, 1)
 	route_astar.update()
-
-	const WATER_ATLAS = Vector2i(2, 0)
 	for x in range(total_rect.position.x, total_rect.position.x + total_rect.size.x):
 		for y in range(total_rect.position.y, total_rect.position.y + total_rect.size.y):
 			var cell = Vector2i(x, y)
-			var src = herbe_tilemap.get_cell_source_id(cell)
-			var is_water = (src != -1 and herbe_tilemap.get_cell_atlas_coords(cell) == WATER_ATLAS)
-
-			# Si eau, on teste si une herbe est à côté
-			if is_water:
-				var voisins = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]
-				var accessible := false
-				for v in voisins:
-					var voisin = cell + v
-					if herbe_tilemap.get_cell_source_id(voisin) == 0:
-						accessible = true
-						break
-				is_water = not accessible  # on garde bloqué si aucun voisin herbe
-
-			var is_route = route_tilemap.get_cell_source_id(cell) != -1
+			var herbe_source = herbe_tilemap.get_cell_source_id(cell)
+			var map_source = map_tilemap.get_cell_source_id(cell)
+			var pont_source = pont_tilemap.get_cell_source_id(cell)
+			var route_source = route_tilemap.get_cell_source_id(cell)
+			var is_water = false
+			var has_bridge = pont_source != -1
+			var is_route = route_source != -1
 			var is_building = occupied_cells.has(cell)
-
-			var traversable = (not is_water) and not is_building and (src != -1 or is_route)
+			if map_source == 2: 
+				is_water = true
+			if herbe_source != -1:
+				var atlas = herbe_tilemap.get_cell_atlas_coords(cell)
+				if atlas == Vector2i(2, 0):  # Ton WATER_ATLAS
+					is_water = true
+			var has_valid_terrain = (herbe_source == 0) or is_route or has_bridge
+			for island in island_tilemaps:
+				if island.get_cell_source_id(cell) == 0:
+					has_valid_terrain = true
+					break
+			var traversable = (not is_water or has_bridge) and not is_building and has_valid_terrain
 			route_astar.set_point_solid(cell, not traversable)
-
-
 
 func _process(delta):
 	reproduction_timer += delta
@@ -397,9 +398,27 @@ func _erase_object_at_mouse():
 					var c = base + Vector2i(x, y)
 					occupied_cells.erase(c)
 					route_tilemap.set_cells_terrain_connect([c], 0, -1, -1)
-					herbe_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+					
+					# 🔥 RESTAURER LE BON TERRAIN selon l'île
+					var terrain_restored = false
+					
+					# Essayer herbe_tilemap d'abord
+					if herbe_tilemap.get_cell_source_id(c) != -1:
+						herbe_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+						terrain_restored = true
+					else:
+						# Essayer les autres îles
+						for island_tilemap in island_tilemaps:
+							if island_tilemap.get_cell_source_id(c) != -1:
+								island_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
+								terrain_restored = true
+								break
+					
+					# Si aucun terrain trouvé, restaurer sur herbe_tilemap par défaut
+					if not terrain_restored:
+						herbe_tilemap.set_cells_terrain_connect([c], 0, TERRAIN_ID, 0)
 
-			# si c’est un feu de camp, on le re-débloque
+			# si c'est un feu de camp, on le re-débloque
 			if nom_base == "feu_camp":
 				inventory["feu_camp"] += 1
 				menu.update_inventory("feu_camp", inventory["feu_camp"])
@@ -407,8 +426,6 @@ func _erase_object_at_mouse():
 
 			obj.queue_free()
 			break
-
-
 
 func _on_objet_selectionne(nom: String):
 	selected_mode = nom
@@ -519,11 +536,12 @@ func placer_route():
 
 
 func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
-
 	if menu == null:
 		print("❌ menu est null !")
+		return false
 	elif not menu.has_method("is_locked"):
 		print("❌ menu n'a pas is_locked")
+		return false
 	else:
 		var verrou = menu.is_locked(selected_mode)
 		if verrou:
@@ -532,12 +550,29 @@ func can_place_object(start_cell: Vector2i, size: Vector2i) -> bool:
 	for x in range(size.x):
 		for y in range(size.y):
 			var cc = start_cell + Vector2i(x, y)
+			
+			# Vérifier si la cellule est déjà occupée ou s'il y a une route
 			if occupied_cells.has(cc) or route_tilemap.get_cell_source_id(cc) != -1:
 				return false
-			if herbe_tilemap.get_cell_source_id(cc) == -1:
+			
+			# 🔥 NOUVELLE LOGIQUE : Vérifier sur TOUTES les îles
+			var valid_terrain = false
+			
+			# Vérifier herbe_tilemap (île principale)
+			if herbe_tilemap.get_cell_source_id(cc) == 0:
+				valid_terrain = true
+			
+			# Vérifier toutes les autres îles
+			for island_tilemap in island_tilemaps:
+				if island_tilemap.get_cell_source_id(cc) == 0:
+					valid_terrain = true
+					break
+			
+			# Si aucun terrain valide trouvé, on ne peut pas placer
+			if not valid_terrain:
 				return false
+	
 	return true
-
 
 func update_ui_stats():
 	var population = get_tree().get_nodes_in_group("pnj").size()

@@ -72,8 +72,6 @@ func detecte_eau():
 						touche_eau = true
 						last_water_point = world_pos
 						return
-					else:
-						print("❌ Eau détectée mais inaccessible A* :", goal_cell)
 
 	touche_eau = false
 
