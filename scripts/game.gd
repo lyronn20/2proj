@@ -47,6 +47,9 @@ var pnj_counter := 1
 var reproduction_timer := 0.0
 var reproduction_interval := 130
 var death_queue := []
+var astar_rebuild_timer := 0.0
+var astar_rebuild_delay := 0.1  # Recalcule l'A* max 10 fois par seconde
+var needs_astar_rebuild := false
 
 var inventory := { "feu_camp": 1 }
 var occupied_cells := {}
@@ -126,52 +129,77 @@ func build_route_astar():
 	var total_rect := herbe_tilemap.get_used_rect()
 	for t in island_tilemaps:
 		total_rect = total_rect.merge(t.get_used_rect())
-	
-	# 🔍 AJOUTER AUSSI map_tilemap dans le calcul
 	total_rect = total_rect.merge(map_tilemap.get_used_rect())
 
 	route_astar.region = total_rect
 	route_astar.cell_size = Vector2(1, 1)
 	route_astar.update()
-	for x in range(total_rect.position.x, total_rect.position.x + total_rect.size.x):
-		for y in range(total_rect.position.y, total_rect.position.y + total_rect.size.y):
-			var cell = Vector2i(x, y)
-			var herbe_source = herbe_tilemap.get_cell_source_id(cell)
-			var map_source = map_tilemap.get_cell_source_id(cell)
-			var pont_source = pont_tilemap.get_cell_source_id(cell)
-			var route_source = route_tilemap.get_cell_source_id(cell)
-			var is_water = false
-			var has_bridge = pont_source != -1
-			var is_route = route_source != -1
-			var is_building = occupied_cells.has(cell)
-			if map_source == 2: 
-				is_water = true
-			if herbe_source != -1:
-				var atlas = herbe_tilemap.get_cell_atlas_coords(cell)
-				if atlas == Vector2i(2, 0):  # Ton WATER_ATLAS
-					is_water = true
-			var has_valid_terrain = (herbe_source == 0) or is_route or has_bridge
-			for island in island_tilemaps:
-				if island.get_cell_source_id(cell) == 0:
-					has_valid_terrain = true
-					break
-			var traversable = (not is_water or has_bridge) and not is_building and has_valid_terrain
-			route_astar.set_point_solid(cell, not traversable)
+
+	# 🔥 OPTIMISATION : Traitement par chunks pour éviter les freezes
+	var chunk_size = 50  # Traite 50x50 cellules à la fois
+	var chunks_processed = 0
+	var max_chunks_per_frame = 4  # Max 4 chunks par frame
+	
+	for chunk_x in range(0, total_rect.size.x, chunk_size):
+		for chunk_y in range(0, total_rect.size.y, chunk_size):
+			if chunks_processed >= max_chunks_per_frame:
+				# Continuer au prochain frame
+				await get_tree().process_frame
+				chunks_processed = 0
+			
+			var end_x = min(chunk_x + chunk_size, total_rect.size.x)
+			var end_y = min(chunk_y + chunk_size, total_rect.size.y)
+			
+			for x in range(chunk_x, end_x):
+				for y in range(chunk_y, end_y):
+					var cell = Vector2i(total_rect.position.x + x, total_rect.position.y + y)
+					_process_astar_cell(cell)
+			
+			chunks_processed += 1
+
+# Sépare la logique de traitement d'une cellule
+func _process_astar_cell(cell: Vector2i):
+	var herbe_source = herbe_tilemap.get_cell_source_id(cell)
+	var map_source = map_tilemap.get_cell_source_id(cell)
+	var pont_source = pont_tilemap.get_cell_source_id(cell)
+	var route_source = route_tilemap.get_cell_source_id(cell)
+	
+	var is_water = false
+	var has_bridge = pont_source != -1
+	var is_route = route_source != -1
+	var is_building = occupied_cells.has(cell)
+	
+	if map_source == 2: 
+		is_water = true
+	if herbe_source != -1:
+		var atlas = herbe_tilemap.get_cell_atlas_coords(cell)
+		if atlas == Vector2i(2, 0):
+			is_water = true
+	
+	var has_valid_terrain = (herbe_source == 0) or is_route or has_bridge
+	for island in island_tilemaps:
+		if island.get_cell_source_id(cell) == 0:
+			has_valid_terrain = true
+			break
+	
+	var traversable = (not is_water or has_bridge) and not is_building and has_valid_terrain
+	route_astar.set_point_solid(cell, not traversable)
 
 func _process(delta):
+	# 🔥 OPTIMISATION A* : Recalcul différé et limité
+	if needs_astar_rebuild:
+		astar_rebuild_timer += delta
+		if astar_rebuild_timer >= astar_rebuild_delay:
+			build_route_astar()
+			needs_astar_rebuild = false
+			astar_rebuild_timer = 0.0
+
+	# Système de reproduction (supprime la duplication)
 	reproduction_timer += delta
 	if reproduction_timer >= reproduction_interval:
 		reproduction_timer = 0.0
 		verifier_reproduction()
 
-	# Et tout ce qui est preview, UI, stats...
-
-	
-	# Système de reproduction
-	reproduction_timer += delta
-	if reproduction_timer >= reproduction_interval:
-		reproduction_timer = 0.0
-		verifier_reproduction()
 	# 1) Si preview verrouillée → on la supprime et on sort
 	if current_preview and menu.is_locked(selected_mode):
 		current_preview.queue_free()
@@ -189,7 +217,7 @@ func _process(delta):
 		grid_preview.visible = false
 		grid_preview.update_grid(world_pos, size)
 
-	# 3) Coordonnées de la souris dans l’UI
+	# 3) Coordonnées de la souris dans l'UI
 	var cell = route_tilemap.local_to_map(get_global_mouse_position())
 	if cell != last_cell:
 		last_cell = cell
@@ -206,7 +234,7 @@ func _process(delta):
 		if selected_mode != "route":
 			current_preview.modulate = Color(1,1,1,0.5) if can_place_object(grid_pos, size) else Color(1,0,0,0.5)
 
-	# 5) Si on est en “hold” et que c’est un mode répétable (ou la gomme), on agit
+	# 5) Si on est en "hold" et que c'est un mode répétable (ou la gomme), on agit
 	if is_holding_place:
 		hold_place_timer += delta
 		if hold_place_timer >= hold_place_interval:
@@ -221,6 +249,7 @@ func _process(delta):
 		if pont_hold_timer >= pont_hold_interval:
 			pont_hold_timer = 0.0
 			placer_pont()
+			
 	# 6) Mise à jour du HUD stat
 	update_ui_stats()
 
@@ -516,7 +545,9 @@ func placer_pont():
 
 	pont_tilemap.set_cell(c, 0, atlas_coords)
 	pont_tilemap.z_index = 10
-	build_route_astar()
+	
+	# 🔥 OPTIMISATION : Ne pas recalculer immédiatement, juste marquer
+	needs_astar_rebuild = true
 
 
 func placer_route():
