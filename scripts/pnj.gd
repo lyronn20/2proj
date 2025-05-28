@@ -201,7 +201,6 @@ func prepare_return_path():
 		chemin.append(maison.global_position)
 		current_step = 0
 		following_route = true
-		request_redraw()
 
 func pick_new_direction():
 	direction = Vector2(cos(randf() * TAU), sin(randf() * TAU)).normalized()
@@ -222,12 +221,6 @@ func move_randomly(delta):
 	else:
 		pick_new_direction()
 		
-func _draw():
-	for i in range(chemin.size() - 1):
-		draw_line(chemin[i], chemin[i + 1], Color(1, 0, 0), 2)
-
-func request_redraw():
-	call_deferred("update")
 	
 func do_chop_tree(delta):
 	if energy <= travail_threshold:
