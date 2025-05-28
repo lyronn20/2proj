@@ -77,7 +77,7 @@ func _ready():
 
 
 
-func _process(delta):
+func _process(_delta):
 	faim = clamp(faim, 0, 100)
 	soif = clamp(soif, 0, 100)
 	if faim < 20 and mission == "" and current_baie == null:
@@ -113,7 +113,7 @@ func _on_click(_vp, event, _si):
 			tab.update_pnj_panel(self)
 			tab.current_pnj = self
 
-func follow_path(delta):
+func follow_path(_delta):
 	if current_step >= chemin.size():
 		following_route = false
 		match mission:
@@ -150,7 +150,7 @@ func follow_path(delta):
 		velocity = dir * speed
 		move_and_slide()
 		
-func do_work(delta):
+func do_work(_delta):
 	match metier:
 		"bucheron":
 			search_next_tree()
@@ -451,8 +451,8 @@ func search_next_rock():
 		mission = "retour_maison"
 		prepare_return_path()
 		return
-	var all_rocks = get_tree().get_nodes_in_group("rock")
-	var radius := 10 * 64
+	var _all_rocks = get_tree().get_nodes_in_group("rock")
+	var _radius := 10 * 64
 	var rocks = lieu_travail.get_nearby_rocks()
 	if rocks.is_empty():
 		mission = "retour_maison"
@@ -559,7 +559,7 @@ func do_pomper(delta):
 			mission = "retour_au_puit"
 			go_to(lieu_travail.global_position, "retour_au_puit")
 			
-func do_deposer_eau(delta):
+func do_deposer_eau(_delta):
 	if global_position.distance_to(lieu_travail.global_position) > 8:
 		return
 	velocity = Vector2.ZERO
@@ -632,7 +632,7 @@ func search_nearest_well():
 		lieu_boisson = closest
 		go_to(closest.global_position, "aller_boire")
 
-func do_boire(delta):
+func do_boire(_delta):
 	if not is_instance_valid(lieu_boisson) or global_position.distance_to(lieu_boisson.global_position) > 8:
 		return
 	velocity = Vector2.ZERO

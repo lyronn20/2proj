@@ -13,7 +13,7 @@ extends Node2D
 @onready var goal_panel = $CanvasLayer/Menu/HUD/Goal
 @onready var epilepsie_layer := $EpilepsieLayer
 @onready var background := $EpilepsieLayer/Background
-@onready var bouton := $EpilepsieLayer/Button
+@onready var epi_bouton := $EpilepsieLayer/Button
 @onready var label := $EpilepsieLayer/Label
 @onready var audio := AudioStreamPlayer.new()
 
@@ -76,13 +76,13 @@ var pont_hold_interval := 0.01
 
 func _ready():
 	background.modulate.a = 0.4
-	bouton.modulate.a = 0.4
+	epi_bouton.modulate.a = 0.4
 	label.modulate.a = 0.4
 	var fade_in = get_tree().create_tween()
 	fade_in.tween_property(background, "modulate:a", 1.0, 1.5)
-	fade_in.tween_property(bouton, "modulate:a", 1.0, 1.5)
+	fade_in.tween_property(epi_bouton, "modulate:a", 1.0, 1.5)
 	fade_in.tween_property(label, "modulate:a", 1.0, 1.5)
-	bouton.pressed.connect(_on_epilepsie_continue_pressed)
+	epi_bouton.pressed.connect(_on_epilepsie_continue_pressed)
 	menu = get_node("/root/game/CanvasLayer/Menu")
 	menu.connect("objet_selectionne", Callable(self, "_on_objet_selectionne"))
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -96,7 +96,6 @@ func _ready():
 	add_child(grid_preview)
 	grid_preview.z_index = 100
 	add_child(audio)
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("music"), -20)
 	build_route_astar()
 
 func _cell_to_id(cell: Vector2i) -> int:
@@ -480,7 +479,6 @@ func update_ui_stats():
 		if p.metier != "" and p.is_inside_tree():
 			jobs_occupees += 1
 	var progress := 0
-	var goal_panel = get_node_or_null("CanvasLayer/Menu/HUD/Goal")
 	if goal_panel:
 		var total = goal_panel.goals.size()
 		var done = goal_panel.goal_accompli
@@ -494,7 +492,7 @@ func update_ui_stats():
 
 func verifier_reproduction():
 	var couples = []
-	var pnjs_libres = []
+	var _pnjs_libres = []
 	for pnj in get_tree().get_nodes_in_group("pnj"):
 		if pnj.has_house and pnj.age > 5.0:  
 			var maison = pnj.maison
@@ -609,20 +607,20 @@ func generate_sapins(count: int = 50):
 	var spawned = 0
 	while spawned < count and tries < count * 20:
 		tries += 1
-		var tilemap = island_tilemaps[randi() % island_tilemaps.size()]
-		if not tilemap.visible:
+		var selected_tilemap = island_tilemaps[randi() % island_tilemaps.size()]
+		if not selected_tilemap.visible:
 			continue
-		var rect = tilemap.get_used_rect()
+		var rect = selected_tilemap.get_used_rect()
 		if rect.size == Vector2i(0, 0):
 			continue
 		var cell = Vector2i(
 			randi_range(rect.position.x, rect.position.x + rect.size.x - 1),
 			randi_range(rect.position.y, rect.position.y + rect.size.y - 1)
 		)
-		if tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
+		if selected_tilemap.get_cell_source_id(cell) == 0 and not occupied_cells.has(cell):
 			var sp = SAPIN_SCENE.instantiate()
 			sp.name = "sapin_" + str(randi() % 100000)
-			sp.global_position = tilemap.map_to_local(cell) + tilemap.global_position
+			sp.global_position = selected_tilemap.map_to_local(cell) + selected_tilemap.global_position
 			sp.add_to_group("sapin")
 			sp.add_to_group("placeable")
 			add_child(sp)
@@ -768,7 +766,7 @@ func detecter_types_eau():
 					}
 				eau_types[key]["count"] += 1
 	for key in eau_types.keys():
-		var info = eau_types[key]	
+		var _info = eau_types[key]	
 	return eau_types
 
 func sauvegarder_jeu():
@@ -819,40 +817,40 @@ func charger_jeu():
 		add_child(p)
 	var objets_data = file.get_var()
 	for data in objets_data:
-		var name = data["type"]
+		var objet = data["type"]
 		var pos = data["position"]
 		var scene: PackedScene = null
-		if name.begins_with("sapin"):
+		if objet.begins_with("sapin"):
 			scene = preload("res://scenes/sapin.tscn")
-		elif name.begins_with("feu_camp"):
+		elif objet.begins_with("feu_camp"):
 			scene = preload("res://scenes/feu_camp.tscn")
-		elif name.begins_with("hutte"):
+		elif objet.begins_with("hutte"):
 			scene = preload("res://scenes/hutte.tscn")
-		elif name.begins_with("scierie"):
+		elif objet.begins_with("scierie"):
 			scene = preload("res://scenes/scierie.tscn")
-		elif name.begins_with("carriere"):
+		elif objet.begins_with("carriere"):
 			scene = preload("res://scenes/carriere.tscn")
-		elif name.begins_with("puit"):
+		elif objet.begins_with("puit"):
 			scene = preload("res://scenes/puit.tscn")
-		elif name.begins_with("collect_baies"):
+		elif objet.begins_with("collect_baies"):
 			scene = preload("res://scenes/collect_baies.tscn")
-		elif name.begins_with("baies"):
+		elif objet.begins_with("baies"):
 			scene = preload("res://scenes/baies.tscn")
-		elif name.begins_with("pierre"):
+		elif objet.begins_with("pierre"):
 			scene = preload("res://scenes/pierre.tscn")
-		elif name.begins_with("ferme"):
+		elif objet.begins_with("ferme"):
 			scene = preload("res://scenes/ferme.tscn")
-		elif name.begins_with("blé"):
+		elif objet.begins_with("blé"):
 			scene = preload("res://scenes/blé.tscn")
-		elif name.begins_with("animaux_bat"):
+		elif objet.begins_with("animaux_bat"):
 			scene = preload("res://scenes/animaux_bat.tscn")
 		if scene:
 			var inst = scene.instantiate()
-			inst.name = name
+			inst.objet = objet
 			inst.global_position = pos
 			inst.add_to_group("placeable")
-			if name.begins_with("sapin") or name.begins_with("baies") or name.begins_with("pierre") or name.begins_with("blé"):
-				if name.begins_with("sapin"):
+			if objet.begins_with("sapin") or objet.begins_with("baies") or objet.begins_with("pierre") or objet.begins_with("blé"):
+				if objet.begins_with("sapin"):
 					inst.add_to_group("sapin")
 				var cell = herbe_tilemap.local_to_map(pos)
 				occupied_cells[cell] = true

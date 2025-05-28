@@ -28,7 +28,7 @@ func _ready():
 	area.connect("input_event", Callable(self, "_on_click"))
 	detecte_eau()
 
-func _process(delta):
+func _process(_delta):
 	if not touche_eau:
 		detecte_eau()
 
@@ -101,6 +101,6 @@ func get_point_eau() -> Vector2:
 		return global_position
 
 
-func _on_click(viewport, event, shape_idx):
+func _on_click(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.pressed:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)

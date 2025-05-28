@@ -6,18 +6,18 @@ signal objet_selectionne(nom: String)
 @onready var btn_play    = $HUD/GestionJeu/button/btn_play
 @onready var btn_fast    = $HUD/GestionJeu/button/btn_fast
 @onready var inventaire  = $HUD/ZoneInventaire
-@onready var feu_camp    = $HBoxContainer/feu_camp
-@onready var hutte       = $HBoxContainer/hutte
-@onready var sapin       = $route/sapin
-@onready var scierie     = $HBoxContainer/scierie
-@onready var puit        = $HBoxContainer/puit
-@onready var carriere    = $HBoxContainer/carriere
-@onready var route_terre = $route/sol_terre
-@onready var collect_baies   = $HBoxContainer/collect_baies
-@onready var baies    = $route/baies
-@onready var pierre   = $route/pierre
-@onready var gomme       = $route/Gomme
-@onready var animaux_bat = $HBoxContainer/animaux_bat
+@onready var feu_camp = $HUD/ZoneInventaire/HBoxContainer/feu_camp
+@onready var hutte = $HUD/ZoneInventaire/HBoxContainer/hutte
+@onready var sapin = $HUD/ZoneInventaire/route/sapin
+@onready var scierie = $HUD/ZoneInventaire/HBoxContainer/scierie
+@onready var puit = $HUD/ZoneInventaire/HBoxContainer/puit
+@onready var carriere = $HUD/ZoneInventaire/HBoxContainer/carriere
+@onready var sol_terre = $HUD/ZoneInventaire/route/sol_terre
+@onready var collect_baies = $HUD/ZoneInventaire/HBoxContainer/collect_baies
+@onready var baies = $HUD/ZoneInventaire/route/baies
+@onready var pierre = $HUD/ZoneInventaire/route/pierre
+@onready var gomme = $HUD/ZoneInventaire/route/Gomme
+@onready var animaux_bat = $HUD/ZoneInventaire/HBoxContainer/animaux_bat
 var menu
 var time_scales = [2.0, 4.0, 8.0]
 
@@ -30,7 +30,6 @@ func _ready():
 	# 2) Initialiser l’affichage du bouton rapide
 	_update_fast_button()
 	menu = get_node("/root/game/CanvasLayer/Menu")
-
 
 func _on_pause():
 	Engine.time_scale = 0.0
@@ -55,7 +54,7 @@ func _on_fast():
 	_update_fast_button()
 
 func _update_fast_button():
-	var ts = Engine.time_scale
+	var _ts = Engine.time_scale
 	var display = ""
 	if btn_fast is Button:
 		btn_fast.text = display

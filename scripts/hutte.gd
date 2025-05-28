@@ -28,6 +28,6 @@ func _ready():
 	area.connect("input_event", Callable(self, "_on_click"), CONNECT_ONE_SHOT)
 
 
-func _on_click(viewport, event, shape_idx):
+func _on_click(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)

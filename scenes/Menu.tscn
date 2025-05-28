@@ -258,6 +258,12 @@ layout_mode = 2
 texture = ExtResource("10_2af52")
 expand_mode = 2
 
+[node name="verrou" type="TextureRect" parent="HUD/ZoneInventaire/route/clique"]
+offset_right = 69.0
+offset_bottom = 69.0
+texture = ExtResource("4_rehui")
+expand_mode = 2
+
 [node name="sapin" type="TextureRect" parent="HUD/ZoneInventaire/route"]
 layout_mode = 2
 texture = ExtResource("10_thu7x")
