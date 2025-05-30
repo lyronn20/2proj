@@ -11,7 +11,7 @@ func add_employe(pnj: Node2D):
 
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
-		return  # Ne pas exécuter le reste si c’est une preview
+		return  
 	add_to_group("ferme")
 	add_to_group("ble")   
 	set_meta("nom_affichage", "Ferme : "+ str(compteur))
@@ -29,12 +29,11 @@ func _ready():
 
 	area.connect("input_event", Callable(self, "_on_click"))
 
-func _on_click(_viewport, event, _shape_idx):
-	if event is InputEventMouseButton and event.pressed:
+func _on_click(_viewport, clic, _shape_idx):
+	if clic is InputEventMouseButton and clic.pressed:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
 
 func get_nearby_ble() -> Array:
-	# 1) Récupère toutes les baies du groupe
 	var all_ble = get_tree().get_nodes_in_group("blé")
 	var radius := 2 * 64
 	var ble := []

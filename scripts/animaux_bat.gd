@@ -17,12 +17,12 @@ func _ready():
 func spawn_animaux():
 	if animaux.size() >= MAX_ANIMAUX:
 		return
-
 	var scenes = [poule_scene, cochon_scene, vache_scene]
 	var scene = scenes[randi() % scenes.size()]
-
 	var instance = scene.instantiate()
-	instance.global_position = global_position + Vector2(randf_range(-48, 48), randf_range(-48, 48))
+	var x_offset = randf_range(-48, 48)
+	var y_offset = randf_range(-48, 48)
+	instance.global_position = global_position + Vector2(x_offset, y_offset)
 	get_tree().get_root().get_node("game").add_child(instance)
 	animaux.append(instance)
 

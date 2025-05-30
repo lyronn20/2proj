@@ -26,8 +26,6 @@ func _ready():
 	btn_play.pressed.connect(_on_play)
 	btn_fast.pressed.connect(_on_fast)
 	inventaire.connect("objet_selectionne", Callable(self, "_on_objet_selectionne_recu"))
-
-	# 2) Initialiser l’affichage du bouton rapide
 	_update_fast_button()
 	menu = get_node("/root/game/CanvasLayer/Menu")
 
@@ -40,15 +38,12 @@ func _on_play():
 	_update_fast_button()
 
 func _on_fast():
-	# Si on est en pause, repasse en x1
 	if Engine.time_scale == 0.0:
 		Engine.time_scale = 1.0
 	else:
-		# Trouver l'index actuel (ou 0 si pas trouvé)
 		var idx = time_scales.find(Engine.time_scale)
 		if idx < 0:
 			idx = 0
-		# Passer au palier suivant, en boucle
 		idx = (idx + 1) % time_scales.size()
 		Engine.time_scale = time_scales[idx]
 	_update_fast_button()
@@ -59,12 +54,10 @@ func _update_fast_button():
 	if btn_fast is Button:
 		btn_fast.text = display
 	else:
-		# sinon, on cherche un Label enfant
 		var lbl = btn_fast.get_node_or_null("Label")
 		if lbl:
 			lbl.text = display
 		else:
-			# fallback
 			btn_fast.text = display
 
 func set_mouse_coords(cell: Vector2i):
@@ -87,8 +80,8 @@ func set_locked_buttons(goal_accompli: int):
 	"ferme": ["blé"],
 	"collect_baies": ["baies"],
 	"carriere": ["pierre", "roches"],
-	"Pont": ["Pont"],              # ← bouton pont dans `route`
-	"route": ["sol_terre"]         # ← bouton route dans `route`
+	"Pont": ["Pont"],              
+	"route": ["sol_terre"]       
 	}
 
 
@@ -97,16 +90,15 @@ func set_locked_buttons(goal_accompli: int):
 		"hutte": 1,
 		"puit": 2,
 		"animaux_bat": 3,
-		"scierie": 4,
-		"sapin": 4,
-		"ferme": 5,
-		"blé": 5,
-		"collect_baies": 6,
-		"baies": 6,
-		"carriere": 7,
-		"roches": 7,
-		"pierre": 7,
-		"Pont": 11,           
+		"scierie": 5,
+		"sapin": 6,
+		"ferme": 11,
+		"blé": 11,
+		"collect_baies": 10,
+		"baies": 10,
+		"carriere": 8,
+		"pierre": 9,
+		"Pont": 12,           
 		"sol_terre": 4  
 	}
 

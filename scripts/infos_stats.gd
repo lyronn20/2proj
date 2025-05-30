@@ -25,7 +25,7 @@ func _process(delta):
 
 func update_stats(pop: int, housing: Vector2i, jobs: int, progress: int):
 	lbl_population.text = "👥 Population : %d" % pop
-	lbl_housing.text = "🏠 Habitations : %d / %d" % [housing.x, housing.y]
+	lbl_housing.text = "🏠 Habitations : %d " % [housing.x]
 	lbl_jobs.text = "🛠 Métiers : %d" % jobs
 	lbl_progress.text = "Progress : %d%%" % progress
 	bar_progress.value = progress

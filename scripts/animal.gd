@@ -17,10 +17,8 @@ func _process(delta):
 	if wander_timer >= interval:
 		wander_timer = 0
 		pick_new_direction()
-
 	var next_pos = global_position + direction * speed * delta
 	var cell = herbe_tilemap.local_to_map(next_pos)
-
 	if herbe_tilemap.get_cell_source_id(cell) == 0:
 		global_position = next_pos
 		self.flip_h = direction.x < 0
@@ -28,4 +26,6 @@ func _process(delta):
 		pick_new_direction()
 
 func pick_new_direction():
-	direction = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized()
+	var dx = randf_range(-1.0, 1.0)
+	var dy = randf_range(-1.0, 1.0)
+	direction = Vector2(dx, dy).normalized()

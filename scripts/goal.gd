@@ -13,7 +13,7 @@ var goals = [
 	{ "title": "Construire 8 huttes", "description": "Construis 8 huttes pour loger tes habitants.", "check": "check_huttes" },
 	{ "title": "Construire un puit", "description": "Installe un puit pour que les PNJ puissent boire.", "check": "check_puit" },
 	{ "title": "Construire un enclos à animaux", "description": "Place un bâtiment à animaux pour les élever.", "check": "check_animaux" },
-	{ "title": "Construire 10 routes", "description": "Place 10 routes pour connecter tes bâtiments.", "check": "check_routes" },
+	{ "title": "Construire 1 route", "description": "Place une route pour connecter tes bâtiments.", "check": "check_routes" },
 	{ "title": "Construire une scierie", "description": "Transforme le bois en planches.", "check": "check_scierie" },
 	{ "title": "Avoir 150 bois", "description": "Stocke au moins 150 bois.", "check": "check_150_bois" },
 	{ "title": "Construire 3 bâtiments à animaux", "description": "Pose au moins 3 bâtiments à animaux pour accueillir du bétail.", "check": "check_3_animaux"},
@@ -39,15 +39,9 @@ func _ready():
 
 	if get_tree().get_root().has_node("game/Route/route"):
 		route_tilemap = get_tree().get_root().get_node("game/Route/route")
-	else:
-		push_warning("❌ TileMap de route introuvable. Vérifie le chemin dans goal.gd")
 
-	# 🔗 Lier le menu
 	if get_tree().get_root().has_node("game/CanvasLayer/Menu"):
 		menu = get_tree().get_root().get_node("game/CanvasLayer/Menu")
-	else:
-		push_warning("❌ Menu introuvable dans goal.gd")
-
 
 func update_goal_display():
 	if current_goal_index < goals.size():
@@ -66,10 +60,7 @@ func valider_goal(goal_id: String):
 		return
 
 	var goal = goals[current_goal_index]
-
-	# Vérifie que le goal actuel correspond à celui à valider
 	if "check" in goal and goal["check"] == goal_id:
-		print("🎯 Objectif validé :", goal["title"])
 		current_goal_index += 1
 		goal_accompli += 1
 
@@ -129,7 +120,6 @@ func _process(_delta):
 			
 func debloquer_zone_nuage(position: Vector2i, rayon: int = 5):
 	if not tilemap_nuages:
-		push_error("❌ tilemap_nuages est nul.")
 		return
 	for x in range(-rayon, rayon + 1):
 		for y in range(-rayon, rayon + 1):
@@ -140,7 +130,6 @@ func debloquer_zone_nuage(position: Vector2i, rayon: int = 5):
 
 func debloquer_zone_nuage_rect(coin_haut_gauche: Vector2i, coin_bas_droit: Vector2i):
 	if not tilemap_nuages:
-		push_error("❌ tilemap_nuages est nul.")
 		return
 
 	for x in range(coin_haut_gauche.x, coin_bas_droit.x + 1):
@@ -162,7 +151,6 @@ func check_current_goal():
 
 
 func check_feu_camp() -> bool:
-	# Vérifie si un bâtiment commençant par "feu_camp" existe
 	for node in get_tree().get_nodes_in_group("batiment"):
 		if node.name.begins_with("feu_camp"):
 			return true
@@ -305,13 +293,12 @@ func check_pont_ile2() -> bool:
 	return false
 	
 func check_pont_ile3() -> bool:
-	return _pont_dans_zone(Vector2i(-122, -102), Vector2i(-38, -11))  # haut gauche
+	return _pont_dans_zone(Vector2i(-122, -102), Vector2i(-38, -11))  
 
 func check_pont_ile4() -> bool:
-	return _pont_dans_zone(Vector2i(6, 28), Vector2i(118, 112))  # bas droite
-
+	return _pont_dans_zone(Vector2i(6, 28), Vector2i(118, 112)) 
 func check_pont_ile5() -> bool:
-	return _pont_dans_zone(Vector2i(8, -94), Vector2i(130, 31))  # haut droite
+	return _pont_dans_zone(Vector2i(8, -94), Vector2i(130, 31))  
 
 
 func _pont_dans_zone(chg: Vector2i, cbd: Vector2i) -> bool:

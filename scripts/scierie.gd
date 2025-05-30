@@ -31,8 +31,8 @@ func _setup_click_area():
 	area.add_child(shape)
 	area.connect("input_event", Callable(self, "_on_click"))
 
-func _on_click(_vp, event, _si):
-	if event is InputEventMouseButton and event.pressed:
+func _on_click(_vp, clic, _si):
+	if clic is InputEventMouseButton and clic.pressed:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
 
 func get_nearby_trees() -> Array:

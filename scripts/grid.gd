@@ -38,18 +38,17 @@ func _refresh_grid():
 		for x in width:
 			var cell := PanelContainer.new()
 			cell.custom_minimum_size = Vector2(cell_width, cell_height)
-			_set_cell_style(cell, Color(1,1,1,0))  # Transparent
+			_set_cell_style(cell, Color(1,1,1,0))  
 
 			cell.mouse_entered.connect(func():
-				_set_cell_style(cell, Color(1, 0, 0, 0.2))  # Rouge au survol
+				_set_cell_style(cell, Color(1, 0, 0, 0.2))  
 			)
 			cell.mouse_exited.connect(func():
-				_set_cell_style(cell, Color(1,1,1,0))  # Re-transparent
+				_set_cell_style(cell, Color(1,1,1,0))
 			)
-			cell.gui_input.connect(func(event):
-				if event is InputEventMouseButton and event.pressed:
-					_set_cell_style(cell, Color(0, 1, 0, 0.4))  # Vert au clic
-					print("Cell clicked at (", x, ",", y, ")")
+			cell.gui_input.connect(func(clic):
+				if clic is InputEventMouseButton and clic.pressed:
+					_set_cell_style(cell, Color(0, 1, 0, 0.4))  
 			)
 
 			add_child(cell)

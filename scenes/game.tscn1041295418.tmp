@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=4 uid="uid://bhs3xfwenrsbx"]
+[gd_scene load_steps=31 format=4 uid="uid://bhs3xfwenrsbx"]
 
 [ext_resource type="Script" uid="uid://dkxjx8q7p23w" path="res://scripts/game.gd" id="1_lnu2h"]
 [ext_resource type="Texture2D" uid="uid://b1r42x5lvt6c" path="res://assets/map/sol_terre.png" id="2_u5sy4"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://6hf7amn2ycd6" path="res://scenes/Menu.tscn" id="5_iywne"]
 [ext_resource type="PackedScene" uid="uid://4sfbb3t2oebs" path="res://scenes/route.tscn" id="5_p57ef"]
 [ext_resource type="PackedScene" uid="uid://cbursyl2q3mos" path="res://scenes/TableauBord.tscn" id="5_u5sy4"]
+[ext_resource type="PackedScene" uid="uid://c0285v6qpxxbl" path="res://scenes/GridPreview.tscn" id="7_u5sy4"]
 [ext_resource type="Texture2D" uid="uid://doeq5gsx228a0" path="res://assets/map/nuage.png" id="9_0tnpc"]
 [ext_resource type="PackedScene" uid="uid://p7p2h1lwbdo8" path="res://scenes/audio_stream_player.tscn" id="10_vtaks"]
 
@@ -1655,7 +1656,13 @@ script = ExtResource("4_iywne")
 
 [node name="TableauBord" parent="CanvasLayer" instance=ExtResource("5_u5sy4")]
 
+[node name="GridPreview" parent="." node_paths=PackedStringArray("tilemap") instance=ExtResource("7_u5sy4")]
+visible = false
+tilemap = NodePath("../Map")
+preview_size = Vector2i(4, 4)
+
 [node name="EpilepsieLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Background" type="ColorRect" parent="EpilepsieLayer"]
 offset_left = -44.0

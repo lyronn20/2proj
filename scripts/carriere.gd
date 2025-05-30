@@ -12,7 +12,7 @@ func get_employes() -> Array:
 
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
-		return  # Ne pas exécuter le reste si c’est une preview
+		return  
 	add_to_group("batiment")
 	add_to_group("carriere")
 	set_meta("nom_affichage", "Carriere : "+ str(compteur))
@@ -33,8 +33,8 @@ func _setup_click_area():
 
 	area.connect("input_event", Callable(self, "_on_click"))
 
-func _on_click(_vp, event, _si):
-	if event is InputEventMouseButton and event.pressed:
+func _on_click(_vp, clic, _si):
+	if clic is InputEventMouseButton and clic.pressed:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
 
 func get_nearby_rocks() -> Array:
@@ -50,8 +50,6 @@ func add_stone(amount: int):
 	var tb = get_node("/root/game/CanvasLayer/TableauBord")
 	if tb.has_method("update_total_stock"):
 		tb.update_total_stock()
-
-
 
 func get_stock():
 	return {"pierre": pierre_stock}

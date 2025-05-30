@@ -19,7 +19,7 @@ func _ready():
 	menu.visible = false
 	panneau_popup.visible = false
 	panneau_confirmation.visible = false
-	panneau_confirmation.hide() # 🛠️ assure que le popup ne clignote pas au lancement
+	panneau_confirmation.hide() 
 
 	bouton.mouse_filter = Control.MOUSE_FILTER_PASS
 	bouton.connect("gui_input", _on_bouton_clicked)
@@ -36,22 +36,21 @@ func _ready():
 
 	set_process_unhandled_input(true)
 
-func _unhandled_input(event):
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_ESCAPE:
+func _unhandled_input(clic):
+	if clic is InputEventKey and clic.pressed:
+		if clic.keycode == KEY_ESCAPE:
 			if panneau_popup.visible:
 				panneau_popup.visible = false
 			elif panneau_confirmation.visible:
 				panneau_confirmation.visible = false
 			elif menu.visible:
 				menu.visible = false
-		elif event.keycode == KEY_M:
+		elif clic.keycode == KEY_M:
 			menu.visible = !menu.visible
 
-func _on_bouton_clicked(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+func _on_bouton_clicked(clic):
+	if clic is InputEventMouseButton and clic.pressed and clic.button_index == MOUSE_BUTTON_LEFT:
 		menu.visible = !menu.visible
-
 
 func _on_reset_pressed():
 	get_tree().reload_current_scene()
@@ -62,12 +61,11 @@ func _on_regles_pressed():
 
 func _on_touches_pressed():
 	_fermer_tous_les_popups()
-	_affiche_popup("Contrôles :\n- Clic gauche = placer objet\n- R = route\n- Gomme = supprimer\n- Échap = fermer\n- M = menu")
+	_affiche_popup("Contrôles :\n- Clic gauche = placer objet\n- R = route\n- P = Pont \n- Gomme = supprimer\n- Échap = fermer\n- M = menu")
 
 func _on_quit_pressed():
 	_fermer_tous_les_popups()
 	panneau_confirmation.visible = true
-
 
 func _on_confirm_quit():
 	get_tree().quit()
@@ -89,7 +87,6 @@ func _affiche_popup(texte: String):
 	label_popup.add_theme_color_override("font_color", Color("#e9bc96"))
 	label_popup.text = texte
 	panneau_popup.visible = true
-	
 	
 func _fermer_tous_les_popups():
 	panneau_popup.visible = false

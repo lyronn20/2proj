@@ -10,7 +10,7 @@ func add_habitant(pnj):
 
 func _ready():
 	if has_meta("is_preview") and get_meta("is_preview") == true:
-		return  # Ne pas exécuter le reste si c’est une preview
+		return 
 	add_to_group("batiment")
 	set_meta("nom_affichage", "Hutte : "+ str(compteur))
 	compteur += 1
@@ -28,6 +28,6 @@ func _ready():
 	area.connect("input_event", Callable(self, "_on_click"), CONNECT_ONE_SHOT)
 
 
-func _on_click(_viewport, event, _shape_idx):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+func _on_click(_viewport, clic, _shape_idx):
+	if clic is InputEventMouseButton and clic.pressed and clic.button_index == MOUSE_BUTTON_LEFT:
 		get_node("/root/game/CanvasLayer/TableauBord").update_dashboard(self)
